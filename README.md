@@ -6,6 +6,27 @@ Minimal e-invitation stack:
 - Frontend: Vue 3 + Vite + TypeScript
 - DB/Auth/Storage: Supabase (Postgres + Auth + Storage)
 
+## Design System
+
+**Style:** Modern, minimalist, elegant
+
+**Mobile-first:** All views, pages, and components must be fully responsive with mobile as the primary target. Optimize for mobile but ensure excellent experience across all devices.
+
+**Tools:**
+
+- Icons: [Lucide](https://lucide.dev/icons/)
+- Styling: Tailwind CSS everywhere
+
+**Color Palette:**
+
+```css
+--black: #000000 
+--oxford-blue: #14213D
+--orange-web: #fca311 
+--platinum: #e5e5e5
+--antiflash-white: #ececec
+```
+
 ## Env vars
 
 Backend `.env` (at `backend/.env`):
@@ -60,6 +81,7 @@ npm run dev
 
 - SPA in `frontend/` (Vue 3 + Vite + TS)
 - Routes:
+  - `/` — landing page (Hero, Navbar, Footer)
   - `/:type(wedding|birthday|party)/:slug` — event landing
   - `/:type/:slug/guest` — guest view (requires `?invite=CODE` for private events)
   - `/host/login`, `/host/dashboard`
@@ -73,10 +95,37 @@ npm run dev
 - GET `/api/v1/events/:type/:slug/details` (private requires `?invite=CODE`)
 - POST `/api/v1/events/:type/:slug/rsvp` body `{ inviteCode, guestId, status: "yes"|"no", message?: string }`
 
+## Private Event Page Components
+
+After entering 6-char alphanumeric invite code (all caps), guests see modular sections:
+
+**Top sections (order configurable per event):**
+
+- Event details (title, description, hosts)
+- Location photo
+- Map (embedded/interactive)
+- FAQ
+- Event schedule/timeline
+- Photo/video gallery
+- Dress code
+- Countdown timer
+- QR code for monetary gifts
+- Gift guide (physical gifts)
+
+**Middle section:**
+
+- Invite details: display names of guests on this invite
+- RSVP form: per-guest confirm/decline with optional message
+
+**Bottom section:**
+
+- Confirmed guests list (all who RSVP'd yes across all invites)
+
 ## Notes
 
 - Public events: one page with details (no guest list/RSVP).
-- Private events: invite code reveals guest list and per-guest RSVP with optional message.
+- Private events: 6-char alphanumeric invite code (random and all caps) reveals full event page with modular components.
+- Invite codes are unique per guest (tied to event).
 
 ### JSON casing
 
