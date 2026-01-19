@@ -1,35 +1,47 @@
-# urinvitedto.my (MVP)
+# urinvitedto.my
 
-Minimal e-invitation stack:
+Minimalist e-invitation platform.
 
-- Backend: Go (chi), JSON-only API under `/api/v1`
-- Frontend: Vue 3 + Vite + TypeScript
-- DB/Auth/Storage: Supabase (Postgres + Auth + Storage)
+## Stack
+
+- **Backend:** Go (chi), JSON API at `/api/v1`
+- **Frontend:** Vue 3 + Vite + TypeScript
+- **DB/Auth/Storage:** Supabase (Postgres + Auth + Storage)
+
+> Full architecture details: [docs/architecture.md](./docs/architecture.md)
 
 ## Design System
 
-**Style:** Modern, minimalist, elegant
-
-**Mobile-first:** All views, pages, and components must be fully responsive with mobile as the primary target. Optimize for mobile but ensure excellent experience across all devices.
+**Style:** Modern, minimalist, elegant, mobile-first
 
 **Tools:**
 
 - Icons: [Lucide](https://lucide.dev/icons/)
-- Styling: Tailwind CSS everywhere
+- Styling: Tailwind CSS
 
 **Color Palette:**
 
 ```css
---black: #000000 
---oxford-blue: #14213D
---orange-web: #fca311 
---platinum: #e5e5e5
---antiflash-white: #ececec
+--black: #000000;
+--oxford-blue: #14213d;
+--orange-web: #fca311;
+--platinum: #e5e5e5;
+--antiflash-white: #ececec;
 ```
 
-## Env vars
+## Setup
 
-Backend `.env` (at `backend/.env`):
+### 1. Supabase
+
+Run `supabase/schema.sql` in Supabase SQL editor, then:
+
+```sql
+insert into public.admins (email) values ('you@example.com');
+```
+
+### 2. Backend
+
+Create `backend/.env`:
 
 ```bash
 PORT=8080
@@ -40,28 +52,7 @@ SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE
 CORS_ORIGIN=http://localhost:5173
 ```
 
-Frontend `.env` (at `frontend/.env`):
-
-```bash
-VITE_API_BASE_URL=http://localhost:8080
-VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-VITE_SUPABASE_ANON_KEY=YOUR_ANON_KEY
-```
-
-## Supabase setup
-
-1) In Supabase SQL editor, run `backend/docs/supabase/schema.sql`.
-2) Insert your admin email:
-
-    ```bash
-    insert into public.admins (email) values ('you@example.com');
-    ```
-
-3) Create at least one host user (Auth > Users) and link their `auth_user_id` in `public.hosts` for their event.
-
-## Run locally
-
-Backend:
+Run:
 
 ```bash
 cd backend
@@ -69,7 +60,17 @@ go mod tidy
 go run .
 ```
 
-Frontend:
+### 3. Frontend
+
+Create `frontend/.env`:
+
+```bash
+VITE_API_BASE_URL=http://localhost:8080
+VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+VITE_SUPABASE_ANON_KEY=YOUR_ANON_KEY
+```
+
+Run:
 
 ```bash
 cd frontend
@@ -77,57 +78,51 @@ npm i
 npm run dev
 ```
 
-## Frontend (MVP)
+## Routes
 
-- SPA in `frontend/` (Vue 3 + Vite + TS)
-- Routes:
-  - `/` — landing page (Hero, Navbar, Footer)
-  - `/:type(wedding|birthday|party)/:slug` — event landing
-  - `/:type/:slug/guest` — guest view (requires `?invite=CODE` for private events)
-  - `/host/login`, `/host/dashboard`
-  - `/admin`
-- Env in `frontend/.env` uses `VITE_API_BASE_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`.
-- Start dev server at `http://localhost:5173`.
+| Path                             | Description                                    |
+| -------------------------------- | ---------------------------------------------- |
+| `/`                              | Landing page                                   |
+| `/:type/:slug`                   | Event landing (public details or invite entry) |
+| `/:type/:slug/guest?invite=CODE` | Private event page                             |
+| `/host/login`                    | Host authentication                            |
+| `/host/dashboard`                | Host's read-only dashboard                     |
+| `/admin`                         | Admin CRUD interface                           |
 
-## API (MVP)
+## API
 
-- GET `/api/v1/events/:type/:slug/summary`
-- GET `/api/v1/events/:type/:slug/details` (private requires `?invite=CODE`)
-- POST `/api/v1/events/:type/:slug/rsvp` body `{ inviteCode, guestId, status: "yes"|"no", message?: string }`
+| Method | Endpoint                                      | Description                                     |
+| ------ | --------------------------------------------- | ----------------------------------------------- |
+| GET    | `/api/v1/events/:type/:slug/summary`          | Basic event info                                |
+| GET    | `/api/v1/events/:type/:slug/details`          | Full event details (`?invite=CODE` for private) |
+| GET    | `/api/v1/events/:type/:slug/confirmed-guests` | List of confirmed attendees                     |
+| POST   | `/api/v1/events/:type/:slug/rsvp`             | Submit RSVP                                     |
 
-## Private Event Page Components
+## Private Event Components
 
 After entering 6-char alphanumeric invite code (all caps), guests see modular sections:
 
-**Top sections (order configurable per event):**
+**Configurable sections (order adjustable):**
 
 - Event details (title, description, hosts)
 - Location photo
+- Countdown timer
 - Map (embedded/interactive)
-- FAQ
 - Event schedule/timeline
 - Photo/video gallery
 - Dress code
-- Countdown timer
-- QR code for monetary gifts
-- Gift guide (physical gifts)
+- FAQ
+- Monetary gifts (QR code)
+- Physical gift guide
+- Custom sections (host-defined)
 
-**Middle section:**
+**Fixed sections (always at bottom):**
 
-- Invite details: display names of guests on this invite
-- RSVP form: per-guest confirm/decline with optional message
+- Invite details + RSVP form
+- Confirmed guests list
 
-**Bottom section:**
+## Conventions
 
-- Confirmed guests list (all who RSVP'd yes across all invites)
-
-## Notes
-
-- Public events: one page with details (no guest list/RSVP).
-- Private events: 6-char alphanumeric invite code (random and all caps) reveals full event page with modular components.
-- Invite codes are unique per guest (tied to event).
-
-### JSON casing
-
-- All API JSON uses camelCase (e.g., `isPublic`, `coverImageUrl`, `startsAt`, `displayName`, `rsvpStatus`).
-- Database columns remain snake_case.
+- API JSON: camelCase (`isPublic`, `startsAt`, `displayName`)
+- DB columns: snake_case (`is_public`, `starts_at`, `display_name`)
+- Invite codes: 6-char alphanumeric, all caps (e.g., `ABC123`)
