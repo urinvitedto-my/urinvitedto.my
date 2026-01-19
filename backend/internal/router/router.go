@@ -1,4 +1,4 @@
-// Package router
+// Package router sets up the HTTP router and middleware.
 package router
 
 import (
@@ -11,6 +11,7 @@ import (
 	"github.com/go-chi/httprate"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/urinvitedto-my/backend/internal/config"
+	"github.com/urinvitedto-my/backend/internal/handlers"
 )
 
 type Router struct {
@@ -27,22 +28,21 @@ func NewRouter(cfg *config.Config, db *pgxpool.Pool) *Router {
 	}
 }
 
-// SetupRouter return a chi Mux router
-func (cm *Router) SetupRouter() *chi.Mux {
-	r := cm.router
+// SetupRouter configures and returns the chi router.
+func (rm *Router) SetupRouter() *chi.Mux {
+	r := rm.router
 
+	// middleware
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-
 	r.Use(httprate.LimitByRealIP(60, time.Minute))
-
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(middleware.Compress(5))
 
 	// CORS
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{cm.cfg.FrontEndURL},
+		AllowedOrigins: []string{rm.cfg.FrontEndURL},
 		AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders: []string{
 			"Accept",
@@ -56,16 +56,24 @@ func (cm *Router) SetupRouter() *chi.Mux {
 		MaxAge:           300,
 	}))
 
+	// init handlers
+	h := handlers.New(rm.db)
+
+	// API routes
 	r.Route("/api/v1", func(api chi.Router) {
-		// Health check
+		// health check
 		api.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(`{"ok":true}`))
 		})
 
-		// Event routes
+		// event routes
 		api.Route("/events/{type}/{slug}", func(er chi.Router) {
+			er.Get("/summary", h.GetEventSummary)
+			er.Get("/details", h.GetEventDetails)
+			er.Get("/confirmed-guests", h.GetConfirmedGuests)
+			er.Post("/rsvp", h.PostRSVP)
 		})
 	})
 
