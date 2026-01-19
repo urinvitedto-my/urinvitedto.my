@@ -1,0 +1,31 @@
+<script setup lang="ts">
+defineProps<{
+  guests: { displayName: string }[]
+  count: number
+}>()
+</script>
+
+<template>
+  <section class="confirmed-guests bg-white py-12 px-4">
+    <div class="max-w-3xl mx-auto">
+      <h2 class="text-2xl font-bold text-[#14213d] text-center mb-2">Who's Coming</h2>
+      <p class="text-gray-600 text-center mb-8">{{ count }} guest{{ count !== 1 ? 's' : '' }} attending</p>
+
+      <div v-if="guests.length === 0" class="text-center text-gray-500 py-8">
+        No confirmed guests yet
+      </div>
+
+      <div v-else class="flex flex-wrap justify-center gap-3">
+        <div
+          v-for="(guest, index) in guests"
+          :key="index"
+          class="px-4 py-2 bg-[#ececec] rounded-full text-gray-700"
+        >
+          {{ guest.displayName }}
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<style scoped></style>
