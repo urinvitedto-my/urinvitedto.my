@@ -2,15 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase, getUser } from '@/services/supabase'
-
-interface EventData {
-  id: string
-  type: string
-  slug: string
-  title: string
-  starts_at: string
-  is_public: boolean
-}
+import { getHostEvents, type HostEvent } from '@/services/api'
 
 interface GuestData {
   id: string
@@ -22,8 +14,8 @@ interface GuestData {
 
 const router = useRouter()
 const loading = ref(true)
-const events = ref<EventData[]>([])
-const selectedEvent = ref<EventData | null>(null)
+const events = ref<HostEvent[]>([])
+const selectedEvent = ref<HostEvent | null>(null)
 const guests = ref<GuestData[]>([])
 const showAllGuests = ref(false)
 const error = ref('')
@@ -46,18 +38,9 @@ async function checkAuthAndLoadData() {
       return
     }
 
-    // fetch events where user is a host
-    const { data, error: fetchError } = await supabase
-      .from('events')
-      .select(`
-        id, type, slug, title, starts_at, is_public,
-        hosts!inner(auth_user_id)
-      `)
-      .eq('hosts.auth_user_id', user.id)
-      .order('starts_at', { ascending: false })
-
-    if (fetchError) throw fetchError
-    events.value = data || []
+    // fetch events via API (bypasses RLS, checks by auth_user_id OR email)
+    const data = await getHostEvents()
+    events.value = data.events
   } catch (e: any) {
     error.value = e.message || 'Failed to load events'
   } finally {
@@ -68,7 +51,7 @@ async function checkAuthAndLoadData() {
 /**
  * Selects an event and loads its guests.
  */
-async function selectEvent(event: EventData) {
+async function selectEvent(event: HostEvent) {
   selectedEvent.value = event
   loading.value = true
 
@@ -99,7 +82,7 @@ function filteredGuests(): GuestData[] {
 /**
  * Formats date for display.
  */
-function formatDate(dateStr: string | null): string {
+function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return '-'
   return new Date(dateStr).toLocaleDateString('en-US', {
     month: 'short',
@@ -152,7 +135,7 @@ function formatDate(dateStr: string | null): string {
                 ]"
               >
                 <div class="font-medium">{{ event.title }}</div>
-                <div class="text-sm opacity-75">{{ formatDate(event.starts_at) }}</div>
+                <div class="text-sm opacity-75">{{ formatDate(event.startsAt) }}</div>
               </button>
             </li>
           </ul>

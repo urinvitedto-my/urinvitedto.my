@@ -171,3 +171,24 @@ export interface ErrorResponse {
   error: string
   message?: string
 }
+
+// --- Admin Types ---
+
+export interface AdminHost {
+  id: string
+  displayName: string
+  contactEmail?: string
+  authUserId?: string
+}
+
+export interface AdminEvent {
+  id: string
+  type: string
+  slug: string
+  title: string
+  isPublic: boolean
+  startsAt?: string
+  location?: string
+  createdAt: string
+  hosts: AdminHost[]
+}
