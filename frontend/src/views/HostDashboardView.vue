@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { supabase, getUser, signOut } from '@/services/supabase'
+import { supabase, getUser } from '@/services/supabase'
 
 interface EventData {
   id: string
@@ -97,14 +97,6 @@ function filteredGuests(): GuestData[] {
 }
 
 /**
- * Handles logout.
- */
-async function handleLogout() {
-  await signOut()
-  router.push('/host/login')
-}
-
-/**
  * Formats date for display.
  */
 function formatDate(dateStr: string | null): string {
@@ -120,17 +112,11 @@ function formatDate(dateStr: string | null): string {
 </script>
 
 <template>
-  <div class="host-dashboard-view min-h-screen py-8 px-4">
+  <div class="host-dashboard-view min-h-screen pt-24 pb-8 px-4">
     <div class="max-w-6xl mx-auto">
       <!-- Header -->
-      <div class="flex items-center justify-between mb-8">
+      <div class="mb-8">
         <h1 class="text-2xl font-bold text-[#14213d]">Host Dashboard</h1>
-        <button
-          @click="handleLogout"
-          class="text-gray-600 hover:text-[#14213d] transition-colors"
-        >
-          Sign Out
-        </button>
       </div>
 
       <!-- Loading -->

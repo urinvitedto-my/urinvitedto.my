@@ -99,7 +99,7 @@ function shouldRender(name: string): boolean {
 </script>
 
 <template>
-  <div class="guest-view min-h-screen">
+  <div class="guest-view min-h-screen pt-16">
     <!-- Loading -->
     <div v-if="loading" class="flex items-center justify-center py-20">
       <div class="animate-spin rounded-full h-12 w-12 border-4 border-[#fca311] border-t-transparent"></div>

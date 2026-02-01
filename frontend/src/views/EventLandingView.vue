@@ -88,14 +88,14 @@ function formatDate(dateStr?: string): string {
 </script>
 
 <template>
-  <div class="event-landing-view min-h-screen">
+  <div class="event-landing-view min-h-screen -mt-16">
     <!-- Loading -->
-    <div v-if="loading" class="flex items-center justify-center py-20">
+    <div v-if="loading" class="flex items-center justify-center pt-32 pb-20">
       <div class="animate-spin rounded-full h-12 w-12 border-4 border-[#fca311] border-t-transparent"></div>
     </div>
 
     <!-- Error -->
-    <div v-else-if="error && !eventSummary" class="max-w-md mx-auto py-20 px-4 text-center">
+    <div v-else-if="error && !eventSummary" class="max-w-md mx-auto pt-32 pb-20 px-4 text-center">
       <p class="text-red-600 mb-4">{{ error }}</p>
       <button @click="loadEvent" class="text-[#fca311] hover:underline">Try again</button>
     </div>
@@ -105,7 +105,7 @@ function formatDate(dateStr?: string): string {
       <!-- Cover Image -->
       <div
         v-if="eventSummary.coverImageUrl"
-        class="w-full h-64 md:h-96 bg-cover bg-center"
+        class="w-full h-80 md:h-[28rem] pt-16 bg-cover bg-center"
         :style="{ backgroundImage: `url(${eventSummary.coverImageUrl})` }"
       >
         <div class="w-full h-full bg-black/40 flex items-center justify-center">
@@ -116,7 +116,7 @@ function formatDate(dateStr?: string): string {
       </div>
 
       <!-- No cover image fallback -->
-      <div v-else class="bg-[#14213d] py-16 px-4 text-center">
+      <div v-else class="bg-[#14213d] pt-24 pb-16 px-4 text-center">
         <h1 class="text-3xl md:text-5xl font-bold text-white">
           {{ eventSummary.title }}
         </h1>

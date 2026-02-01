@@ -33,7 +33,7 @@ async function handleLogin() {
 </script>
 
 <template>
-  <div class="host-login-view min-h-screen flex items-center justify-center py-12 px-4">
+  <div class="host-login-view min-h-screen flex items-center justify-center pt-24 pb-12 px-4">
     <div class="max-w-md w-full">
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-[#14213d]">Host Login</h1>

@@ -5,7 +5,7 @@
 <template>
   <div class="landing-view">
     <!-- Hero Section -->
-    <section class="bg-[#14213d] text-white py-20 px-4">
+    <section class="bg-[#14213d] text-white pt-32 pb-20 px-4">
       <div class="max-w-4xl mx-auto text-center">
         <h1 class="text-4xl md:text-6xl font-bold mb-6">
           Beautiful Digital Invitations

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { supabase, getUser, signOut } from '@/services/supabase'
+import { supabase, getUser, onAuthStateChange } from '@/services/supabase'
 
 const router = useRouter()
 const loading = ref(true)
@@ -11,8 +11,22 @@ const email = ref('')
 const password = ref('')
 const loginLoading = ref(false)
 
+let authSubscription: { unsubscribe: () => void } | null = null
+
 onMounted(async () => {
   await checkAdmin()
+
+  // listen for auth state changes (e.g. sign out from navbar)
+  const { data } = onAuthStateChange(async (_event, session) => {
+    if (!session) {
+      isAdmin.value = false
+    }
+  })
+  authSubscription = data.subscription
+})
+
+onUnmounted(() => {
+  authSubscription?.unsubscribe()
 })
 
 /**
@@ -75,17 +89,10 @@ async function handleLogin() {
   }
 }
 
-/**
- * Handles logout.
- */
-async function handleLogout() {
-  await signOut()
-  isAdmin.value = false
-}
 </script>
 
 <template>
-  <div class="admin-view min-h-screen py-8 px-4">
+  <div class="admin-view min-h-screen pt-24 pb-8 px-4">
     <div class="max-w-6xl mx-auto">
       <!-- Loading -->
       <div v-if="loading" class="flex items-center justify-center py-20">
@@ -142,14 +149,8 @@ async function handleLogout() {
 
       <!-- Admin Dashboard -->
       <template v-else>
-        <div class="flex items-center justify-between mb-8">
+        <div class="mb-8">
           <h1 class="text-2xl font-bold text-[#14213d]">Admin Dashboard</h1>
-          <button
-            @click="handleLogout"
-            class="text-gray-600 hover:text-[#14213d] transition-colors"
-          >
-            Sign Out
-          </button>
         </div>
 
         <div class="bg-white rounded-lg shadow-sm p-8">
