@@ -138,3 +138,60 @@ type ErrorResponse struct {
 	Error   string `json:"error"`
 	Message string `json:"message,omitempty"`
 }
+
+// --- Admin/Host Models ---
+
+// BaseEvent contains shared fields for list views.
+type BaseEvent struct {
+	ID        string     `json:"id"`
+	Type      string     `json:"type"`
+	Slug      string     `json:"slug"`
+	Title     string     `json:"title"`
+	IsPublic  bool       `json:"isPublic"`
+	StartsAt  *time.Time `json:"startsAt,omitempty"`
+	Location  *string    `json:"location,omitempty"`
+	CreatedAt time.Time  `json:"createdAt"`
+}
+
+// CreateEventRequest is the request body for creating an event.
+type CreateEventRequest struct {
+	Type     string  `json:"type"`
+	Slug     string  `json:"slug"`
+	Title    string  `json:"title"`
+	IsPublic bool    `json:"isPublic"`
+	StartsAt *string `json:"startsAt,omitempty"`
+	Location *string `json:"location,omitempty"`
+}
+
+// AdminEvent is an event with hosts for admin list view.
+type AdminEvent struct {
+	BaseEvent
+	Hosts []AdminHost `json:"hosts"`
+}
+
+// AdminHost is a host with email for admin views.
+type AdminHost struct {
+	ID           string  `json:"id"`
+	DisplayName  string  `json:"displayName"`
+	ContactEmail *string `json:"contactEmail,omitempty"`
+	AuthUserID   *string `json:"authUserId,omitempty"`
+}
+
+// AddHostRequest is the request body for adding a host to an event.
+type AddHostRequest struct {
+	Email       string `json:"email"`
+	DisplayName string `json:"displayName"`
+}
+
+// AdminEventsResponse is the response for listing events.
+type AdminEventsResponse struct {
+	Events []AdminEvent `json:"events"`
+}
+
+// HostEvent is an alias for BaseEvent for host dashboard view.
+type HostEvent = BaseEvent
+
+// HostEventsResponse is the response for host events endpoint.
+type HostEventsResponse struct {
+	Events []HostEvent `json:"events"`
+}

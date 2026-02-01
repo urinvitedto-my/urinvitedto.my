@@ -19,12 +19,14 @@ func main() {
 	cfg, cfgErr := config.LoadCfg()
 	if cfgErr != nil {
 		slog.Error("Error loading config", "error", cfgErr)
+		os.Exit(1)
 	}
 
 	slog.Info("Setting up database...")
 	db, dbErr := database.Connect(context.Background(), cfg.DatabaseURL)
 	if dbErr != nil {
 		slog.Error("Database connection failed", "error", dbErr)
+		os.Exit(1)
 	} else {
 		slog.Info("Database connected")
 		defer db.Close()
