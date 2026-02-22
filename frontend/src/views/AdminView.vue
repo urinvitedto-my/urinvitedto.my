@@ -15,6 +15,8 @@ import AdminSchedule from '@/components/admin/AdminSchedule.vue'
 import AdminFAQs from '@/components/admin/AdminFAQs.vue'
 import AdminGifts from '@/components/admin/AdminGifts.vue'
 import AdminGallery from '@/components/admin/AdminGallery.vue'
+import AdminCustomContent from '@/components/admin/AdminCustomContent.vue'
+import AdminComponentOrder from '@/components/admin/AdminComponentOrder.vue'
 
 const loading = ref(true)
 const isAdmin = ref(false)
@@ -833,6 +835,20 @@ function getEventUrl(event: AdminEvent): string {
               :event-id="event.id"
               :collapsed="isSectionCollapsed(event.id, 'gallery')"
               @toggle="toggleSection(event.id, 'gallery')"
+            />
+
+            <!-- Custom Content Section -->
+            <AdminCustomContent
+              :event-id="event.id"
+              :collapsed="isSectionCollapsed(event.id, 'customContent')"
+              @toggle="toggleSection(event.id, 'customContent')"
+            />
+
+            <!-- Component Order Section -->
+            <AdminComponentOrder
+              :event-id="event.id"
+              :collapsed="isSectionCollapsed(event.id, 'componentOrder')"
+              @toggle="toggleSection(event.id, 'componentOrder')"
             />
           </div>
         </div>

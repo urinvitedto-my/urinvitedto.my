@@ -13,6 +13,8 @@ import type {
   AdminFAQ,
   AdminGift,
   AdminGalleryItem,
+  CustomContent,
+  EnabledComponents,
 } from '@/types'
 import { supabase } from './supabase'
 
@@ -734,6 +736,94 @@ export async function adminDeleteGalleryItem(eventId: string, itemId: string): P
     const err = await res.json()
     throw new Error(err.message || 'Failed to delete gallery item')
   }
+}
+
+// --- Admin Custom Content API Functions ---
+
+/**
+ * Fetches the custom_content JSONB for an event.
+ */
+export async function adminGetCustomContent(eventId: string): Promise<CustomContent> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/custom-content`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to get custom content')
+  }
+  return res.json()
+}
+
+/**
+ * Replaces the custom_content JSONB for an event.
+ */
+export async function adminUpdateCustomContent(
+  eventId: string,
+  data: CustomContent,
+): Promise<CustomContent> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/custom-content`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to update custom content')
+  }
+  return res.json()
+}
+
+// --- Admin Enabled Components API Functions ---
+
+/**
+ * Fetches the enabled_components JSONB for an event.
+ */
+export async function adminGetEnabledComponents(eventId: string): Promise<EnabledComponents> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/enabled-components`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to get enabled components')
+  }
+  return res.json()
+}
+
+/**
+ * Replaces the enabled_components JSONB for an event.
+ */
+export async function adminUpdateEnabledComponents(
+  eventId: string,
+  data: EnabledComponents,
+): Promise<EnabledComponents> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/enabled-components`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to update enabled components')
+  }
+  return res.json()
 }
 
 // --- Host API Functions ---

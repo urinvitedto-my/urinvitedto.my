@@ -1,0 +1,199 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { adminGetEnabledComponents, adminUpdateEnabledComponents } from '@/services/api'
+import type { ComponentConfig } from '@/types'
+
+const props = defineProps<{
+  eventId: string
+  collapsed: boolean
+}>()
+
+const emit = defineEmits<{ toggle: [] }>()
+
+const loading = ref(false)
+const saving = ref(false)
+const error = ref('')
+const saveMsg = ref('')
+
+const components = ref<ComponentConfig[]>([])
+
+const DEFAULT_COMPONENTS: ComponentConfig[] = [
+  { name: 'EventDetails', enabled: true, order: 1 },
+  { name: 'LocationPhoto', enabled: true, order: 2 },
+  { name: 'CountdownTimer', enabled: true, order: 3 },
+  { name: 'EventMap', enabled: true, order: 4 },
+  { name: 'EventSchedule', enabled: true, order: 5 },
+  { name: 'EventGallery', enabled: true, order: 6 },
+  { name: 'DressCode', enabled: true, order: 7 },
+  { name: 'EventFAQ', enabled: true, order: 8 },
+  { name: 'MonetaryGifts', enabled: true, order: 9 },
+  { name: 'GiftGuide', enabled: true, order: 10 },
+  { name: 'CustomSections', enabled: true, order: 11 },
+]
+
+const DISPLAY_NAMES: Record<string, string> = {
+  EventDetails: 'Event Details',
+  LocationPhoto: 'Location Photo',
+  CountdownTimer: 'Countdown Timer',
+  EventMap: 'Map & Directions',
+  EventSchedule: 'Schedule',
+  EventGallery: 'Gallery',
+  DressCode: 'Dress Code',
+  EventFAQ: 'FAQs',
+  MonetaryGifts: 'Monetary Gifts',
+  GiftGuide: 'Gift Guide',
+  CustomSections: 'Custom Sections',
+}
+
+onMounted(() => loadComponents())
+
+/**
+ * Loads enabled components from the API.
+ */
+async function loadComponents() {
+  loading.value = true
+  error.value = ''
+
+  try {
+    const data = await adminGetEnabledComponents(props.eventId)
+    if (data.components?.length) {
+      components.value = data.components.sort((a, b) => a.order - b.order)
+    } else {
+      components.value = [...DEFAULT_COMPONENTS]
+    }
+  } catch (e: any) {
+    error.value = e.message || 'Failed to load component config'
+  } finally {
+    loading.value = false
+  }
+}
+
+/**
+ * Saves enabled components to the API.
+ */
+async function handleSave() {
+  saving.value = true
+  saveMsg.value = ''
+
+  try {
+    const saved = await adminUpdateEnabledComponents(props.eventId, {
+      components: components.value,
+    })
+    if (saved.components?.length) {
+      components.value = saved.components.sort((a, b) => a.order - b.order)
+    }
+    saveMsg.value = 'Saved'
+    setTimeout(() => { saveMsg.value = '' }, 2000)
+  } catch (e: any) {
+    alert(e.message || 'Failed to save')
+  } finally {
+    saving.value = false
+  }
+}
+
+/**
+ * Resets to default component configuration.
+ */
+function resetToDefaults() {
+  components.value = [...DEFAULT_COMPONENTS]
+}
+
+/**
+ * Moves a component up or down in order.
+ */
+function moveComponent(index: number, direction: 'up' | 'down') {
+  const swapIndex = direction === 'up' ? index - 1 : index + 1
+  if (swapIndex < 0 || swapIndex >= components.value.length) return
+
+  const temp = components.value[index]!.order
+  components.value[index]!.order = components.value[swapIndex]!.order
+  components.value[swapIndex]!.order = temp
+
+  components.value.sort((a, b) => a.order - b.order)
+}
+
+/**
+ * Returns a readable name for a component key.
+ */
+function displayName(name: string): string {
+  return DISPLAY_NAMES[name] || name
+}
+</script>
+
+<template>
+  <div class="border-t border-gray-100 pt-4">
+    <div class="flex items-center justify-between mb-3">
+      <button
+        @click="emit('toggle')"
+        class="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-[#14213d] transition-colors"
+      >
+        <span
+          class="inline-block transition-transform duration-200"
+          :class="collapsed ? '' : 'rotate-90'"
+        >▶</span>
+        Component Order
+      </button>
+    </div>
+
+    <template v-if="!collapsed">
+      <!-- Loading -->
+      <div v-if="loading" class="flex items-center justify-center py-4">
+        <div class="animate-spin rounded-full h-6 w-6 border-2 border-[#fca311] border-t-transparent"></div>
+      </div>
+
+      <p v-else-if="error" class="text-red-600 text-sm mb-3">{{ error }}</p>
+
+      <div v-else class="space-y-2">
+        <p class="text-xs text-gray-500 mb-2">
+          Toggle visibility and reorder event page sections. Disabled sections won't appear on the event page.
+        </p>
+
+        <div
+          v-for="(comp, index) in components"
+          :key="comp.name"
+          class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-2.5"
+          :class="{ 'opacity-50': !comp.enabled }"
+        >
+          <div class="flex items-center gap-3">
+            <div class="flex flex-col gap-0.5 shrink-0">
+              <button
+                @click="moveComponent(index, 'up')"
+                :disabled="index === 0"
+                class="text-gray-400 hover:text-gray-600 disabled:opacity-30 text-xs leading-none"
+                title="Move up"
+              >▲</button>
+              <button
+                @click="moveComponent(index, 'down')"
+                :disabled="index === components.length - 1"
+                class="text-gray-400 hover:text-gray-600 disabled:opacity-30 text-xs leading-none"
+                title="Move down"
+              >▼</button>
+            </div>
+            <span class="text-sm text-[#14213d]">{{ displayName(comp.name) }}</span>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input v-model="comp.enabled" type="checkbox" class="sr-only peer" />
+            <div class="w-9 h-5 bg-gray-300 rounded-full peer peer-checked:bg-[#fca311] transition-colors after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
+          </label>
+        </div>
+
+        <div class="flex items-center gap-3 pt-2">
+          <button
+            @click="handleSave"
+            :disabled="saving"
+            class="bg-[#14213d] text-white font-medium px-4 py-2 rounded-lg hover:bg-[#1a2a4d] transition-colors disabled:opacity-50 text-sm"
+          >
+            {{ saving ? 'Saving...' : 'Save Component Order' }}
+          </button>
+          <button
+            @click="resetToDefaults"
+            class="text-sm text-gray-500 hover:text-gray-700"
+          >
+            Reset to defaults
+          </button>
+          <span v-if="saveMsg" class="text-sm text-green-600">{{ saveMsg }}</span>
+        </div>
+      </div>
+    </template>
+  </div>
+</template>
