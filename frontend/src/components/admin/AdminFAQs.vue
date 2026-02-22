@@ -135,6 +135,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
 
   const current = items.value[idx]
   const swap = items.value[swapIdx]
+  if (!current || !swap) return
 
   try {
     const [updatedCurrent, updatedSwap] = await Promise.all([
