@@ -98,6 +98,10 @@ func (rm *Router) SetupRouter() *chi.Mux {
 			ar.Post("/events/{id}/invites/{inviteId}/guests", h.AddGuest)
 			ar.Put("/events/{id}/guests/{guestId}", h.UpdateGuest)
 			ar.Delete("/events/{id}/guests/{guestId}", h.DeleteGuest)
+			ar.Get("/events/{id}/schedule", h.ListSchedule)
+			ar.Post("/events/{id}/schedule", h.CreateScheduleItem)
+			ar.Put("/events/{id}/schedule/{itemId}", h.UpdateScheduleItem)
+			ar.Delete("/events/{id}/schedule/{itemId}", h.DeleteScheduleItem)
 		})
 
 		// host routes (protected - any authenticated user)

@@ -244,6 +244,37 @@ type UpdateGuestRequest struct {
 	RsvpStatus  string `json:"rsvpStatus"`
 }
 
+// AdminScheduleItem is a schedule item with createdAt for admin views.
+type AdminScheduleItem struct {
+	ID          string    `json:"id"`
+	Time        time.Time `json:"time"`
+	Title       string    `json:"title"`
+	Description *string   `json:"description,omitempty"`
+	OrderIndex  int       `json:"orderIndex"`
+	CreatedAt   time.Time `json:"createdAt"`
+}
+
+// AdminScheduleResponse is the response for listing schedule items.
+type AdminScheduleResponse struct {
+	Items []AdminScheduleItem `json:"items"`
+}
+
+// CreateScheduleItemRequest is the request body for creating a schedule item.
+type CreateScheduleItemRequest struct {
+	Time        string  `json:"time"`
+	Title       string  `json:"title"`
+	Description *string `json:"description"`
+	OrderIndex  *int    `json:"orderIndex"`
+}
+
+// UpdateScheduleItemRequest is the request body for updating a schedule item.
+type UpdateScheduleItemRequest struct {
+	Time        string  `json:"time"`
+	Title       string  `json:"title"`
+	Description *string `json:"description"`
+	OrderIndex  *int    `json:"orderIndex"`
+}
+
 // HostEvent is an alias for BaseEvent for host dashboard view.
 type HostEvent = BaseEvent
 
