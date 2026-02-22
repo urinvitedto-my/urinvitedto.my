@@ -114,6 +114,10 @@ func (rm *Router) SetupRouter() *chi.Mux {
 			ar.Post("/events/{id}/gallery", h.CreateGalleryItem)
 			ar.Put("/events/{id}/gallery/{itemId}", h.UpdateGalleryItem)
 			ar.Delete("/events/{id}/gallery/{itemId}", h.DeleteGalleryItem)
+			ar.Get("/events/{id}/custom-content", h.GetCustomContent)
+			ar.Put("/events/{id}/custom-content", h.UpdateCustomContent)
+			ar.Get("/events/{id}/enabled-components", h.GetEnabledComponents)
+			ar.Put("/events/{id}/enabled-components", h.UpdateEnabledComponents)
 		})
 
 		// host routes (protected - any authenticated user)
