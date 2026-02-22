@@ -1,4 +1,4 @@
-app = "urinvitedto-my-backend"
+app = "urinvitedto-my-api"
 primary_region = "sin"
 
 [build]
