@@ -92,6 +92,12 @@ func (rm *Router) SetupRouter() *chi.Mux {
 			ar.Delete("/events/{id}", h.DeleteEvent)
 			ar.Post("/events/{id}/hosts", h.AddHost)
 			ar.Delete("/events/{id}/hosts/{hostId}", h.DeleteHost)
+			ar.Get("/events/{id}/invites", h.ListInvites)
+			ar.Post("/events/{id}/invites", h.CreateInvite)
+			ar.Delete("/events/{id}/invites/{inviteId}", h.DeleteInvite)
+			ar.Post("/events/{id}/invites/{inviteId}/guests", h.AddGuest)
+			ar.Put("/events/{id}/guests/{guestId}", h.UpdateGuest)
+			ar.Delete("/events/{id}/guests/{guestId}", h.DeleteGuest)
 		})
 
 		// host routes (protected - any authenticated user)

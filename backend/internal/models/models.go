@@ -204,6 +204,46 @@ type AdminEventsResponse struct {
 	Events []AdminEvent `json:"events"`
 }
 
+// AdminInvite is an invite with guests for admin views.
+type AdminInvite struct {
+	ID         string       `json:"id"`
+	InviteCode string       `json:"inviteCode"`
+	Label      *string      `json:"label,omitempty"`
+	CreatedAt  time.Time    `json:"createdAt"`
+	Guests     []AdminGuest `json:"guests"`
+}
+
+// AdminGuest is a guest with full details for admin views.
+type AdminGuest struct {
+	ID          string     `json:"id"`
+	DisplayName string     `json:"displayName"`
+	RsvpStatus  string     `json:"rsvpStatus"`
+	RsvpMessage *string    `json:"rsvpMessage,omitempty"`
+	RsvpAt      *time.Time `json:"rsvpAt,omitempty"`
+	CreatedAt   time.Time  `json:"createdAt"`
+}
+
+// AdminInvitesResponse is the response for listing invites.
+type AdminInvitesResponse struct {
+	Invites []AdminInvite `json:"invites"`
+}
+
+// CreateInviteRequest is the request body for creating an invite.
+type CreateInviteRequest struct {
+	Label *string `json:"label"`
+}
+
+// AddGuestRequest is the request body for adding a guest to an invite.
+type AddGuestRequest struct {
+	DisplayName string `json:"displayName"`
+}
+
+// UpdateGuestRequest is the request body for updating a guest.
+type UpdateGuestRequest struct {
+	DisplayName string `json:"displayName"`
+	RsvpStatus  string `json:"rsvpStatus"`
+}
+
 // HostEvent is an alias for BaseEvent for host dashboard view.
 type HostEvent = BaseEvent
 
