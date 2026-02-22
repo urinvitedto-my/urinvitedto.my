@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { supabase, getUser, onAuthStateChange } from '@/services/supabase'
+import { supabase, getSession, onAuthStateChange } from '@/services/supabase'
 import {
   adminListEvents,
   adminCreateEvent,
@@ -83,8 +83,8 @@ async function checkAdmin() {
   loading.value = true
 
   try {
-    const user = await getUser()
-    if (!user) {
+    const session = await getSession()
+    if (!session?.user?.email) {
       isAdmin.value = false
       loading.value = false
       return
@@ -93,7 +93,7 @@ async function checkAdmin() {
     const { data, error: fetchError } = await supabase
       .from('admins')
       .select('email')
-      .eq('email', user.email)
+      .eq('email', session.user.email)
       .single()
 
     if (fetchError || !data) {

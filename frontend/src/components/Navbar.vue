@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { onAuthStateChange, signOut, supabase } from '@/services/supabase'
+import { onAuthStateChange, signOut, getSession, supabase } from '@/services/supabase'
 
 const router = useRouter()
 const route = useRoute()
@@ -62,12 +62,19 @@ function handleClickOutside(e: MouseEvent) {
   }
 }
 
-onMounted(() => {
-  const { data } = onAuthStateChange(async (_event, session) => {
-    isLoggedIn.value = !!session
-    if (session?.user?.email) {
-      userEmail.value = session.user.email
-      await checkAdmin(session.user.email)
+onMounted(async () => {
+  const session = await getSession()
+  isLoggedIn.value = !!session
+  if (session?.user?.email) {
+    userEmail.value = session.user.email
+    await checkAdmin(session.user.email)
+  }
+
+  const { data } = onAuthStateChange(async (_event, newSession) => {
+    isLoggedIn.value = !!newSession
+    if (newSession?.user?.email) {
+      userEmail.value = newSession.user.email
+      await checkAdmin(newSession.user.email)
     } else {
       userEmail.value = ''
       isAdmin.value = false

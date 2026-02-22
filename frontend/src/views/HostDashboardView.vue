@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { supabase, getUser } from '@/services/supabase'
+import { supabase, getSession } from '@/services/supabase'
 import { getHostEvents, type HostEvent } from '@/services/api'
 
 interface GuestData {
@@ -32,8 +32,8 @@ async function checkAuthAndLoadData() {
   error.value = ''
 
   try {
-    const user = await getUser()
-    if (!user) {
+    const session = await getSession()
+    if (!session) {
       router.push('/host/login')
       return
     }
