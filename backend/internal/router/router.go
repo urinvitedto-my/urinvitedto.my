@@ -88,6 +88,8 @@ func (rm *Router) SetupRouter() *chi.Mux {
 			ar.Use(rm.mw.RequireAdmin)
 			ar.Get("/events", h.ListEvents)
 			ar.Post("/events", h.CreateEvent)
+			ar.Put("/events/{id}", h.UpdateEvent)
+			ar.Delete("/events/{id}", h.DeleteEvent)
 			ar.Post("/events/{id}/hosts", h.AddHost)
 			ar.Delete("/events/{id}/hosts/{hostId}", h.DeleteHost)
 		})

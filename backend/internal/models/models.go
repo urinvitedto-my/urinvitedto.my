@@ -166,7 +166,23 @@ type CreateEventRequest struct {
 // AdminEvent is an event with hosts for admin list view.
 type AdminEvent struct {
 	BaseEvent
-	Hosts []AdminHost `json:"hosts"`
+	Description      *string     `json:"description,omitempty"`
+	CoverImageURL    *string     `json:"coverImageUrl,omitempty"`
+	LocationPhotoURL *string     `json:"locationPhotoUrl,omitempty"`
+	Hosts            []AdminHost `json:"hosts"`
+}
+
+// UpdateEventRequest is the request body for updating an event.
+type UpdateEventRequest struct {
+	Type             string  `json:"type"`
+	Slug             string  `json:"slug"`
+	Title            string  `json:"title"`
+	Description      *string `json:"description"`
+	IsPublic         bool    `json:"isPublic"`
+	StartsAt         *string `json:"startsAt"`
+	Location         *string `json:"location"`
+	CoverImageURL    *string `json:"coverImageUrl"`
+	LocationPhotoURL *string `json:"locationPhotoUrl"`
 }
 
 // AdminHost is a host with email for admin views.

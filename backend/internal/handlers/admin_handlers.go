@@ -21,7 +21,8 @@ func (h *Handlers) ListEvents(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	rows, err := h.db.Query(ctx, `
-		SELECT id, type, slug, title, is_public, starts_at, location, created_at
+		SELECT id, type, slug, title, description, is_public,
+			cover_image_url, location_photo_url, starts_at, location, created_at
 		FROM events ORDER BY created_at DESC
 	`)
 	if err != nil {
@@ -44,7 +45,10 @@ func (h *Handlers) ListEvents(w http.ResponseWriter, r *http.Request) {
 			&e.Type,
 			&e.Slug,
 			&e.Title,
+			&e.Description,
 			&e.IsPublic,
+			&e.CoverImageURL,
+			&e.LocationPhotoURL,
 			&e.StartsAt,
 			&e.Location,
 			&e.CreatedAt,
@@ -267,6 +271,139 @@ func (h *Handlers) DeleteHost(w http.ResponseWriter, r *http.Request) {
 
 	if result.RowsAffected() == 0 {
 		h.writeError(w, http.StatusNotFound, "not_found", "Host not found")
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// UpdateEvent handles PUT /admin/events/:id - updates an existing event.
+func (h *Handlers) UpdateEvent(w http.ResponseWriter, r *http.Request) {
+	eventID := chi.URLParam(r, "id")
+
+	var req models.UpdateEventRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.writeError(w, http.StatusBadRequest, "invalid_body", "Invalid request body")
+		return
+	}
+
+	req.Type = strings.ToLower(strings.TrimSpace(req.Type))
+	if req.Type != "wedding" && req.Type != "birthday" && req.Type != "party" {
+		h.writeError(
+			w,
+			http.StatusBadRequest,
+			"invalid_type",
+			"Type must be wedding, birthday, or party",
+		)
+		return
+	}
+
+	req.Slug = strings.ToLower(strings.TrimSpace(req.Slug))
+	if req.Slug == "" {
+		h.writeError(w, http.StatusBadRequest, "invalid_slug", "Slug is required")
+		return
+	}
+	if !slugRegex.MatchString(req.Slug) {
+		h.writeError(
+			w,
+			http.StatusBadRequest,
+			"invalid_slug",
+			"Slug must be lowercase alphanumeric with hyphens only",
+		)
+		return
+	}
+
+	req.Title = strings.TrimSpace(req.Title)
+	if req.Title == "" {
+		h.writeError(w, http.StatusBadRequest, "invalid_title", "Title is required")
+		return
+	}
+
+	ctx := r.Context()
+
+	var startsAt *time.Time
+	if req.StartsAt != nil && *req.StartsAt != "" {
+		t, err := time.Parse(time.RFC3339, *req.StartsAt)
+		if err != nil {
+			h.writeError(
+				w,
+				http.StatusBadRequest,
+				"invalid_date",
+				"Invalid date format. Use ISO 8601 (e.g., 2024-06-15T14:00:00Z)",
+			)
+			return
+		}
+		startsAt = &t
+	}
+
+	var event models.AdminEvent
+	err := h.db.QueryRow(ctx, `
+		UPDATE events SET
+			type = $1, slug = $2, title = $3, description = $4, is_public = $5,
+			starts_at = $6, location = $7, cover_image_url = $8, location_photo_url = $9
+		WHERE id = $10
+		RETURNING id, type, slug, title, description, is_public,
+			cover_image_url, location_photo_url, starts_at, location, created_at
+	`, req.Type, req.Slug, req.Title, req.Description, req.IsPublic,
+		startsAt, req.Location, req.CoverImageURL, req.LocationPhotoURL, eventID,
+	).Scan(
+		&event.ID, &event.Type, &event.Slug, &event.Title, &event.Description,
+		&event.IsPublic, &event.CoverImageURL, &event.LocationPhotoURL,
+		&event.StartsAt, &event.Location, &event.CreatedAt,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			h.writeError(w, http.StatusNotFound, "not_found", "Event not found")
+			return
+		}
+		if strings.Contains(err.Error(), "duplicate key") ||
+			strings.Contains(err.Error(), "unique constraint") {
+			h.writeError(
+				w,
+				http.StatusConflict,
+				"duplicate_slug",
+				"An event with this type and slug already exists",
+			)
+			return
+		}
+		slog.Error("DB error updating event", "error", err)
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to update event",
+		)
+		return
+	}
+
+	hosts, err := h.fetchAdminHosts(ctx, event.ID)
+	if err != nil {
+		slog.Error("Error fetching hosts", "eventId", event.ID, "error", err)
+	}
+	event.Hosts = hosts
+
+	h.writeJSON(w, http.StatusOK, event)
+}
+
+// DeleteEvent handles DELETE /admin/events/:id - deletes an event and all related data.
+func (h *Handlers) DeleteEvent(w http.ResponseWriter, r *http.Request) {
+	eventID := chi.URLParam(r, "id")
+	ctx := r.Context()
+
+	result, err := h.db.Exec(ctx, `DELETE FROM events WHERE id = $1`, eventID)
+	if err != nil {
+		slog.Error("DB error deleting event", "error", err)
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to delete event",
+		)
+		return
+	}
+
+	if result.RowsAffected() == 0 {
+		h.writeError(w, http.StatusNotFound, "not_found", "Event not found")
 		return
 	}
 
