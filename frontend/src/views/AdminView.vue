@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { supabase, getUser, onAuthStateChange } from '@/services/supabase'
-import { adminListEvents, adminCreateEvent, adminAddHost, adminDeleteHost } from '@/services/api'
+import {
+  adminListEvents,
+  adminCreateEvent,
+  adminUpdateEvent,
+  adminDeleteEvent,
+  adminAddHost,
+  adminDeleteHost,
+} from '@/services/api'
 import type { AdminEvent } from '@/types'
 
 const loading = ref(true)
@@ -34,6 +41,22 @@ const selectedEventId = ref<string | null>(null)
 const hostForm = ref({ email: '', displayName: '' })
 const hostLoading = ref(false)
 const hostError = ref('')
+
+// edit event
+const editingEventId = ref<string | null>(null)
+const editForm = ref({
+  type: 'wedding',
+  slug: '',
+  title: '',
+  description: '',
+  isPublic: false,
+  startsAt: '',
+  location: '',
+  coverImageUrl: '',
+  locationPhotoUrl: '',
+})
+const editLoading = ref(false)
+const editError = ref('')
 
 let authSubscription: { unsubscribe: () => void } | null = null
 
@@ -222,6 +245,91 @@ async function handleDeleteHost(eventId: string, hostId: string) {
     }
   } catch (e: any) {
     alert(e.message || 'Failed to remove host')
+  }
+}
+
+/**
+ * Converts ISO date string to datetime-local input format.
+ */
+function formatDateTimeForInput(isoStr?: string): string {
+  if (!isoStr) return ''
+  const date = new Date(isoStr)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
+/**
+ * Opens edit mode for an event, pre-filling the form.
+ */
+function startEditEvent(event: AdminEvent) {
+  editingEventId.value = event.id
+  editForm.value = {
+    type: event.type,
+    slug: event.slug,
+    title: event.title,
+    description: event.description || '',
+    isPublic: event.isPublic,
+    startsAt: formatDateTimeForInput(event.startsAt),
+    location: event.location || '',
+    coverImageUrl: event.coverImageUrl || '',
+    locationPhotoUrl: event.locationPhotoUrl || '',
+  }
+  editError.value = ''
+}
+
+/**
+ * Cancels edit mode.
+ */
+function cancelEdit() {
+  editingEventId.value = null
+  editError.value = ''
+}
+
+/**
+ * Saves edits to an event.
+ */
+async function handleUpdateEvent() {
+  if (!editingEventId.value) return
+
+  editLoading.value = true
+  editError.value = ''
+
+  try {
+    const updated = await adminUpdateEvent(editingEventId.value, {
+      type: editForm.value.type,
+      slug: editForm.value.slug,
+      title: editForm.value.title,
+      description: editForm.value.description || null,
+      isPublic: editForm.value.isPublic,
+      startsAt: formatDateTimeForAPI(editForm.value.startsAt) || null,
+      location: editForm.value.location || null,
+      coverImageUrl: editForm.value.coverImageUrl || null,
+      locationPhotoUrl: editForm.value.locationPhotoUrl || null,
+    })
+
+    const idx = events.value.findIndex((e) => e.id === editingEventId.value)
+    if (idx !== -1) {
+      events.value[idx] = updated
+    }
+    editingEventId.value = null
+  } catch (e: any) {
+    editError.value = e.message || 'Failed to update event'
+  } finally {
+    editLoading.value = false
+  }
+}
+
+/**
+ * Deletes an event after confirmation.
+ */
+async function handleDeleteEvent(eventId: string) {
+  if (!confirm('Delete this event? This will remove all related data (hosts, invites, guests, etc.) and cannot be undone.')) return
+
+  try {
+    await adminDeleteEvent(eventId)
+    events.value = events.value.filter((e) => e.id !== eventId)
+  } catch (e: any) {
+    alert(e.message || 'Failed to delete event')
   }
 }
 
@@ -420,28 +528,165 @@ function getEventUrl(event: AdminEvent): string {
             :key="event.id"
             class="bg-white rounded-lg shadow-sm p-6"
           >
-            <div class="flex items-start justify-between mb-4">
-              <div>
-                <div class="flex items-center gap-2 mb-1">
-                  <span class="inline-block px-2 py-0.5 bg-[#fca311] text-black text-xs font-medium rounded capitalize">
-                    {{ event.type }}
-                  </span>
-                  <span v-if="event.isPublic" class="text-xs text-gray-500">Public</span>
-                  <span v-else class="text-xs text-gray-500">Private</span>
+            <!-- View Mode -->
+            <template v-if="editingEventId !== event.id">
+              <div class="flex items-start justify-between mb-4">
+                <div>
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="inline-block px-2 py-0.5 bg-[#fca311] text-black text-xs font-medium rounded capitalize">
+                      {{ event.type }}
+                    </span>
+                    <span v-if="event.isPublic" class="text-xs text-gray-500">Public</span>
+                    <span v-else class="text-xs text-gray-500">Private</span>
+                  </div>
+                  <h3 class="text-lg font-semibold text-[#14213d]">{{ event.title }}</h3>
+                  <p v-if="event.description" class="text-sm text-gray-600 mt-1">{{ event.description }}</p>
+                  <p class="text-sm text-gray-500 mt-1">
+                    {{ formatDate(event.startsAt) }} · {{ event.location || 'No location' }}
+                  </p>
                 </div>
-                <h3 class="text-lg font-semibold text-[#14213d]">{{ event.title }}</h3>
-                <p class="text-sm text-gray-500">
-                  {{ formatDate(event.startsAt) }} · {{ event.location || 'No location' }}
-                </p>
+                <div class="flex items-center gap-3 shrink-0">
+                  <a
+                    :href="getEventUrl(event)"
+                    target="_blank"
+                    class="text-sm text-[#fca311] hover:underline"
+                  >
+                    {{ getEventUrl(event) }} →
+                  </a>
+                  <button
+                    @click="startEditEvent(event)"
+                    class="text-sm text-[#14213d] hover:underline"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    @click="handleDeleteEvent(event.id)"
+                    class="text-sm text-red-500 hover:text-red-700"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-              <a
-                :href="getEventUrl(event)"
-                target="_blank"
-                class="text-sm text-[#fca311] hover:underline"
-              >
-                {{ getEventUrl(event) }} →
-              </a>
-            </div>
+            </template>
+
+            <!-- Edit Mode -->
+            <template v-else>
+              <form @submit.prevent="handleUpdateEvent" class="space-y-4 mb-4">
+                <div class="flex items-center justify-between mb-2">
+                  <h3 class="text-lg font-semibold text-[#14213d]">Edit Event</h3>
+                  <button
+                    type="button"
+                    @click="cancelEdit"
+                    class="text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                    <select
+                      v-model="editForm.type"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                    >
+                      <option value="wedding">Wedding</option>
+                      <option value="birthday">Birthday</option>
+                      <option value="party">Party</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Slug (URL path)</label>
+                    <input
+                      v-model="editForm.slug"
+                      type="text"
+                      required
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <input
+                    v-model="editForm.title"
+                    type="text"
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    v-model="editForm.description"
+                    rows="3"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                  ></textarea>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Date & Time</label>
+                    <input
+                      v-model="editForm.startsAt"
+                      type="datetime-local"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                    <input
+                      v-model="editForm.location"
+                      type="text"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                    />
+                  </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Cover Image URL</label>
+                    <input
+                      v-model="editForm.coverImageUrl"
+                      type="url"
+                      placeholder="https://..."
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Location Photo URL</label>
+                    <input
+                      v-model="editForm.locationPhotoUrl"
+                      type="url"
+                      placeholder="https://..."
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                    />
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <input
+                    v-model="editForm.isPublic"
+                    type="checkbox"
+                    id="editIsPublic"
+                    class="rounded"
+                  />
+                  <label for="editIsPublic" class="text-sm text-gray-700">Public event (no invite code required)</label>
+                </div>
+                <p v-if="editError" class="text-red-600 text-sm">{{ editError }}</p>
+                <div class="flex gap-3">
+                  <button
+                    type="submit"
+                    :disabled="editLoading"
+                    class="bg-[#14213d] text-white font-medium px-4 py-2 rounded-lg hover:bg-[#1a2a4d] transition-colors disabled:opacity-50"
+                  >
+                    {{ editLoading ? 'Saving...' : 'Save Changes' }}
+                  </button>
+                  <button
+                    type="button"
+                    @click="cancelEdit"
+                    class="text-gray-600 hover:text-gray-800 px-4 py-2"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </template>
 
             <!-- Hosts Section -->
             <div class="border-t border-gray-100 pt-4">

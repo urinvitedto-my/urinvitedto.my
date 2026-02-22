@@ -178,6 +178,58 @@ export async function adminDeleteHost(eventId: string, hostId: string): Promise<
   }
 }
 
+/**
+ * Updates an existing event.
+ */
+export async function adminUpdateEvent(
+  eventId: string,
+  data: {
+    type: string
+    slug: string
+    title: string
+    description?: string | null
+    isPublic: boolean
+    startsAt?: string | null
+    location?: string | null
+    coverImageUrl?: string | null
+    locationPhotoUrl?: string | null
+  }
+): Promise<AdminEvent> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to update event')
+  }
+  return res.json()
+}
+
+/**
+ * Deletes an event and all related data.
+ */
+export async function adminDeleteEvent(eventId: string): Promise<void> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to delete event')
+  }
+}
+
 // --- Host API Functions ---
 
 export interface HostEvent {

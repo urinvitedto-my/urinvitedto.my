@@ -186,7 +186,10 @@ export interface AdminEvent {
   type: string
   slug: string
   title: string
+  description?: string
   isPublic: boolean
+  coverImageUrl?: string
+  locationPhotoUrl?: string
   startsAt?: string
   location?: string
   createdAt: string
