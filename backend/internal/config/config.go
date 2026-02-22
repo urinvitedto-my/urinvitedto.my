@@ -22,9 +22,10 @@ type Config struct {
 }
 
 func LoadCfg() (*Config, error) {
-	if err := godotenv.Load(); err != nil {
-		return nil, err
-	}
+	// if err := godotenv.Load(); err != nil {
+	// 	return nil, err
+	// }
+	_ = godotenv.Load()
 
 	cfg := &Config{
 		Port: os.Getenv("PORT"),
