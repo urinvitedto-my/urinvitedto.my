@@ -105,7 +105,7 @@ function formatDate(dateStr?: string): string {
       <!-- Cover Image -->
       <div
         v-if="eventSummary.coverImageUrl"
-        class="w-full h-80 md:h-[28rem] pt-16 bg-cover bg-center"
+        class="w-full h-80 md:h-112 pt-16 bg-cover bg-center"
         :style="{ backgroundImage: `url(${eventSummary.coverImageUrl})` }"
       >
         <div class="w-full h-full bg-black/40 flex items-center justify-center">

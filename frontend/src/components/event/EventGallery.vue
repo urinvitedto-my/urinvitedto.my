@@ -10,6 +10,13 @@ const lightboxOpen = ref(false)
 const lightboxIndex = ref(0)
 
 /**
+ * Returns the gallery item at the current lightbox index.
+ */
+function currentItem(items: GalleryItem[]): GalleryItem {
+  return items[lightboxIndex.value]!
+}
+
+/**
  * Opens lightbox at given index.
  */
 function openLightbox(index: number) {
@@ -103,19 +110,19 @@ function navigate(direction: 1 | -1, total: number) {
       <!-- Content -->
       <div class="max-w-4xl max-h-[80vh] mx-4">
         <img
-          v-if="items[lightboxIndex].mediaType === 'photo'"
-          :src="items[lightboxIndex].mediaUrl"
-          :alt="items[lightboxIndex].caption || 'Gallery image'"
+          v-if="currentItem(items).mediaType === 'photo'"
+          :src="currentItem(items).mediaUrl"
+          :alt="currentItem(items).caption || 'Gallery image'"
           class="max-w-full max-h-[80vh] object-contain"
         />
         <video
           v-else
-          :src="items[lightboxIndex].mediaUrl"
+          :src="currentItem(items).mediaUrl"
           controls
           class="max-w-full max-h-[80vh]"
         ></video>
-        <p v-if="items[lightboxIndex].caption" class="text-white text-center mt-4">
-          {{ items[lightboxIndex].caption }}
+        <p v-if="currentItem(items).caption" class="text-white text-center mt-4">
+          {{ currentItem(items).caption }}
         </p>
       </div>
     </div>

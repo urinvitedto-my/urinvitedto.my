@@ -14,14 +14,25 @@ const emit = defineEmits<{
   rsvpUpdated: []
 }>()
 
-// track RSVP state per guest
-const guestStates = ref<Record<string, {
+interface GuestState {
   status: 'yes' | 'no' | null
   message: string
   submitting: boolean
   submitted: boolean
   error: string
-}>>({})
+}
+
+// track RSVP state per guest
+const guestStates = ref<Record<string, GuestState>>({})
+
+/**
+ * Returns the RSVP state for a guest, with a safe fallback.
+ */
+function getState(guestId: string): GuestState {
+  return guestStates.value[guestId] ?? {
+    status: null, message: '', submitting: false, submitted: false, error: '',
+  }
+}
 
 // initialize state for each guest
 props.invite.guests.forEach((guest) => {
@@ -38,15 +49,16 @@ props.invite.guests.forEach((guest) => {
  * Selects RSVP status for a guest.
  */
 function selectStatus(guestId: string, status: 'yes' | 'no') {
-  guestStates.value[guestId].status = status
-  guestStates.value[guestId].error = ''
+  const state = getState(guestId)
+  state.status = status
+  state.error = ''
 }
 
 /**
  * Submits RSVP for a guest.
  */
 async function handleSubmit(guest: Guest) {
-  const state = guestStates.value[guest.id]
+  const state = getState(guest.id)
 
   if (!state.status) {
     state.error = 'Please select Yes or No'
@@ -90,30 +102,30 @@ async function handleSubmit(guest: Guest) {
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-[#14213d]">{{ guest.displayName }}</h3>
             <span
-              v-if="guestStates[guest.id].submitted"
+              v-if="getState(guest.id).submitted"
               :class="[
                 'px-3 py-1 rounded-full text-sm font-medium',
-                guestStates[guest.id].status === 'yes'
+                getState(guest.id).status === 'yes'
                   ? 'bg-green-100 text-green-800'
                   : 'bg-red-100 text-red-800',
               ]"
             >
-              {{ guestStates[guest.id].status === 'yes' ? 'Attending' : 'Not Attending' }}
+              {{ getState(guest.id).status === 'yes' ? 'Attending' : 'Not Attending' }}
             </span>
           </div>
 
-          <template v-if="!guestStates[guest.id].submitted">
+          <template v-if="!getState(guest.id).submitted">
             <!-- Status buttons -->
             <div class="flex gap-4 mb-4">
               <button
                 @click="selectStatus(guest.id, 'yes')"
                 :class="[
                   'flex-1 py-3 rounded-lg font-semibold transition-colors',
-                  guestStates[guest.id].status === 'yes'
+                  getState(guest.id).status === 'yes'
                     ? 'bg-green-500 text-white'
                     : 'bg-[#ececec] text-gray-700 hover:bg-[#e5e5e5]',
                 ]"
-                :disabled="guestStates[guest.id].submitting"
+                :disabled="getState(guest.id).submitting"
               >
                 Yes, I'll be there
               </button>
@@ -121,46 +133,46 @@ async function handleSubmit(guest: Guest) {
                 @click="selectStatus(guest.id, 'no')"
                 :class="[
                   'flex-1 py-3 rounded-lg font-semibold transition-colors',
-                  guestStates[guest.id].status === 'no'
+                  getState(guest.id).status === 'no'
                     ? 'bg-red-500 text-white'
                     : 'bg-[#ececec] text-gray-700 hover:bg-[#e5e5e5]',
                 ]"
-                :disabled="guestStates[guest.id].submitting"
+                :disabled="getState(guest.id).submitting"
               >
                 Sorry, can't make it
               </button>
             </div>
 
             <!-- Message input -->
-            <div v-if="guestStates[guest.id].status" class="mb-4">
+            <div v-if="getState(guest.id).status" class="mb-4">
               <textarea
-                v-model="guestStates[guest.id].message"
+                v-model="getState(guest.id).message"
                 placeholder="Leave a message (optional)"
                 rows="2"
                 class="w-full px-4 py-3 border border-[#e5e5e5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fca311] resize-none"
-                :disabled="guestStates[guest.id].submitting"
+                :disabled="getState(guest.id).submitting"
               ></textarea>
             </div>
 
             <!-- Error -->
-            <p v-if="guestStates[guest.id].error" class="text-red-600 text-sm mb-4">
-              {{ guestStates[guest.id].error }}
+            <p v-if="getState(guest.id).error" class="text-red-600 text-sm mb-4">
+              {{ getState(guest.id).error }}
             </p>
 
             <!-- Submit button -->
             <button
-              v-if="guestStates[guest.id].status"
+              v-if="getState(guest.id).status"
               @click="handleSubmit(guest)"
-              :disabled="guestStates[guest.id].submitting"
+              :disabled="getState(guest.id).submitting"
               class="w-full bg-[#fca311] text-black font-semibold py-3 rounded-lg hover:bg-[#e5930f] transition-colors disabled:opacity-50"
             >
-              {{ guestStates[guest.id].submitting ? 'Submitting...' : 'Confirm RSVP' }}
+              {{ getState(guest.id).submitting ? 'Submitting...' : 'Confirm RSVP' }}
             </button>
           </template>
 
           <!-- Show message if already submitted -->
-          <p v-else-if="guestStates[guest.id].message" class="text-gray-600 italic">
-            "{{ guestStates[guest.id].message }}"
+          <p v-else-if="getState(guest.id).message" class="text-gray-600 italic">
+            "{{ getState(guest.id).message }}"
           </p>
         </div>
       </div>
