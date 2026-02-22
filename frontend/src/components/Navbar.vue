@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { onAuthStateChange, signOut } from '@/services/supabase'
+import { onAuthStateChange, signOut, supabase } from '@/services/supabase'
 
 const router = useRouter()
 const route = useRoute()
 const menuOpen = ref(false)
 const isLoggedIn = ref(false)
+const userEmail = ref('')
+const isAdmin = ref(false)
 const navbarVisible = ref(true)
 let lastScrollY = 0
 
@@ -24,40 +26,74 @@ function handleScroll() {
   const currentScrollY = window.scrollY
 
   if (currentScrollY > lastScrollY && currentScrollY > 80) {
-    // scrolling down & past threshold - hide
     navbarVisible.value = false
     menuOpen.value = false
   } else {
-    // scrolling up - show
     navbarVisible.value = true
   }
 
   lastScrollY = currentScrollY
 }
 
+/**
+ * Checks if the given email exists in the admins table.
+ */
+async function checkAdmin(email: string) {
+  try {
+    const { data, error } = await supabase
+      .from('admins')
+      .select('email')
+      .eq('email', email)
+      .single()
+    isAdmin.value = !error && !!data
+  } catch {
+    isAdmin.value = false
+  }
+}
+
+/**
+ * Closes the menu when clicking outside of it.
+ */
+function handleClickOutside(e: MouseEvent) {
+  const target = e.target as HTMLElement
+  if (!target.closest('[data-navbar-menu]')) {
+    menuOpen.value = false
+  }
+}
+
 onMounted(() => {
-  // listen for auth state changes
-  const { data } = onAuthStateChange((_event, session) => {
+  const { data } = onAuthStateChange(async (_event, session) => {
     isLoggedIn.value = !!session
+    if (session?.user?.email) {
+      userEmail.value = session.user.email
+      await checkAdmin(session.user.email)
+    } else {
+      userEmail.value = ''
+      isAdmin.value = false
+    }
   })
   authSubscription = data.subscription
 
-  // listen for scroll
   window.addEventListener('scroll', handleScroll, { passive: true })
+  document.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {
   authSubscription?.unsubscribe()
   window.removeEventListener('scroll', handleScroll)
+  document.removeEventListener('click', handleClickOutside)
 })
 
 /**
  * Handles user logout and redirects to home.
  */
 async function handleLogout() {
-  await signOut()
-  menuOpen.value = false
-  router.push('/')
+  try {
+    await signOut()
+  } finally {
+    menuOpen.value = false
+    router.push('/')
+  }
 }
 </script>
 
@@ -81,107 +117,139 @@ async function handleLogout() {
           urinvitedto.my
         </RouterLink>
 
-        <!-- Desktop nav -->
-        <div class="hidden md:flex items-center gap-6">
-          <template v-if="isLoggedIn">
-            <RouterLink
-              to="/host/dashboard"
-              :class="[
-                'transition-colors font-medium',
-                isHomePage ? 'text-white hover:text-white/80' : 'text-[#14213d] hover:text-[#14213d]/80'
-              ]"
-            >
-              Dashboard
-            </RouterLink>
-            <span
-              :class="[
-                'h-4 w-px',
-                isHomePage ? 'bg-white/30' : 'bg-gray-300'
-              ]"
-            ></span>
-            <button
-              @click="handleLogout"
-              :class="[
-                'transition-colors text-sm',
-                isHomePage ? 'text-white/70 hover:text-white' : 'text-gray-500 hover:text-gray-700'
-              ]"
-            >
-              Sign Out
-            </button>
-          </template>
-          <RouterLink
-            v-else
-            to="/host/login"
+        <!-- Desktop: LOGIN link when not logged in -->
+        <RouterLink
+          v-if="!isLoggedIn"
+          to="/host/login"
+          :class="[
+            'hidden md:block font-bold uppercase tracking-wide transition-colors',
+            isHomePage ? 'text-white hover:text-white/80' : 'text-[#14213d] hover:text-[#14213d]/80'
+          ]"
+        >
+          LOGIN
+        </RouterLink>
+
+        <!-- Burger button + desktop dropdown -->
+        <div
+          data-navbar-menu
+          :class="['relative', isLoggedIn ? '' : 'md:hidden']"
+        >
+          <button
+            @click.stop="menuOpen = !menuOpen"
             :class="[
-              'transition-colors',
-              isHomePage ? 'text-white/80 hover:text-white' : 'text-gray-600 hover:text-[#14213d]'
+              'cursor-pointer p-1.5 rounded-md transition-colors',
+              isHomePage
+                ? 'text-white hover:bg-white/10'
+                : 'text-gray-600 hover:bg-gray-100'
             ]"
           >
-            Login
-          </RouterLink>
-        </div>
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
 
-        <!-- Mobile menu button -->
-        <button
-          @click="menuOpen = !menuOpen"
-          :class="['md:hidden', isHomePage ? 'text-white' : 'text-gray-600']"
-        >
-          <svg
-            v-if="!menuOpen"
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <!-- Desktop dropdown -->
+          <div
+            v-if="menuOpen"
+            class="hidden md:block absolute right-0 top-full mt-2 min-w-[240px] bg-white rounded-xl py-2 shadow-xl ring-1 ring-black/5"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-          <svg
-            v-else
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
+            <template v-if="isLoggedIn">
+              <div class="px-4 py-2.5 border-b border-gray-100">
+                <p class="text-xs text-gray-400 leading-none">Signed in as</p>
+                <p class="text-sm text-[#14213d] font-medium truncate mt-1">{{ userEmail }}</p>
+              </div>
+              <div class="py-1">
+                <RouterLink
+                  to="/host/dashboard"
+                  class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  @click="menuOpen = false"
+                >
+                  Dashboard
+                </RouterLink>
+                <RouterLink
+                  v-if="isAdmin"
+                  to="/admin"
+                  class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  @click="menuOpen = false"
+                >
+                  Admin Dashboard
+                </RouterLink>
+              </div>
+              <div class="border-t border-gray-100 py-1">
+                <button
+                  @click.stop="handleLogout"
+                  class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            </template>
+            <RouterLink
+              v-else
+              to="/host/login"
+              class="block px-4 py-2.5 text-[#14213d] font-bold uppercase transition-colors hover:bg-gray-50"
+              @click="menuOpen = false"
+            >
+              LOGIN
+            </RouterLink>
+          </div>
+        </div>
       </div>
 
       <!-- Mobile menu -->
-      <div v-if="menuOpen" class="md:hidden bg-white/95 backdrop-blur-sm rounded-b-lg py-4 px-4">
+      <div
+        v-if="menuOpen"
+        data-navbar-menu
+        class="md:hidden bg-white rounded-xl mt-2 py-3 shadow-xl ring-1 ring-black/5"
+      >
         <template v-if="isLoggedIn">
-          <RouterLink
-            to="/host/dashboard"
-            class="block text-[#14213d] font-medium py-2 hover:text-[#14213d]/80 transition-colors"
-            @click="menuOpen = false"
-          >
-            Dashboard
-          </RouterLink>
-          <hr class="my-3 border-gray-200" />
-          <button
-            @click="handleLogout"
-            class="block text-gray-500 text-sm py-1 hover:text-gray-700 transition-colors"
-          >
-            Sign Out
-          </button>
+          <div class="px-5 py-3 border-b border-gray-100 text-center">
+            <p class="text-xs text-gray-400 leading-none">Signed in as</p>
+            <p class="text-base text-[#14213d] font-medium truncate mt-1">{{ userEmail }}</p>
+          </div>
+          <div class="py-1">
+            <RouterLink
+              to="/host/dashboard"
+              class="block px-5 py-3 text-base text-center text-gray-700 hover:bg-gray-50 transition-colors"
+              @click="menuOpen = false"
+            >
+              Dashboard
+            </RouterLink>
+            <RouterLink
+              v-if="isAdmin"
+              to="/admin"
+              class="block px-5 py-3 text-base text-center text-gray-700 hover:bg-gray-50 transition-colors"
+              @click="menuOpen = false"
+            >
+              Admin Dashboard
+            </RouterLink>
+          </div>
+          <div class="border-t border-gray-100 py-1">
+            <button
+              @click.stop="handleLogout"
+              class="w-full px-5 py-3 text-base text-center text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
+            >
+              Logout
+            </button>
+          </div>
         </template>
         <RouterLink
           v-else
           to="/host/login"
-          class="block text-gray-600 hover:text-[#14213d] transition-colors"
+          class="block px-5 py-3 text-base text-center text-[#14213d] font-bold uppercase transition-colors hover:bg-gray-50"
           @click="menuOpen = false"
         >
-          Login
+          LOGIN
         </RouterLink>
       </div>
     </div>
