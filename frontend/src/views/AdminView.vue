@@ -44,6 +44,25 @@ const hostForm = ref({ email: '', displayName: '' })
 const hostLoading = ref(false)
 const hostError = ref('')
 
+// collapsible section state per event
+const collapsedSections = ref<Record<string, Set<string>>>({})
+
+function isSectionCollapsed(eventId: string, section: string): boolean {
+  return !(collapsedSections.value[eventId]?.has(section) ?? false)
+}
+
+function toggleSection(eventId: string, section: string) {
+  if (!collapsedSections.value[eventId]) {
+    collapsedSections.value[eventId] = new Set()
+  }
+  const sections = collapsedSections.value[eventId]
+  if (sections.has(section)) {
+    sections.delete(section)
+  } else {
+    sections.add(section)
+  }
+}
+
 // edit event
 const editingEventId = ref<string | null>(null)
 const editForm = ref({
@@ -695,8 +714,18 @@ function getEventUrl(event: AdminEvent): string {
             <!-- Hosts Section -->
             <div class="border-t border-gray-100 pt-4">
               <div class="flex items-center justify-between mb-3">
-                <h4 class="text-sm font-medium text-gray-700">Hosts</h4>
                 <button
+                  @click="toggleSection(event.id, 'hosts')"
+                  class="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-[#14213d] transition-colors"
+                >
+                  <span
+                    class="inline-block transition-transform duration-200"
+                    :class="isSectionCollapsed(event.id, 'hosts') ? '' : 'rotate-90'"
+                  >▶</span>
+                  Hosts
+                </button>
+                <button
+                  v-if="!isSectionCollapsed(event.id, 'hosts')"
                   @click="selectedEventId = selectedEventId === event.id ? null : event.id"
                   class="text-sm text-[#14213d] hover:underline"
                 >
@@ -704,73 +733,83 @@ function getEventUrl(event: AdminEvent): string {
                 </button>
               </div>
 
-              <!-- Host List -->
-              <div v-if="event.hosts.length > 0" class="space-y-2 mb-3">
-                <div
-                  v-for="host in event.hosts"
-                  :key="host.id"
-                  class="flex items-center justify-between bg-gray-50 px-3 py-2 rounded"
-                >
-                  <div>
-                    <span class="font-medium">{{ host.displayName }}</span>
-                    <span class="text-sm text-gray-500 ml-2">{{ host.contactEmail }}</span>
-                    <span
-                      v-if="host.authUserId"
-                      class="text-xs text-green-600 ml-2"
-                      title="Account linked"
-                    >✓ Linked</span>
-                    <span
-                      v-else
-                      class="text-xs text-orange-500 ml-2"
-                      title="No auth account yet"
-                    >⚠ Not linked</span>
-                  </div>
-                  <button
-                    @click="handleDeleteHost(event.id, host.id)"
-                    class="text-red-500 hover:text-red-700 text-sm"
+              <template v-if="!isSectionCollapsed(event.id, 'hosts')">
+                <!-- Host List -->
+                <div v-if="event.hosts.length > 0" class="space-y-2 mb-3">
+                  <div
+                    v-for="host in event.hosts"
+                    :key="host.id"
+                    class="flex items-center justify-between bg-gray-50 px-3 py-2 rounded"
                   >
-                    Remove
-                  </button>
+                    <div>
+                      <span class="font-medium">{{ host.displayName }}</span>
+                      <span class="text-sm text-gray-500 ml-2">{{ host.contactEmail }}</span>
+                      <span
+                        v-if="host.authUserId"
+                        class="text-xs text-green-600 ml-2"
+                        title="Account linked"
+                      >✓ Linked</span>
+                      <span
+                        v-else
+                        class="text-xs text-orange-500 ml-2"
+                        title="No auth account yet"
+                      >⚠ Not linked</span>
+                    </div>
+                    <button
+                      @click="handleDeleteHost(event.id, host.id)"
+                      class="text-red-500 hover:text-red-700 text-sm"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <p v-else class="text-sm text-gray-400 mb-3">No hosts added yet</p>
+                <p v-else class="text-sm text-gray-400 mb-3">No hosts added yet</p>
 
-              <!-- Add Host Form -->
-              <div v-if="selectedEventId === event.id" class="bg-gray-50 p-4 rounded-lg">
-                <form @submit.prevent="handleAddHost" class="space-y-3">
-                  <div class="grid md:grid-cols-2 gap-3">
-                    <input
-                      v-model="hostForm.email"
-                      type="email"
-                      placeholder="Host email"
-                      required
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
-                    />
-                    <input
-                      v-model="hostForm.displayName"
-                      type="text"
-                      placeholder="Display name"
-                      required
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
-                    />
-                  </div>
-                  <p v-if="hostError" class="text-red-600 text-sm">{{ hostError }}</p>
-                  <button
-                    type="submit"
-                    :disabled="hostLoading"
-                    class="bg-[#14213d] text-white font-medium px-4 py-2 rounded-lg hover:bg-[#1a2a4d] transition-colors disabled:opacity-50"
-                  >
-                    {{ hostLoading ? 'Adding...' : 'Add Host' }}
-                  </button>
-                </form>
-              </div>
+                <!-- Add Host Form -->
+                <div v-if="selectedEventId === event.id" class="bg-gray-50 p-4 rounded-lg">
+                  <form @submit.prevent="handleAddHost" class="space-y-3">
+                    <div class="grid md:grid-cols-2 gap-3">
+                      <input
+                        v-model="hostForm.email"
+                        type="email"
+                        placeholder="Host email"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                      />
+                      <input
+                        v-model="hostForm.displayName"
+                        type="text"
+                        placeholder="Display name"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                      />
+                    </div>
+                    <p v-if="hostError" class="text-red-600 text-sm">{{ hostError }}</p>
+                    <button
+                      type="submit"
+                      :disabled="hostLoading"
+                      class="bg-[#14213d] text-white font-medium px-4 py-2 rounded-lg hover:bg-[#1a2a4d] transition-colors disabled:opacity-50"
+                    >
+                      {{ hostLoading ? 'Adding...' : 'Add Host' }}
+                    </button>
+                  </form>
+                </div>
+              </template>
             </div>
 
             <!-- Invites & Guests Section -->
-            <AdminInvites :event-id="event.id" />
+            <AdminInvites
+              :event-id="event.id"
+              :collapsed="isSectionCollapsed(event.id, 'invites')"
+              @toggle="toggleSection(event.id, 'invites')"
+            />
 
             <!-- Schedule Section -->
-            <AdminSchedule :event-id="event.id" />
+            <AdminSchedule
+              :event-id="event.id"
+              :collapsed="isSectionCollapsed(event.id, 'schedule')"
+              @toggle="toggleSection(event.id, 'schedule')"
+            />
           </div>
         </div>
       </div>

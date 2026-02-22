@@ -8,7 +8,12 @@ import {
 } from '@/services/api'
 import type { AdminScheduleItem } from '@/types'
 
-const props = defineProps<{ eventId: string }>()
+const props = defineProps<{
+  eventId: string
+  collapsed: boolean
+}>()
+
+const emit = defineEmits<{ toggle: [] }>()
 
 const items = ref<AdminScheduleItem[]>([])
 const loading = ref(false)
@@ -190,11 +195,19 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
 <template>
   <div class="border-t border-gray-100 pt-4">
     <div class="flex items-center justify-between mb-3">
-      <h4 class="text-sm font-medium text-gray-700">
+      <button
+        @click="emit('toggle')"
+        class="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-[#14213d] transition-colors"
+      >
+        <span
+          class="inline-block transition-transform duration-200"
+          :class="collapsed ? '' : 'rotate-90'"
+        >▶</span>
         Schedule
         <span v-if="items.length > 0" class="text-gray-400 font-normal">({{ items.length }})</span>
-      </h4>
+      </button>
       <button
+        v-if="!collapsed"
         @click="showCreateForm = !showCreateForm"
         class="text-sm text-[#14213d] hover:underline"
       >
@@ -202,6 +215,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
       </button>
     </div>
 
+    <template v-if="!collapsed">
     <!-- Create Form -->
     <div v-if="showCreateForm" class="bg-gray-50 p-4 rounded-lg mb-3">
       <form @submit.prevent="handleCreate" class="space-y-3">
@@ -358,5 +372,6 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
         </template>
       </div>
     </div>
+    </template>
   </div>
 </template>

@@ -10,7 +10,12 @@ import {
 } from '@/services/api'
 import type { AdminInvite, AdminGuest } from '@/types'
 
-const props = defineProps<{ eventId: string }>()
+const props = defineProps<{
+  eventId: string
+  collapsed: boolean
+}>()
+
+const emit = defineEmits<{ toggle: [] }>()
 
 const invites = ref<AdminInvite[]>([])
 const loading = ref(false)
@@ -176,11 +181,19 @@ function rsvpClass(status: string): string {
 <template>
   <div class="border-t border-gray-100 pt-4">
     <div class="flex items-center justify-between mb-3">
-      <h4 class="text-sm font-medium text-gray-700">
+      <button
+        @click="emit('toggle')"
+        class="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-[#14213d] transition-colors"
+      >
+        <span
+          class="inline-block transition-transform duration-200"
+          :class="collapsed ? '' : 'rotate-90'"
+        >▶</span>
         Invites
         <span v-if="invites.length > 0" class="text-gray-400 font-normal">({{ invites.length }})</span>
-      </h4>
+      </button>
       <button
+        v-if="!collapsed"
         @click="showCreateForm = !showCreateForm"
         class="text-sm text-[#14213d] hover:underline"
       >
@@ -188,6 +201,7 @@ function rsvpClass(status: string): string {
       </button>
     </div>
 
+    <template v-if="!collapsed">
     <!-- Create Invite Form -->
     <div v-if="showCreateForm" class="bg-gray-50 p-4 rounded-lg mb-3">
       <form @submit.prevent="handleCreateInvite" class="flex items-end gap-3">
@@ -348,5 +362,6 @@ function rsvpClass(status: string): string {
         </div>
       </div>
     </div>
+    </template>
   </div>
 </template>
