@@ -275,6 +275,68 @@ type UpdateScheduleItemRequest struct {
 	OrderIndex  *int    `json:"orderIndex"`
 }
 
+// AdminFAQ is a FAQ item with createdAt for admin views.
+type AdminFAQ struct {
+	ID         string    `json:"id"`
+	Question   string    `json:"question"`
+	Answer     string    `json:"answer"`
+	OrderIndex int       `json:"orderIndex"`
+	CreatedAt  time.Time `json:"createdAt"`
+}
+
+// AdminFAQsResponse is the response for listing FAQs.
+type AdminFAQsResponse struct {
+	Items []AdminFAQ `json:"items"`
+}
+
+// CreateFAQRequest is the request body for creating a FAQ.
+type CreateFAQRequest struct {
+	Question   string `json:"question"`
+	Answer     string `json:"answer"`
+	OrderIndex *int   `json:"orderIndex"`
+}
+
+// UpdateFAQRequest is the request body for updating a FAQ.
+type UpdateFAQRequest struct {
+	Question   string `json:"question"`
+	Answer     string `json:"answer"`
+	OrderIndex *int   `json:"orderIndex"`
+}
+
+// AdminGift is a gift item with createdAt for admin views.
+type AdminGift struct {
+	ID          string    `json:"id"`
+	GiftType    string    `json:"giftType"`
+	Title       string    `json:"title"`
+	Description *string   `json:"description,omitempty"`
+	Link        *string   `json:"link,omitempty"`
+	OrderIndex  int       `json:"orderIndex"`
+	CreatedAt   time.Time `json:"createdAt"`
+}
+
+// AdminGiftsResponse is the response for listing gifts.
+type AdminGiftsResponse struct {
+	Items []AdminGift `json:"items"`
+}
+
+// CreateGiftRequest is the request body for creating a gift.
+type CreateGiftRequest struct {
+	GiftType    string  `json:"giftType"`
+	Title       string  `json:"title"`
+	Description *string `json:"description"`
+	Link        *string `json:"link"`
+	OrderIndex  *int    `json:"orderIndex"`
+}
+
+// UpdateGiftRequest is the request body for updating a gift.
+type UpdateGiftRequest struct {
+	GiftType    string  `json:"giftType"`
+	Title       string  `json:"title"`
+	Description *string `json:"description"`
+	Link        *string `json:"link"`
+	OrderIndex  *int    `json:"orderIndex"`
+}
+
 // HostEvent is an alias for BaseEvent for host dashboard view.
 type HostEvent = BaseEvent
 
