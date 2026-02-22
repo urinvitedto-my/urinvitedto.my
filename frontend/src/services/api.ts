@@ -12,6 +12,7 @@ import type {
   AdminScheduleItem,
   AdminFAQ,
   AdminGift,
+  AdminGalleryItem,
 } from '@/types'
 import { supabase } from './supabase'
 
@@ -635,6 +636,103 @@ export async function adminDeleteGift(eventId: string, itemId: string): Promise<
   if (!res.ok) {
     const err = await res.json()
     throw new Error(err.message || 'Failed to delete gift')
+  }
+}
+
+// --- Admin Gallery API Functions ---
+
+/**
+ * Fetches all gallery items for an event.
+ */
+export async function adminListGallery(
+  eventId: string,
+): Promise<{ items: AdminGalleryItem[] }> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/gallery`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to list gallery')
+  }
+  return res.json()
+}
+
+/**
+ * Creates a new gallery item.
+ */
+export async function adminCreateGalleryItem(
+  eventId: string,
+  data: {
+    mediaType: string
+    mediaUrl: string
+    caption?: string | null
+    orderIndex?: number | null
+  },
+): Promise<AdminGalleryItem> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/gallery`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to create gallery item')
+  }
+  return res.json()
+}
+
+/**
+ * Updates a gallery item (caption and order).
+ */
+export async function adminUpdateGalleryItem(
+  eventId: string,
+  itemId: string,
+  data: {
+    caption?: string | null
+    orderIndex?: number | null
+  },
+): Promise<AdminGalleryItem> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/gallery/${itemId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to update gallery item')
+  }
+  return res.json()
+}
+
+/**
+ * Deletes a gallery item.
+ */
+export async function adminDeleteGalleryItem(eventId: string, itemId: string): Promise<void> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/gallery/${itemId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to delete gallery item')
   }
 }
 

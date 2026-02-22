@@ -225,6 +225,15 @@ export interface AdminGift {
   createdAt: string
 }
 
+export interface AdminGalleryItem {
+  id: string
+  mediaType: 'photo' | 'video'
+  mediaUrl: string
+  caption?: string
+  orderIndex: number
+  createdAt: string
+}
+
 export interface AdminEvent {
   id: string
   type: string
