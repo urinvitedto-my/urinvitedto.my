@@ -10,6 +10,7 @@ import {
   adminDeleteHost,
 } from '@/services/api'
 import type { AdminEvent } from '@/types'
+import AdminInvites from '@/components/admin/AdminInvites.vue'
 
 const loading = ref(true)
 const isAdmin = ref(false)
@@ -761,6 +762,9 @@ function getEventUrl(event: AdminEvent): string {
                 </form>
               </div>
             </div>
+
+            <!-- Invites & Guests Section -->
+            <AdminInvites :event-id="event.id" />
           </div>
         </div>
       </template>

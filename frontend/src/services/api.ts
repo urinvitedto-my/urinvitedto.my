@@ -7,6 +7,8 @@ import type {
   RSVPResponse,
   AdminEvent,
   AdminHost,
+  AdminInvite,
+  AdminGuest,
 } from '@/types'
 import { supabase } from './supabase'
 
@@ -227,6 +229,136 @@ export async function adminDeleteEvent(eventId: string): Promise<void> {
   if (!res.ok) {
     const err = await res.json()
     throw new Error(err.message || 'Failed to delete event')
+  }
+}
+
+// --- Admin Invite/Guest API Functions ---
+
+/**
+ * Fetches all invites with guests for an event.
+ */
+export async function adminListInvites(eventId: string): Promise<{ invites: AdminInvite[] }> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/invites`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to list invites')
+  }
+  return res.json()
+}
+
+/**
+ * Creates a new invite with auto-generated code.
+ */
+export async function adminCreateInvite(
+  eventId: string,
+  data: { label?: string | null }
+): Promise<AdminInvite> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/invites`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to create invite')
+  }
+  return res.json()
+}
+
+/**
+ * Deletes an invite and all its guests.
+ */
+export async function adminDeleteInvite(eventId: string, inviteId: string): Promise<void> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/invites/${inviteId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to delete invite')
+  }
+}
+
+/**
+ * Adds a guest to an invite.
+ */
+export async function adminAddGuest(
+  eventId: string,
+  inviteId: string,
+  data: { displayName: string }
+): Promise<AdminGuest> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/invites/${inviteId}/guests`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to add guest')
+  }
+  return res.json()
+}
+
+/**
+ * Updates a guest's name or RSVP status.
+ */
+export async function adminUpdateGuest(
+  eventId: string,
+  guestId: string,
+  data: { displayName: string; rsvpStatus: string }
+): Promise<AdminGuest> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/guests/${guestId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to update guest')
+  }
+  return res.json()
+}
+
+/**
+ * Removes a guest.
+ */
+export async function adminDeleteGuest(eventId: string, guestId: string): Promise<void> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/guests/${guestId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to delete guest')
   }
 }
 

@@ -181,6 +181,23 @@ export interface AdminHost {
   authUserId?: string
 }
 
+export interface AdminGuest {
+  id: string
+  displayName: string
+  rsvpStatus: 'pending' | 'yes' | 'no'
+  rsvpMessage?: string
+  rsvpAt?: string
+  createdAt: string
+}
+
+export interface AdminInvite {
+  id: string
+  inviteCode: string
+  label?: string
+  createdAt: string
+  guests: AdminGuest[]
+}
+
 export interface AdminEvent {
   id: string
   type: string
