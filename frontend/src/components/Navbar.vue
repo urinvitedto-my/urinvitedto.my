@@ -20,15 +20,16 @@ const isHomePage = computed(() => route.path === '/')
 let authSubscription: { unsubscribe: () => void } | null = null
 
 /**
- * Handles scroll to hide/show navbar.
+ * Handles scroll to hide/show navbar. Only reappears near the top
+ * to avoid floating over content on transparent-nav pages.
  */
 function handleScroll() {
   const currentScrollY = window.scrollY
 
-  if (currentScrollY > lastScrollY && currentScrollY > 80) {
+  if (currentScrollY > lastScrollY && currentScrollY > 50) {
     navbarVisible.value = false
     menuOpen.value = false
-  } else {
+  } else if (currentScrollY <= 50) {
     navbarVisible.value = true
   }
 
@@ -101,7 +102,7 @@ async function handleLogout() {
   <nav
     :class="[
       'fixed top-0 left-0 right-0 z-40 transition-transform duration-300',
-      navbarVisible ? 'translate-y-0' : '-translate-y-full'
+      navbarVisible ? 'translate-y-0' : '-translate-y-full',
     ]"
   >
     <div class="max-w-6xl mx-auto px-4">
@@ -110,8 +111,8 @@ async function handleLogout() {
         <RouterLink
           to="/"
           :class="[
-            'text-xl font-bold transition-colors',
-            isHomePage ? 'text-white' : 'text-[#14213d]'
+            'text-2xl font-bold transition-colors',
+            isHomePage ? 'text-white' : 'text-[#14213d]',
           ]"
         >
           urinvitedto.my
@@ -123,32 +124,26 @@ async function handleLogout() {
           to="/host/login"
           :class="[
             'hidden md:block font-bold uppercase tracking-wide transition-colors',
-            isHomePage ? 'text-white hover:text-white/80' : 'text-[#14213d] hover:text-[#14213d]/80'
+            isHomePage
+              ? 'text-white hover:text-white/80'
+              : 'text-[#14213d] hover:text-[#14213d]/80',
           ]"
         >
           LOGIN
         </RouterLink>
 
         <!-- Burger button + desktop dropdown -->
-        <div
-          data-navbar-menu
-          :class="['relative', isLoggedIn ? '' : 'md:hidden']"
-        >
+        <div data-navbar-menu :class="['relative', isLoggedIn ? '' : 'md:hidden']">
           <button
             @click.stop="menuOpen = !menuOpen"
             :class="[
               'cursor-pointer p-1.5 rounded-md transition-colors',
               isHomePage
                 ? 'text-white hover:bg-white/10'
-                : 'text-gray-600 hover:bg-gray-100'
+                : 'text-gray-600 hover:bg-gray-100',
             ]"
           >
-            <svg
-              class="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -166,7 +161,9 @@ async function handleLogout() {
             <template v-if="isLoggedIn">
               <div class="px-4 py-2.5 border-b border-gray-100">
                 <p class="text-xs text-gray-400 leading-none">Signed in as</p>
-                <p class="text-sm text-[#14213d] font-medium truncate mt-1">{{ userEmail }}</p>
+                <p class="text-sm text-[#14213d] font-medium truncate mt-1">
+                  {{ userEmail }}
+                </p>
               </div>
               <div class="py-1">
                 <RouterLink
@@ -215,7 +212,9 @@ async function handleLogout() {
         <template v-if="isLoggedIn">
           <div class="px-5 py-3 border-b border-gray-100 text-center">
             <p class="text-xs text-gray-400 leading-none">Signed in as</p>
-            <p class="text-base text-[#14213d] font-medium truncate mt-1">{{ userEmail }}</p>
+            <p class="text-base text-[#14213d] font-medium truncate mt-1">
+              {{ userEmail }}
+            </p>
           </div>
           <div class="py-1">
             <RouterLink
