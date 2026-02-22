@@ -355,15 +355,15 @@ function getEventUrl(event: AdminEvent): string {
 </script>
 
 <template>
-  <div class="admin-view min-h-screen pt-24 pb-8 px-4">
-    <div class="max-w-6xl mx-auto">
-      <!-- Loading -->
-      <div v-if="loading" class="flex items-center justify-center py-20">
-        <div class="animate-spin rounded-full h-12 w-12 border-4 border-[#fca311] border-t-transparent"></div>
-      </div>
+  <div class="admin-view">
+    <!-- Loading -->
+    <div v-if="loading" class="min-h-screen flex items-center justify-center pt-24 pb-12 px-4">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-[#fca311] border-t-transparent"></div>
+    </div>
 
-      <!-- Login Form -->
-      <div v-else-if="!isAdmin" class="max-w-md mx-auto">
+    <!-- Login Form -->
+    <div v-else-if="!isAdmin" class="min-h-screen flex items-center justify-center pt-24 pb-12 px-4">
+      <div class="max-w-md w-full">
         <div class="text-center mb-8">
           <h1 class="text-3xl font-bold text-[#14213d]">Admin Login</h1>
           <p class="text-gray-600 mt-2">Sign in with your admin account</p>
@@ -409,9 +409,11 @@ function getEventUrl(event: AdminEvent): string {
           </button>
         </form>
       </div>
+    </div>
 
-      <!-- Admin Dashboard -->
-      <template v-else>
+    <!-- Admin Dashboard -->
+    <div v-else class="min-h-screen pt-24 pb-8 px-4">
+      <div class="max-w-6xl mx-auto">
         <div class="flex items-center justify-between mb-8">
           <h1 class="text-2xl font-bold text-[#14213d]">Admin Dashboard</h1>
           <button
@@ -767,7 +769,7 @@ function getEventUrl(event: AdminEvent): string {
             <AdminInvites :event-id="event.id" />
           </div>
         </div>
-      </template>
+      </div>
     </div>
   </div>
 </template>
