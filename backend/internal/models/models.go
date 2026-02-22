@@ -337,6 +337,35 @@ type UpdateGiftRequest struct {
 	OrderIndex  *int    `json:"orderIndex"`
 }
 
+// AdminGalleryItem is a gallery item with createdAt for admin views.
+type AdminGalleryItem struct {
+	ID         string    `json:"id"`
+	MediaType  string    `json:"mediaType"`
+	MediaURL   string    `json:"mediaUrl"`
+	Caption    *string   `json:"caption,omitempty"`
+	OrderIndex int       `json:"orderIndex"`
+	CreatedAt  time.Time `json:"createdAt"`
+}
+
+// AdminGalleryResponse is the response for listing gallery items.
+type AdminGalleryResponse struct {
+	Items []AdminGalleryItem `json:"items"`
+}
+
+// CreateGalleryItemRequest is the request body for creating a gallery item.
+type CreateGalleryItemRequest struct {
+	MediaType  string  `json:"mediaType"`
+	MediaURL   string  `json:"mediaUrl"`
+	Caption    *string `json:"caption"`
+	OrderIndex *int    `json:"orderIndex"`
+}
+
+// UpdateGalleryItemRequest is the request body for updating a gallery item.
+type UpdateGalleryItemRequest struct {
+	Caption    *string `json:"caption"`
+	OrderIndex *int    `json:"orderIndex"`
+}
+
 // HostEvent is an alias for BaseEvent for host dashboard view.
 type HostEvent = BaseEvent
 
