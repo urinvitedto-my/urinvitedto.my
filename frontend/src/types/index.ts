@@ -207,6 +207,24 @@ export interface AdminScheduleItem {
   createdAt: string
 }
 
+export interface AdminFAQ {
+  id: string
+  question: string
+  answer: string
+  orderIndex: number
+  createdAt: string
+}
+
+export interface AdminGift {
+  id: string
+  giftType: 'physical' | 'monetary'
+  title: string
+  description?: string
+  link?: string
+  orderIndex: number
+  createdAt: string
+}
+
 export interface AdminEvent {
   id: string
   type: string

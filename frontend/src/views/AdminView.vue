@@ -12,6 +12,8 @@ import {
 import type { AdminEvent } from '@/types'
 import AdminInvites from '@/components/admin/AdminInvites.vue'
 import AdminSchedule from '@/components/admin/AdminSchedule.vue'
+import AdminFAQs from '@/components/admin/AdminFAQs.vue'
+import AdminGifts from '@/components/admin/AdminGifts.vue'
 
 const loading = ref(true)
 const isAdmin = ref(false)
@@ -809,6 +811,20 @@ function getEventUrl(event: AdminEvent): string {
               :event-id="event.id"
               :collapsed="isSectionCollapsed(event.id, 'schedule')"
               @toggle="toggleSection(event.id, 'schedule')"
+            />
+
+            <!-- FAQs Section -->
+            <AdminFAQs
+              :event-id="event.id"
+              :collapsed="isSectionCollapsed(event.id, 'faqs')"
+              @toggle="toggleSection(event.id, 'faqs')"
+            />
+
+            <!-- Gifts Section -->
+            <AdminGifts
+              :event-id="event.id"
+              :collapsed="isSectionCollapsed(event.id, 'gifts')"
+              @toggle="toggleSection(event.id, 'gifts')"
             />
           </div>
         </div>

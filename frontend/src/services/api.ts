@@ -10,6 +10,8 @@ import type {
   AdminInvite,
   AdminGuest,
   AdminScheduleItem,
+  AdminFAQ,
+  AdminGift,
 } from '@/types'
 import { supabase } from './supabase'
 
@@ -447,6 +449,192 @@ export async function adminDeleteScheduleItem(eventId: string, itemId: string): 
   if (!res.ok) {
     const err = await res.json()
     throw new Error(err.message || 'Failed to delete schedule item')
+  }
+}
+
+// --- Admin FAQ API Functions ---
+
+/**
+ * Fetches all FAQs for an event.
+ */
+export async function adminListFAQs(eventId: string): Promise<{ items: AdminFAQ[] }> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/faqs`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to list FAQs')
+  }
+  return res.json()
+}
+
+/**
+ * Creates a new FAQ.
+ */
+export async function adminCreateFAQ(
+  eventId: string,
+  data: { question: string; answer: string; orderIndex?: number | null }
+): Promise<AdminFAQ> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/faqs`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to create FAQ')
+  }
+  return res.json()
+}
+
+/**
+ * Updates a FAQ.
+ */
+export async function adminUpdateFAQ(
+  eventId: string,
+  itemId: string,
+  data: { question: string; answer: string; orderIndex?: number | null }
+): Promise<AdminFAQ> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/faqs/${itemId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to update FAQ')
+  }
+  return res.json()
+}
+
+/**
+ * Deletes a FAQ.
+ */
+export async function adminDeleteFAQ(eventId: string, itemId: string): Promise<void> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/faqs/${itemId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to delete FAQ')
+  }
+}
+
+// --- Admin Gift API Functions ---
+
+/**
+ * Fetches all gifts for an event.
+ */
+export async function adminListGifts(eventId: string): Promise<{ items: AdminGift[] }> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/gifts`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to list gifts')
+  }
+  return res.json()
+}
+
+/**
+ * Creates a new gift.
+ */
+export async function adminCreateGift(
+  eventId: string,
+  data: {
+    giftType: string
+    title: string
+    description?: string | null
+    link?: string | null
+    orderIndex?: number | null
+  }
+): Promise<AdminGift> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/gifts`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to create gift')
+  }
+  return res.json()
+}
+
+/**
+ * Updates a gift.
+ */
+export async function adminUpdateGift(
+  eventId: string,
+  itemId: string,
+  data: {
+    giftType: string
+    title: string
+    description?: string | null
+    link?: string | null
+    orderIndex?: number | null
+  }
+): Promise<AdminGift> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/gifts/${itemId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to update gift')
+  }
+  return res.json()
+}
+
+/**
+ * Deletes a gift.
+ */
+export async function adminDeleteGift(eventId: string, itemId: string): Promise<void> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/gifts/${itemId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to delete gift')
   }
 }
 
