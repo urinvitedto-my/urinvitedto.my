@@ -11,6 +11,7 @@ import {
 } from '@/services/api'
 import type { AdminEvent } from '@/types'
 import AdminInvites from '@/components/admin/AdminInvites.vue'
+import AdminSchedule from '@/components/admin/AdminSchedule.vue'
 
 const loading = ref(true)
 const isAdmin = ref(false)
@@ -767,6 +768,9 @@ function getEventUrl(event: AdminEvent): string {
 
             <!-- Invites & Guests Section -->
             <AdminInvites :event-id="event.id" />
+
+            <!-- Schedule Section -->
+            <AdminSchedule :event-id="event.id" />
           </div>
         </div>
       </div>

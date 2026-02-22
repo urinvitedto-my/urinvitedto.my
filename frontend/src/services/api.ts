@@ -9,6 +9,7 @@ import type {
   AdminHost,
   AdminInvite,
   AdminGuest,
+  AdminScheduleItem,
 } from '@/types'
 import { supabase } from './supabase'
 
@@ -359,6 +360,93 @@ export async function adminDeleteGuest(eventId: string, guestId: string): Promis
   if (!res.ok) {
     const err = await res.json()
     throw new Error(err.message || 'Failed to delete guest')
+  }
+}
+
+// --- Admin Schedule API Functions ---
+
+/**
+ * Fetches all schedule items for an event.
+ */
+export async function adminListSchedule(eventId: string): Promise<{ items: AdminScheduleItem[] }> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/schedule`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to list schedule')
+  }
+  return res.json()
+}
+
+/**
+ * Creates a new schedule item.
+ */
+export async function adminCreateScheduleItem(
+  eventId: string,
+  data: { time: string; title: string; description?: string | null; orderIndex?: number | null }
+): Promise<AdminScheduleItem> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/schedule`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to create schedule item')
+  }
+  return res.json()
+}
+
+/**
+ * Updates a schedule item.
+ */
+export async function adminUpdateScheduleItem(
+  eventId: string,
+  itemId: string,
+  data: { time: string; title: string; description?: string | null; orderIndex?: number | null }
+): Promise<AdminScheduleItem> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/schedule/${itemId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to update schedule item')
+  }
+  return res.json()
+}
+
+/**
+ * Deletes a schedule item.
+ */
+export async function adminDeleteScheduleItem(eventId: string, itemId: string): Promise<void> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/schedule/${itemId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to delete schedule item')
   }
 }
 

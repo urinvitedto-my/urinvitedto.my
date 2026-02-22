@@ -198,6 +198,15 @@ export interface AdminInvite {
   guests: AdminGuest[]
 }
 
+export interface AdminScheduleItem {
+  id: string
+  time: string
+  title: string
+  description?: string
+  orderIndex: number
+  createdAt: string
+}
+
 export interface AdminEvent {
   id: string
   type: string
