@@ -1,2 +1,5 @@
+# IDE folders
+.cursor/
+
 # env file
 .env

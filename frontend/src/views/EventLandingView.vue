@@ -182,10 +182,17 @@ function formatDate(dateStr?: string): string {
 
         <!-- Public Event: Show Details -->
         <div v-else-if="eventDetails" class="bg-white rounded-lg shadow-sm p-6">
-          <p v-if="eventDetails.event.description" class="text-gray-700 whitespace-pre-wrap">
+          <p v-if="eventDetails.event.description" class="text-gray-700 whitespace-pre-wrap mb-6">
             {{ eventDetails.event.description }}
           </p>
-          <p v-else class="text-gray-500 italic">No additional details available.</p>
+          <p v-else class="text-gray-500 italic mb-6">No additional details available.</p>
+
+          <RouterLink
+            :to="{ name: 'guest', params: { type, slug } }"
+            class="block w-full bg-[#fca311] text-black font-semibold py-3 rounded-lg hover:bg-[#e5930f] transition-colors text-center"
+          >
+            View Event
+          </RouterLink>
         </div>
       </div>
     </template>

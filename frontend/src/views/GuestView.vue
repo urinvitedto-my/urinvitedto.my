@@ -67,18 +67,13 @@ onMounted(async () => {
  * Loads event details and confirmed guests.
  */
 async function loadEventData() {
-  if (!inviteCode.value) {
-    error.value = 'Invite code required'
-    loading.value = false
-    return
-  }
-
   loading.value = true
   error.value = ''
 
   try {
+    const code = inviteCode.value || undefined
     const [details, guests] = await Promise.all([
-      getEventDetails(props.type, props.slug, inviteCode.value),
+      getEventDetails(props.type, props.slug, code),
       getConfirmedGuests(props.type, props.slug),
     ])
     eventData.value = details
