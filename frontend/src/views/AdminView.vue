@@ -119,7 +119,7 @@ async function checkAdmin() {
       .from('admins')
       .select('email')
       .eq('email', session.user.email)
-      .single()
+      .maybeSingle()
 
     if (fetchError || !data) {
       isAdmin.value = false

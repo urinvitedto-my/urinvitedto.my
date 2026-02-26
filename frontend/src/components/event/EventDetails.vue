@@ -36,20 +36,6 @@ function formatDate(dateStr?: string): string {
         {{ event.title }}
       </h1>
 
-      <!-- Hosts -->
-      <div v-if="hosts.length" class="flex items-center justify-center gap-4 mb-6">
-        <div
-          v-for="host in hosts"
-          :key="host.id"
-          class="flex items-center gap-2"
-        >
-          <div class="w-10 h-10 bg-[#14213d] text-white rounded-full flex items-center justify-center font-semibold">
-            {{ host.displayName.charAt(0).toUpperCase() }}
-          </div>
-          <span class="text-gray-700">{{ host.displayName }}</span>
-        </div>
-      </div>
-
       <!-- Date & Location -->
       <div class="space-y-3 text-gray-600">
         <div v-if="event.startsAt" class="flex items-center justify-center gap-2">

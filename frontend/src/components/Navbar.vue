@@ -45,7 +45,7 @@ async function checkAdmin(email: string) {
       .from('admins')
       .select('email')
       .eq('email', email)
-      .single()
+      .maybeSingle()
     isAdmin.value = !error && !!data
   } catch {
     isAdmin.value = false
