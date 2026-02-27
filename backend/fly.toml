@@ -2,7 +2,8 @@ app = "urinvitedto-my-api"
 primary_region = "sin"
 
 [build]
-builder = "paketobuildpacks/builder-jammy-base:0.4.502"
+  [build.args]
+    GO_VERSION = "1.25"
 
 [env]
 PORT = "8080"
