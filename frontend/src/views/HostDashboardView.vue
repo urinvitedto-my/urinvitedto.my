@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, RouterLink } from 'vue-router'
 import { getSession } from '@/services/supabase'
 import { getHostEvents, getHostGuests, type HostEvent, type HostGuest } from '@/services/api'
 
@@ -122,7 +122,16 @@ function formatDate(dateStr: string | null | undefined): string {
                     : 'bg-[#ececec] hover:bg-[#e5e5e5]',
                 ]"
               >
-                <div class="font-medium">{{ event.title }}</div>
+                <div class="flex items-center justify-between">
+                  <div class="font-medium">{{ event.title }}</div>
+                  <RouterLink
+                    :to="`/${event.type}/${event.slug}`"
+                    class="text-xs underline opacity-75 hover:opacity-100"
+                    @click.stop
+                  >
+                    View page
+                  </RouterLink>
+                </div>
                 <div class="text-sm opacity-75">{{ formatDate(event.startsAt) }}</div>
               </button>
             </li>
