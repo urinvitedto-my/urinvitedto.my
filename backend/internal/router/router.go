@@ -124,6 +124,7 @@ func (rm *Router) SetupRouter() *chi.Mux {
 		api.Route("/host", func(hr chi.Router) {
 			hr.Use(rm.mw.Auth)
 			hr.Get("/events", h.GetHostEvents)
+			hr.Get("/events/{eventId}/guests", h.GetHostGuests)
 		})
 	})
 

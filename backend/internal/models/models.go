@@ -373,3 +373,8 @@ type HostEvent = BaseEvent
 type HostEventsResponse struct {
 	Events []HostEvent `json:"events"`
 }
+
+// HostGuestsResponse is the response for host guests endpoint.
+type HostGuestsResponse struct {
+	Guests []AdminGuest `json:"guests"`
+}

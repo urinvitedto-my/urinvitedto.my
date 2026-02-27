@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/urinvitedto-my/backend/internal/models"
 )
 
@@ -63,4 +64,59 @@ func (h *Handlers) GetHostEvents(w http.ResponseWriter, r *http.Request) {
 
 	slog.Info("Host events found", "email", emailLower, "count", len(events))
 	h.writeJSON(w, http.StatusOK, models.HostEventsResponse{Events: events})
+}
+
+// GetHostGuests handles GET /host/events/:eventId/guests - returns guests for an event if the user is a host.
+func (h *Handlers) GetHostGuests(w http.ResponseWriter, r *http.Request) {
+	email, ok := r.Context().Value(UserEmailKey).(string)
+	if !ok || email == "" {
+		h.writeError(w, http.StatusUnauthorized, "unauthorized", "Not authenticated")
+		return
+	}
+
+	eventID := chi.URLParam(r, "eventId")
+	if eventID == "" {
+		h.writeError(w, http.StatusBadRequest, "bad_request", "Event ID required")
+		return
+	}
+
+	ctx := r.Context()
+	emailLower := strings.ToLower(strings.TrimSpace(email))
+
+	// verify user is a host of this event (auth_user_id OR contact_email)
+	var isHost bool
+	err := h.db.QueryRow(ctx, `
+		SELECT EXISTS(
+			SELECT 1 FROM hosts h
+			LEFT JOIN auth.users u ON u.id = h.auth_user_id
+			WHERE h.event_id = $1 AND (LOWER(u.email) = $2 OR LOWER(h.contact_email) = $2)
+		)
+	`, eventID, emailLower).Scan(&isHost)
+	if err != nil || !isHost {
+		h.writeError(w, http.StatusForbidden, "forbidden", "Not a host of this event")
+		return
+	}
+
+	rows, err := h.db.Query(ctx, `
+		SELECT id, display_name, rsvp_status, rsvp_message, rsvp_at, created_at
+		FROM guests WHERE event_id = $1 ORDER BY display_name ASC
+	`, eventID)
+	if err != nil {
+		slog.Error("DB error fetching host guests", "error", err)
+		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to fetch guests")
+		return
+	}
+	defer rows.Close()
+
+	guests := []models.AdminGuest{}
+	for rows.Next() {
+		var g models.AdminGuest
+		if err := rows.Scan(&g.ID, &g.DisplayName, &g.RsvpStatus, &g.RsvpMessage, &g.RsvpAt, &g.CreatedAt); err != nil {
+			slog.Error("Error scanning guest", "error", err)
+			continue
+		}
+		guests = append(guests, g)
+	}
+
+	h.writeJSON(w, http.StatusOK, models.HostGuestsResponse{Guests: guests})
 }
