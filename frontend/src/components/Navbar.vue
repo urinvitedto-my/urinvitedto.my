@@ -59,14 +59,18 @@ onUnmounted(() => {
 })
 
 /**
- * Handles user logout and redirects to home.
+ * Handles user logout. Redirects to home unless on a public route
+ * (event landing or guest page), where we stay put.
  */
 async function handleLogout() {
   try {
     await authStore.logout()
   } finally {
     menuOpen.value = false
-    router.push('/')
+    const isPublicRoute = ['event-landing', 'guest'].includes(route.name as string)
+    if (!isPublicRoute) {
+      router.push('/')
+    }
   }
 }
 </script>
