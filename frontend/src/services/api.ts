@@ -855,3 +855,28 @@ export async function getHostEvents(): Promise<{ events: HostEvent[] }> {
   }
   return res.json()
 }
+
+export interface HostGuest {
+  id: string
+  displayName: string
+  rsvpStatus: string
+  rsvpMessage: string | null
+  rsvpAt: string | null
+}
+
+/**
+ * Fetches guests for an event. Requires the user to be a host of that event.
+ */
+export async function getHostGuests(eventId: string): Promise<{ guests: HostGuest[] }> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const res = await fetch(`${API_BASE}/api/v1/host/events/${eventId}/guests`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message || 'Failed to fetch guests')
+  }
+  return res.json()
+}

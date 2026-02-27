@@ -1,22 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { supabase, getSession } from '@/services/supabase'
-import { getHostEvents, type HostEvent } from '@/services/api'
-
-interface GuestData {
-  id: string
-  display_name: string
-  rsvp_status: string
-  rsvp_message: string | null
-  rsvp_at: string | null
-}
+import { getSession } from '@/services/supabase'
+import { getHostEvents, getHostGuests, type HostEvent, type HostGuest } from '@/services/api'
 
 const router = useRouter()
 const loading = ref(true)
 const events = ref<HostEvent[]>([])
 const selectedEvent = ref<HostEvent | null>(null)
-const guests = ref<GuestData[]>([])
+const guests = ref<HostGuest[]>([])
 const showAllGuests = ref(false)
 const error = ref('')
 
@@ -49,23 +41,19 @@ async function checkAuthAndLoadData() {
 }
 
 /**
- * Selects an event and loads its guests.
+ * Selects an event and loads its guests via API (works for hosts linked by email or auth).
  */
 async function selectEvent(event: HostEvent) {
   selectedEvent.value = event
   loading.value = true
+  error.value = ''
 
   try {
-    const { data, error: fetchError } = await supabase
-      .from('guests')
-      .select('id, display_name, rsvp_status, rsvp_message, rsvp_at')
-      .eq('event_id', event.id)
-      .order('display_name')
-
-    if (fetchError) throw fetchError
-    guests.value = data || []
+    const data = await getHostGuests(event.id)
+    guests.value = data.guests || []
   } catch (e: any) {
     error.value = e.message || 'Failed to load guests'
+    guests.value = []
   } finally {
     loading.value = false
   }
@@ -74,9 +62,9 @@ async function selectEvent(event: HostEvent) {
 /**
  * Filters guests based on toggle.
  */
-function filteredGuests(): GuestData[] {
+function filteredGuests(): HostGuest[] {
   if (showAllGuests.value) return guests.value
-  return guests.value.filter((g) => g.rsvp_status === 'yes')
+  return guests.value.filter((g) => g.rsvpStatus === 'yes')
 }
 
 /**
@@ -181,26 +169,26 @@ function formatDate(dateStr: string | null | undefined): string {
                     :key="guest.id"
                     class="border-b border-[#ececec]"
                   >
-                    <td class="py-3 px-4">{{ guest.display_name }}</td>
+                    <td class="py-3 px-4">{{ guest.displayName }}</td>
                     <td class="py-3 px-4">
                       <span
                         :class="[
                           'inline-block px-2 py-1 rounded text-xs font-medium',
-                          guest.rsvp_status === 'yes'
+                          guest.rsvpStatus === 'yes'
                             ? 'bg-green-100 text-green-800'
-                            : guest.rsvp_status === 'no'
+                            : guest.rsvpStatus === 'no'
                               ? 'bg-red-100 text-red-800'
                               : 'bg-gray-100 text-gray-800',
                         ]"
                       >
-                        {{ guest.rsvp_status }}
+                        {{ guest.rsvpStatus }}
                       </span>
                     </td>
                     <td class="py-3 px-4 text-gray-600">
-                      {{ guest.rsvp_message || '-' }}
+                      {{ guest.rsvpMessage || '-' }}
                     </td>
                     <td class="py-3 px-4 text-gray-600">
-                      {{ formatDate(guest.rsvp_at) }}
+                      {{ formatDate(guest.rsvpAt) }}
                     </td>
                   </tr>
                 </tbody>
