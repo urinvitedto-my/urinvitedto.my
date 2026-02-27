@@ -75,6 +75,7 @@ const editForm = ref({
   location: '',
   coverImageUrl: '',
   locationPhotoUrl: '',
+  musicUrl: '',
 })
 const editLoading = ref(false)
 const editError = ref('')
@@ -258,6 +259,7 @@ function startEditEvent(event: AdminEvent) {
     location: event.location || '',
     coverImageUrl: event.coverImageUrl || '',
     locationPhotoUrl: event.locationPhotoUrl || '',
+    musicUrl: event.musicUrl || '',
   }
   editError.value = ''
 }
@@ -290,6 +292,7 @@ async function handleUpdateEvent() {
       location: editForm.value.location || null,
       coverImageUrl: editForm.value.coverImageUrl || null,
       locationPhotoUrl: editForm.value.locationPhotoUrl || null,
+      musicUrl: editForm.value.musicUrl || null,
     })
     editingEventId.value = null
   } catch (e: any) {
@@ -634,6 +637,15 @@ function getEventUrl(event: AdminEvent): string {
                     <label class="block text-sm font-medium text-gray-700 mb-1">Venue Photo URL</label>
                     <input
                       v-model="editForm.locationPhotoUrl"
+                      type="url"
+                      placeholder="https://..."
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Background Music URL</label>
+                    <input
+                      v-model="editForm.musicUrl"
                       type="url"
                       placeholder="https://..."
                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"

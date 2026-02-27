@@ -68,6 +68,7 @@ export const useAdminStore = defineStore('admin', () => {
       location?: string | null
       coverImageUrl?: string | null
       locationPhotoUrl?: string | null
+      musicUrl?: string | null
     },
   ): Promise<AdminEvent> {
     const updated = await adminUpdateEvent(eventId, data)

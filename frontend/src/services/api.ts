@@ -201,6 +201,7 @@ export async function adminUpdateEvent(
     location?: string | null
     coverImageUrl?: string | null
     locationPhotoUrl?: string | null
+    musicUrl?: string | null
   }
 ): Promise<AdminEvent> {
   const token = await getAuthToken()

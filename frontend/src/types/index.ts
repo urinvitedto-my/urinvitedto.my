@@ -7,6 +7,7 @@ export interface EventSummary {
   title: string
   isPublic: boolean
   coverImageUrl?: string
+  musicUrl?: string
   startsAt?: string
   location?: string
 }
@@ -20,6 +21,7 @@ export interface Event {
   isPublic: boolean
   coverImageUrl?: string
   locationPhotoUrl?: string
+  musicUrl?: string
   startsAt?: string
   location?: string
   customContent?: CustomContent
@@ -243,6 +245,7 @@ export interface AdminEvent {
   isPublic: boolean
   coverImageUrl?: string
   locationPhotoUrl?: string
+  musicUrl?: string
   startsAt?: string
   location?: string
   createdAt: string
