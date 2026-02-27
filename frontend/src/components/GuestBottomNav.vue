@@ -25,7 +25,7 @@ function scrollToSection(sectionId: string) {
 
 <template>
   <nav class="fixed bottom-0 left-0 right-0 z-50 guest-bottom-nav pb-[env(safe-area-inset-bottom)]">
-    <div class="flex items-center justify-evenly max-w-lg mx-auto pt-12 pb-10">
+    <div class="flex items-center justify-evenly max-w-lg mx-auto pt-20 pb-4">
         <!-- 1: Envelope / Invitation (top of page) -->
         <button
           v-for="item in navItems"
