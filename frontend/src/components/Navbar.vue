@@ -28,10 +28,10 @@ const useLightNav = computed(() =>
 function handleScroll() {
   const currentScrollY = window.scrollY
 
-  if (currentScrollY > lastScrollY && currentScrollY > 50) {
+  if (currentScrollY > lastScrollY && currentScrollY > 15) {
     navbarVisible.value = false
     menuOpen.value = false
-  } else if (currentScrollY <= 50) {
+  } else if (currentScrollY <= 15) {
     navbarVisible.value = true
   }
 
