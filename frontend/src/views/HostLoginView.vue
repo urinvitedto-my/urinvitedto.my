@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { signIn } from '@/services/supabase'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
@@ -22,7 +23,7 @@ async function handleLogin() {
   error.value = ''
 
   try {
-    await signIn(email.value, password.value)
+    await authStore.login(email.value, password.value)
     router.push('/host/dashboard')
   } catch (e: any) {
     error.value = e.message || 'Login failed'

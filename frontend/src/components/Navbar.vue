@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { onAuthStateChange, signOut, getSession, supabase } from '@/services/supabase'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
 const menuOpen = ref(false)
-const isLoggedIn = ref(false)
-const userEmail = ref('')
-const isAdmin = ref(false)
 const navbarVisible = ref(true)
 let lastScrollY = 0
+
+const isLoggedIn = computed(() => authStore.isLoggedIn)
+const userEmail = computed(() => authStore.userEmail)
+const isAdmin = computed(() => authStore.isAdmin)
 
 /**
  * Pages that need light (white) nav text over dark backgrounds.
@@ -18,8 +20,6 @@ let lastScrollY = 0
 const useLightNav = computed(() =>
   ['home', 'event-landing', 'guest'].includes(route.name as string),
 )
-
-let authSubscription: { unsubscribe: () => void } | null = null
 
 /**
  * Handles scroll to hide/show navbar. Only reappears near the top
@@ -39,22 +39,6 @@ function handleScroll() {
 }
 
 /**
- * Checks if the given email exists in the admins table.
- */
-async function checkAdmin(email: string) {
-  try {
-    const { data, error } = await supabase
-      .from('admins')
-      .select('email')
-      .eq('email', email)
-      .maybeSingle()
-    isAdmin.value = !error && !!data
-  } catch {
-    isAdmin.value = false
-  }
-}
-
-/**
  * Closes the menu when clicking outside of it.
  */
 function handleClickOutside(e: MouseEvent) {
@@ -64,32 +48,12 @@ function handleClickOutside(e: MouseEvent) {
   }
 }
 
-onMounted(async () => {
-  const session = await getSession()
-  isLoggedIn.value = !!session
-  if (session?.user?.email) {
-    userEmail.value = session.user.email
-    await checkAdmin(session.user.email)
-  }
-
-  const { data } = onAuthStateChange(async (_event, newSession) => {
-    isLoggedIn.value = !!newSession
-    if (newSession?.user?.email) {
-      userEmail.value = newSession.user.email
-      await checkAdmin(newSession.user.email)
-    } else {
-      userEmail.value = ''
-      isAdmin.value = false
-    }
-  })
-  authSubscription = data.subscription
-
+onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true })
   document.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {
-  authSubscription?.unsubscribe()
   window.removeEventListener('scroll', handleScroll)
   document.removeEventListener('click', handleClickOutside)
 })
@@ -99,7 +63,7 @@ onUnmounted(() => {
  */
 async function handleLogout() {
   try {
-    await signOut()
+    await authStore.logout()
   } finally {
     menuOpen.value = false
     router.push('/')

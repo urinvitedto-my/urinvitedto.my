@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getEventDetails, getConfirmedGuests } from '@/services/api'
-import type { EventDetailsResponse, ConfirmedGuestsResponse, ComponentConfig } from '@/types'
+import { useEventStore } from '@/stores/event'
 
-// event components
 import EventDetails from '@/components/event/EventDetails.vue'
 import LocationPhoto from '@/components/event/LocationPhoto.vue'
 import CountdownTimer from '@/components/event/CountdownTimer.vue'
@@ -25,71 +23,40 @@ const props = defineProps<{
 }>()
 
 const route = useRoute()
-const loading = ref(true)
-const error = ref('')
-const eventData = ref<EventDetailsResponse | null>(null)
-const confirmedGuests = ref<ConfirmedGuestsResponse | null>(null)
+const eventStore = useEventStore()
 
-// get invite code from query
+const loading = computed(() => eventStore.loading)
+const error = computed(() => eventStore.error)
+const eventData = computed(() => eventStore.eventDetails)
+const confirmedGuests = computed(() => eventStore.confirmedGuests)
+const orderedComponents = computed(() => eventStore.orderedComponents)
+
 const inviteCode = computed(() => {
   const code = route.query.invite
   return typeof code === 'string' ? code.toUpperCase() : ''
-})
-
-// ordered components based on enabled_components config
-const orderedComponents = computed(() => {
-  if (!eventData.value?.event.enabledComponents?.components) {
-    // default order if not configured
-    return [
-      { name: 'EventDetails', enabled: true, order: 1 },
-      { name: 'LocationPhoto', enabled: true, order: 2 },
-      { name: 'CountdownTimer', enabled: true, order: 3 },
-      { name: 'EventMap', enabled: true, order: 4 },
-      { name: 'EventSchedule', enabled: true, order: 5 },
-      { name: 'EventGallery', enabled: true, order: 6 },
-      { name: 'DressCode', enabled: true, order: 7 },
-      { name: 'EventFAQ', enabled: true, order: 8 },
-      { name: 'MonetaryGifts', enabled: true, order: 9 },
-      { name: 'GiftGuide', enabled: true, order: 10 },
-      { name: 'CustomSections', enabled: true, order: 11 },
-    ] as ComponentConfig[]
-  }
-  return eventData.value.event.enabledComponents.components
-    .filter((c) => c.enabled)
-    .sort((a, b) => a.order - b.order)
 })
 
 onMounted(async () => {
   await loadEventData()
 })
 
+onUnmounted(() => {
+  eventStore.$reset()
+})
+
 /**
- * Loads event details and confirmed guests.
+ * Loads event details and confirmed guests in parallel.
  */
 async function loadEventData() {
-  loading.value = true
-  error.value = ''
-
   try {
     const code = inviteCode.value || undefined
-    const [details, guests] = await Promise.all([
-      getEventDetails(props.type, props.slug, code),
-      getConfirmedGuests(props.type, props.slug),
+    await Promise.all([
+      eventStore.fetchDetails(props.type, props.slug, code),
+      eventStore.fetchConfirmedGuests(props.type, props.slug),
     ])
-    eventData.value = details
-    confirmedGuests.value = guests
-  } catch (e: any) {
-    error.value = e.message || 'Failed to load event'
-  } finally {
-    loading.value = false
+  } catch {
+    // errors are already set in the event store
   }
-}
-
-/**
- * Checks if a component should be rendered.
- */
-function shouldRender(name: string): boolean {
-  return orderedComponents.value.some((c) => c.name === name)
 }
 </script>
 

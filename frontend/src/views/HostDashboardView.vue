@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
-import { getSession } from '@/services/supabase'
+import { useAuthStore } from '@/stores/auth'
 import { getHostEvents, getHostGuests, type HostEvent, type HostGuest } from '@/services/api'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const loading = ref(true)
 const events = ref<HostEvent[]>([])
 const selectedEvent = ref<HostEvent | null>(null)
@@ -24,13 +25,15 @@ async function checkAuthAndLoadData() {
   error.value = ''
 
   try {
-    const session = await getSession()
-    if (!session) {
+    if (!authStore.initialized) {
+      await authStore.init()
+    }
+
+    if (!authStore.isLoggedIn) {
       router.push('/host/login')
       return
     }
 
-    // fetch events via API (bypasses RLS, checks by auth_user_id OR email)
     const data = await getHostEvents()
     events.value = data.events
   } catch (e: any) {

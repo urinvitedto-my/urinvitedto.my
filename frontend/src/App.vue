@@ -1,11 +1,17 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
 
 const route = useRoute()
+const authStore = useAuthStore()
 const showFooter = computed(() => !route.meta.hideFooter)
+
+onMounted(() => {
+  authStore.init()
+})
 </script>
 
 <template>

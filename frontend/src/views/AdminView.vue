@@ -1,14 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { supabase, getSession, onAuthStateChange } from '@/services/supabase'
-import {
-  adminListEvents,
-  adminCreateEvent,
-  adminUpdateEvent,
-  adminDeleteEvent,
-  adminAddHost,
-  adminDeleteHost,
-} from '@/services/api'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { useAdminStore } from '@/stores/admin'
 import type { AdminEvent } from '@/types'
 import AdminInvites from '@/components/admin/AdminInvites.vue'
 import AdminSchedule from '@/components/admin/AdminSchedule.vue'
@@ -18,17 +11,19 @@ import AdminGallery from '@/components/admin/AdminGallery.vue'
 import AdminCustomContent from '@/components/admin/AdminCustomContent.vue'
 import AdminComponentOrder from '@/components/admin/AdminComponentOrder.vue'
 
+const authStore = useAuthStore()
+const adminStore = useAdminStore()
+
 const loading = ref(true)
-const isAdmin = ref(false)
 const error = ref('')
 const email = ref('')
 const password = ref('')
 const loginLoading = ref(false)
 
-// events data
-const events = ref<AdminEvent[]>([])
-const eventsLoading = ref(false)
-const eventsError = ref('')
+const isAdmin = computed(() => authStore.isAdmin)
+const events = computed(() => adminStore.events)
+const eventsLoading = computed(() => adminStore.loading)
+const eventsError = computed(() => adminStore.error)
 
 // create event form
 const showCreateForm = ref(false)
@@ -84,60 +79,50 @@ const editForm = ref({
 const editLoading = ref(false)
 const editError = ref('')
 
-let authSubscription: { unsubscribe: () => void } | null = null
-
 onMounted(async () => {
-  await checkAdmin()
-
-  const { data } = onAuthStateChange(async (_event, session) => {
-    if (!session) {
-      isAdmin.value = false
-    }
-  })
-  authSubscription = data.subscription
-})
-
-onUnmounted(() => {
-  authSubscription?.unsubscribe()
+  await initAdmin()
 })
 
 /**
- * Checks if user is logged in and is an admin.
+ * Waits for auth to initialize, then loads events if admin.
  */
-async function checkAdmin() {
+async function initAdmin() {
   loading.value = true
 
-  try {
-    const session = await getSession()
-    if (!session?.user?.email) {
-      isAdmin.value = false
-      loading.value = false
-      return
-    }
-
-    const { data, error: fetchError } = await supabase
-      .from('admins')
-      .select('email')
-      .eq('email', session.user.email)
-      .maybeSingle()
-
-    if (fetchError || !data) {
-      isAdmin.value = false
-    } else {
-      isAdmin.value = true
-      await loadEvents()
-    }
-  } catch (e: any) {
-    console.error('Admin check error:', e)
-    isAdmin.value = false
-  } finally {
-    loading.value = false
+  if (!authStore.initialized) {
+    await authStore.init()
   }
+
+  if (authStore.isAdmin) {
+    try {
+      await adminStore.fetchEvents()
+    } catch {
+      // error is in adminStore.error
+    }
+  }
+
+  loading.value = false
 }
 
 /**
- * Handles admin login.
+ * Watch for admin status changes (e.g. session restored via auth listener).
+ * Skips if handleLogin is already managing the fetch.
  */
+watch(isAdmin, async (newVal) => {
+  if (newVal && !loginInProgress && adminStore.events.length === 0) {
+    try {
+      await adminStore.fetchEvents()
+    } catch {
+      // error is in adminStore.error
+    }
+  }
+})
+
+/**
+ * Handles admin login. Sets flag to prevent the isAdmin watcher from double-fetching.
+ */
+let loginInProgress = false
+
 async function handleLogin() {
   if (!email.value || !password.value) {
     error.value = 'Please enter email and password'
@@ -145,35 +130,22 @@ async function handleLogin() {
   }
 
   loginLoading.value = true
+  loginInProgress = true
   error.value = ''
 
   try {
-    await supabase.auth.signInWithPassword({
-      email: email.value,
-      password: password.value,
-    })
-    await checkAdmin()
+    await authStore.login(email.value, password.value)
+
+    if (authStore.isAdmin) {
+      await adminStore.fetchEvents()
+    } else {
+      error.value = 'This account does not have admin access'
+    }
   } catch (e: any) {
     error.value = e.message || 'Login failed'
   } finally {
     loginLoading.value = false
-  }
-}
-
-/**
- * Loads all events.
- */
-async function loadEvents() {
-  eventsLoading.value = true
-  eventsError.value = ''
-
-  try {
-    const data = await adminListEvents()
-    events.value = data.events
-  } catch (e: any) {
-    eventsError.value = e.message || 'Failed to load events'
-  } finally {
-    eventsLoading.value = false
+    loginInProgress = false
   }
 }
 
@@ -182,7 +154,6 @@ async function loadEvents() {
  */
 function formatDateTimeForAPI(value: string): string | undefined {
   if (!value) return undefined
-  // datetime-local gives "2024-06-15T14:00", need "2024-06-15T14:00:00Z"
   const date = new Date(value)
   return date.toISOString()
 }
@@ -195,7 +166,7 @@ async function handleCreateEvent() {
   createError.value = ''
 
   try {
-    const newEvent = await adminCreateEvent({
+    await adminStore.createEvent({
       type: createForm.value.type,
       slug: createForm.value.slug,
       title: createForm.value.title,
@@ -203,7 +174,6 @@ async function handleCreateEvent() {
       startsAt: formatDateTimeForAPI(createForm.value.startsAt),
       location: createForm.value.location || undefined,
     })
-    events.value.unshift(newEvent)
     showCreateForm.value = false
     resetCreateForm()
   } catch (e: any) {
@@ -238,17 +208,10 @@ async function handleAddHost() {
   hostError.value = ''
 
   try {
-    const newHost = await adminAddHost(selectedEventId.value, {
+    await adminStore.addHost(selectedEventId.value, {
       email: hostForm.value.email,
       displayName: hostForm.value.displayName,
     })
-
-    // update local state
-    const event = events.value.find((e) => e.id === selectedEventId.value)
-    if (event) {
-      event.hosts.push(newHost)
-    }
-
     hostForm.value = { email: '', displayName: '' }
   } catch (e: any) {
     hostError.value = e.message || 'Failed to add host'
@@ -264,11 +227,7 @@ async function handleDeleteHost(eventId: string, hostId: string) {
   if (!confirm('Remove this host?')) return
 
   try {
-    await adminDeleteHost(eventId, hostId)
-    const event = events.value.find((e) => e.id === eventId)
-    if (event) {
-      event.hosts = event.hosts.filter((h) => h.id !== hostId)
-    }
+    await adminStore.deleteHost(eventId, hostId)
   } catch (e: any) {
     alert(e.message || 'Failed to remove host')
   }
@@ -321,7 +280,7 @@ async function handleUpdateEvent() {
   editError.value = ''
 
   try {
-    const updated = await adminUpdateEvent(editingEventId.value, {
+    await adminStore.updateEvent(editingEventId.value, {
       type: editForm.value.type,
       slug: editForm.value.slug,
       title: editForm.value.title,
@@ -332,11 +291,6 @@ async function handleUpdateEvent() {
       coverImageUrl: editForm.value.coverImageUrl || null,
       locationPhotoUrl: editForm.value.locationPhotoUrl || null,
     })
-
-    const idx = events.value.findIndex((e) => e.id === editingEventId.value)
-    if (idx !== -1) {
-      events.value[idx] = updated
-    }
     editingEventId.value = null
   } catch (e: any) {
     editError.value = e.message || 'Failed to update event'
@@ -352,8 +306,7 @@ async function handleDeleteEvent(eventId: string) {
   if (!confirm('Delete this event? This will remove all related data (hosts, invites, guests, etc.) and cannot be undone.')) return
 
   try {
-    await adminDeleteEvent(eventId)
-    events.value = events.value.filter((e) => e.id !== eventId)
+    await adminStore.deleteEvent(eventId)
   } catch (e: any) {
     alert(e.message || 'Failed to delete event')
   }
@@ -542,7 +495,7 @@ function getEventUrl(event: AdminEvent): string {
         <!-- Events Error -->
         <div v-else-if="eventsError" class="text-center py-12">
           <p class="text-red-600 mb-4">{{ eventsError }}</p>
-          <button @click="loadEvents" class="text-[#fca311] hover:underline">Try again</button>
+          <button @click="adminStore.fetchEvents()" class="text-[#fca311] hover:underline">Try again</button>
         </div>
 
         <!-- Events List -->

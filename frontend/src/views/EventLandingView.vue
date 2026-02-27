@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getEventSummary, getEventDetails } from '@/services/api'
-import type { EventSummary, EventDetailsResponse } from '@/types'
+import { useEventStore } from '@/stores/event'
+import { getEventDetails } from '@/services/api'
 
 const props = defineProps<{
   type: string
@@ -10,15 +10,21 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
-const loading = ref(true)
-const error = ref('')
-const eventSummary = ref<EventSummary | null>(null)
-const eventDetails = ref<EventDetailsResponse | null>(null)
+const eventStore = useEventStore()
 const inviteCode = ref('')
 const submitting = ref(false)
 
+const loading = ref(true)
+const error = ref('')
+const eventSummary = computed(() => eventStore.eventSummary)
+const eventDetails = computed(() => eventStore.eventDetails)
+
 onMounted(async () => {
   await loadEvent()
+})
+
+onUnmounted(() => {
+  eventStore.$reset()
 })
 
 /**
@@ -29,11 +35,10 @@ async function loadEvent() {
   error.value = ''
 
   try {
-    eventSummary.value = await getEventSummary(props.type, props.slug)
+    await eventStore.fetchSummary(props.type, props.slug)
 
-    // if public, load full details directly
-    if (eventSummary.value.isPublic) {
-      eventDetails.value = await getEventDetails(props.type, props.slug)
+    if (eventStore.eventSummary?.isPublic) {
+      await eventStore.fetchDetails(props.type, props.slug)
     }
   } catch (e: any) {
     error.value = e.message || 'Failed to load event'
@@ -55,9 +60,7 @@ async function handleInviteSubmit() {
   error.value = ''
 
   try {
-    // validate invite by trying to load details
     await getEventDetails(props.type, props.slug, inviteCode.value.toUpperCase())
-    // success - navigate to guest page
     router.push({
       name: 'guest',
       params: { type: props.type, slug: props.slug },
