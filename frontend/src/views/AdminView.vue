@@ -449,7 +449,7 @@ function getEventUrl(event: AdminEvent): string {
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Venue</label>
                 <input
                   v-model="createForm.location"
                   type="text"
@@ -612,7 +612,7 @@ function getEventUrl(event: AdminEvent): string {
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Venue</label>
                     <input
                       v-model="editForm.location"
                       type="text"
@@ -631,7 +631,7 @@ function getEventUrl(event: AdminEvent): string {
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Location Photo URL</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Venue Photo URL</label>
                     <input
                       v-model="editForm.locationPhotoUrl"
                       type="url"
