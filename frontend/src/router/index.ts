@@ -13,12 +13,14 @@ const router = createRouter({
       name: 'event-landing',
       component: () => import('@/views/EventLandingView.vue'),
       props: true,
+      meta: { hideFooter: true },
     },
     {
       path: '/:type(wedding|birthday|party)/:slug/guest',
       name: 'guest',
       component: () => import('@/views/GuestView.vue'),
       props: true,
+      meta: { hideFooter: true },
     },
     {
       path: '/host/login',
@@ -29,11 +31,13 @@ const router = createRouter({
       path: '/host/dashboard',
       name: 'host-dashboard',
       component: () => import('@/views/HostDashboardView.vue'),
+      meta: { hideFooter: true },
     },
     {
       path: '/admin',
       name: 'admin',
       component: () => import('@/views/AdminView.vue'),
+      meta: { hideFooter: true },
     },
     {
       path: '/:pathMatch(.*)*',

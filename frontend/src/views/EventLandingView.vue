@@ -116,7 +116,7 @@ function formatDate(dateStr?: string): string {
       </div>
 
       <!-- No cover image fallback -->
-      <div v-else class="bg-[#14213d] pt-24 pb-16 px-4 text-center">
+      <div v-else class="bg-[#14213d] pt-34 pb-16 px-4 text-center">
         <h1 class="text-3xl md:text-5xl font-bold text-white">
           {{ eventSummary.title }}
         </h1>

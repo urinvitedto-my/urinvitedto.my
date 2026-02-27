@@ -1,6 +1,11 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
+
+const route = useRoute()
+const showFooter = computed(() => !route.meta.hideFooter)
 </script>
 
 <template>
@@ -9,7 +14,7 @@ import Footer from '@/components/Footer.vue'
     <main class="flex-1">
       <RouterView />
     </main>
-    <Footer />
+    <Footer v-if="showFooter" />
   </div>
 </template>
 
