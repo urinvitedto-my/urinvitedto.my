@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useEventStore } from '@/stores/event'
 
@@ -37,11 +37,65 @@ const inviteCode = computed(() => {
   return typeof code === 'string' ? code.toUpperCase() : ''
 })
 
+const isMuted = ref(false)
+let audioEl: HTMLAudioElement | null = null
+const activationEvents = ['scroll', 'click', 'touchstart', 'keydown'] as const
+
+/**
+ * Starts music on first user interaction (works across all browsers).
+ */
+function startMusic() {
+  if (!audioEl) return
+  audioEl.play().catch(() => {})
+  activationEvents.forEach((evt) => window.removeEventListener(evt, startMusic))
+}
+
+/**
+ * Toggles background music mute state.
+ */
+function toggleMute() {
+  if (!audioEl) return
+  isMuted.value = !isMuted.value
+  audioEl.muted = isMuted.value
+  if (!isMuted.value) {
+    audioEl.play().catch(() => {})
+  }
+}
+
+/**
+ * Sets up the audio element if the event has a music URL.
+ */
+function initAudio() {
+  const musicSrc = eventData.value?.event.musicUrl
+  if (!musicSrc) return
+
+  audioEl = new Audio(musicSrc)
+  audioEl.loop = true
+  audioEl.volume = 0.3
+  activationEvents.forEach((evt) =>
+    window.addEventListener(evt, startMusic, { once: true }),
+  )
+}
+
+/**
+ * Tears down audio and removes any lingering listeners.
+ */
+function cleanupAudio() {
+  activationEvents.forEach((evt) => window.removeEventListener(evt, startMusic))
+  if (audioEl) {
+    audioEl.pause()
+    audioEl.src = ''
+    audioEl = null
+  }
+}
+
 onMounted(async () => {
   await loadEventData()
+  initAudio()
 })
 
 onUnmounted(() => {
+  cleanupAudio()
   eventStore.$reset()
 })
 
@@ -63,6 +117,21 @@ async function loadEventData() {
 
 <template>
   <div id="section-top" class="guest-view min-h-screen pb-24">
+    <!-- Music toggle -->
+    <button
+      v-if="eventData?.event.musicUrl"
+      @click="toggleMute"
+      class="fixed top-4 right-4 z-50 p-2.5 text-[#14213d] transition-opacity hover:opacity-70"
+      :title="isMuted ? 'Unmute music' : 'Mute music'"
+    >
+      <svg v-if="!isMuted" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M11 5L6 9H2v6h4l5 4V5z" />
+      </svg>
+      <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707A1 1 0 0112 5v14a1 1 0 01-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+      </svg>
+    </button>
+
     <!-- Loading -->
     <div v-if="loading" class="flex items-center justify-center py-20">
       <div class="animate-spin rounded-full h-12 w-12 border-4 border-[#fca311] border-t-transparent"></div>
