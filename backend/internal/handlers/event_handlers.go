@@ -19,11 +19,11 @@ func (h *Handlers) GetEventSummary(w http.ResponseWriter, r *http.Request) {
 
 	var event models.EventSummary
 	err := h.db.QueryRow(r.Context(), `
-		SELECT id, type, slug, title, is_public, cover_image_url, starts_at, location
+		SELECT id, type, slug, title, is_public, cover_image_url, music_url, starts_at, location
 		FROM events WHERE type = $1 AND slug = $2
 	`, eventType, slug).Scan(
 		&event.ID, &event.Type, &event.Slug, &event.Title,
-		&event.IsPublic, &event.CoverImageURL, &event.StartsAt, &event.Location,
+		&event.IsPublic, &event.CoverImageURL, &event.MusicURL, &event.StartsAt, &event.Location,
 	)
 
 	if err == pgx.ErrNoRows {
@@ -56,11 +56,11 @@ func (h *Handlers) GetEventDetails(w http.ResponseWriter, r *http.Request) {
 	var event models.Event
 	err := h.db.QueryRow(ctx, `
 		SELECT id, type, slug, title, description, is_public, cover_image_url,
-		       location_photo_url, starts_at, location, custom_content, enabled_components, created_at
+		       location_photo_url, music_url, starts_at, location, custom_content, enabled_components, created_at
 		FROM events WHERE type = $1 AND slug = $2
 	`, eventType, slug).Scan(
 		&event.ID, &event.Type, &event.Slug, &event.Title, &event.Description,
-		&event.IsPublic, &event.CoverImageURL, &event.LocationPhotoURL,
+		&event.IsPublic, &event.CoverImageURL, &event.LocationPhotoURL, &event.MusicURL,
 		&event.StartsAt, &event.Location, &event.CustomContent, &event.EnabledComponents, &event.CreatedAt,
 	)
 

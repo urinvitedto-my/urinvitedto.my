@@ -22,7 +22,7 @@ func (h *Handlers) ListEvents(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := h.db.Query(ctx, `
 		SELECT id, type, slug, title, description, is_public,
-			cover_image_url, location_photo_url, starts_at, location, created_at
+			cover_image_url, location_photo_url, music_url, starts_at, location, created_at
 		FROM events ORDER BY created_at DESC
 	`)
 	if err != nil {
@@ -49,6 +49,7 @@ func (h *Handlers) ListEvents(w http.ResponseWriter, r *http.Request) {
 			&e.IsPublic,
 			&e.CoverImageURL,
 			&e.LocationPhotoURL,
+			&e.MusicURL,
 			&e.StartsAt,
 			&e.Location,
 			&e.CreatedAt,
@@ -340,15 +341,16 @@ func (h *Handlers) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 	err := h.db.QueryRow(ctx, `
 		UPDATE events SET
 			type = $1, slug = $2, title = $3, description = $4, is_public = $5,
-			starts_at = $6, location = $7, cover_image_url = $8, location_photo_url = $9
-		WHERE id = $10
+			starts_at = $6, location = $7, cover_image_url = $8, location_photo_url = $9,
+			music_url = $10
+		WHERE id = $11
 		RETURNING id, type, slug, title, description, is_public,
-			cover_image_url, location_photo_url, starts_at, location, created_at
+			cover_image_url, location_photo_url, music_url, starts_at, location, created_at
 	`, req.Type, req.Slug, req.Title, req.Description, req.IsPublic,
-		startsAt, req.Location, req.CoverImageURL, req.LocationPhotoURL, eventID,
+		startsAt, req.Location, req.CoverImageURL, req.LocationPhotoURL, req.MusicURL, eventID,
 	).Scan(
 		&event.ID, &event.Type, &event.Slug, &event.Title, &event.Description,
-		&event.IsPublic, &event.CoverImageURL, &event.LocationPhotoURL,
+		&event.IsPublic, &event.CoverImageURL, &event.LocationPhotoURL, &event.MusicURL,
 		&event.StartsAt, &event.Location, &event.CreatedAt,
 	)
 	if err != nil {

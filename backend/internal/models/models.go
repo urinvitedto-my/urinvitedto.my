@@ -16,6 +16,7 @@ type Event struct {
 	IsPublic          bool            `json:"isPublic"`
 	CoverImageURL     *string         `json:"coverImageUrl,omitempty"`
 	LocationPhotoURL  *string         `json:"locationPhotoUrl,omitempty"`
+	MusicURL          *string         `json:"musicUrl,omitempty"`
 	StartsAt          *time.Time      `json:"startsAt,omitempty"`
 	Location          *string         `json:"location,omitempty"`
 	CustomContent     json.RawMessage `json:"customContent,omitempty"`
@@ -31,6 +32,7 @@ type EventSummary struct {
 	Title         string     `json:"title"`
 	IsPublic      bool       `json:"isPublic"`
 	CoverImageURL *string    `json:"coverImageUrl,omitempty"`
+	MusicURL      *string    `json:"musicUrl,omitempty"`
 	StartsAt      *time.Time `json:"startsAt,omitempty"`
 	Location      *string    `json:"location,omitempty"`
 }
@@ -169,6 +171,7 @@ type AdminEvent struct {
 	Description      *string     `json:"description,omitempty"`
 	CoverImageURL    *string     `json:"coverImageUrl,omitempty"`
 	LocationPhotoURL *string     `json:"locationPhotoUrl,omitempty"`
+	MusicURL         *string     `json:"musicUrl,omitempty"`
 	Hosts            []AdminHost `json:"hosts"`
 }
 
@@ -183,6 +186,7 @@ type UpdateEventRequest struct {
 	Location         *string `json:"location"`
 	CoverImageURL    *string `json:"coverImageUrl"`
 	LocationPhotoURL *string `json:"locationPhotoUrl"`
+	MusicURL         *string `json:"musicUrl"`
 }
 
 // AdminHost is a host with email for admin views.
