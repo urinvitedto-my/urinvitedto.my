@@ -91,7 +91,7 @@ function formatDate(dateStr?: string): string {
 </script>
 
 <template>
-  <div class="event-landing-view min-h-screen -mt-16">
+  <div class="event-landing-view min-h-screen">
     <!-- Loading -->
     <div v-if="loading" class="flex items-center justify-center pt-32 pb-20">
       <div class="animate-spin rounded-full h-12 w-12 border-4 border-[#fca311] border-t-transparent"></div>
@@ -108,7 +108,7 @@ function formatDate(dateStr?: string): string {
       <!-- Cover Image -->
       <div
         v-if="eventSummary.coverImageUrl"
-        class="w-full h-80 md:h-112 pt-16 bg-cover bg-center"
+        class="w-full h-80 md:h-112 bg-cover bg-center"
         :style="{ backgroundImage: `url(${eventSummary.coverImageUrl})` }"
       >
         <div class="w-full h-full bg-black/40 flex items-center justify-center">
@@ -119,7 +119,7 @@ function formatDate(dateStr?: string): string {
       </div>
 
       <!-- No cover image fallback -->
-      <div v-else class="bg-[#14213d] pt-34 pb-16 px-4 text-center">
+      <div v-else class="bg-[#14213d] pt-16 pb-16 px-4 text-center">
         <h1 class="text-3xl md:text-5xl font-bold text-white">
           {{ eventSummary.title }}
         </h1>

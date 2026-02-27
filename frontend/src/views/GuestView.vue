@@ -16,6 +16,7 @@ import GiftGuide from '@/components/event/GiftGuide.vue'
 import CustomSection from '@/components/event/CustomSection.vue'
 import InviteRSVP from '@/components/event/InviteRSVP.vue'
 import ConfirmedGuests from '@/components/event/ConfirmedGuests.vue'
+import GuestBottomNav from '@/components/GuestBottomNav.vue'
 
 const props = defineProps<{
   type: string
@@ -61,9 +62,7 @@ async function loadEventData() {
 </script>
 
 <template>
-  <div class="guest-view min-h-screen">
-    <!-- Blue bar behind navbar -->
-    <div class="bg-[#14213d] h-16"></div>
+  <div id="section-top" class="guest-view min-h-screen pb-24">
     <!-- Loading -->
     <div v-if="loading" class="flex items-center justify-center py-20">
       <div class="animate-spin rounded-full h-12 w-12 border-4 border-[#fca311] border-t-transparent"></div>
@@ -93,27 +92,28 @@ async function loadEventData() {
           :location="eventData.event.location"
         />
 
-        <CountdownTimer
-          v-else-if="comp.name === 'CountdownTimer' && eventData.event.startsAt"
-          :target-date="eventData.event.startsAt"
-          :custom-message="eventData.event.customContent?.countdownTimer?.customMessage"
-        />
+        <div v-else-if="comp.name === 'CountdownTimer' && eventData.event.startsAt" id="section-countdown">
+          <CountdownTimer
+            :target-date="eventData.event.startsAt"
+            :custom-message="eventData.event.customContent?.countdownTimer?.customMessage"
+          />
+        </div>
 
-        <EventMap
-          v-else-if="comp.name === 'EventMap' && eventData.event.customContent?.locationDetails"
-          :location-details="eventData.event.customContent.locationDetails"
-          :address="eventData.event.location"
-        />
+        <div v-else-if="comp.name === 'EventMap' && eventData.event.customContent?.locationDetails" id="section-venue">
+          <EventMap
+            :location-details="eventData.event.customContent.locationDetails"
+            :address="eventData.event.location"
+          />
+        </div>
 
         <EventSchedule
           v-else-if="comp.name === 'EventSchedule' && eventData.schedule.length"
           :items="eventData.schedule"
         />
 
-        <EventGallery
-          v-else-if="comp.name === 'EventGallery' && eventData.gallery.length"
-          :items="eventData.gallery"
-        />
+        <div v-else-if="comp.name === 'EventGallery' && eventData.gallery.length" id="section-gallery">
+          <EventGallery :items="eventData.gallery" />
+        </div>
 
         <DressCode
           v-else-if="comp.name === 'DressCode' && eventData.event.customContent?.dressCode"
@@ -145,20 +145,23 @@ async function loadEventData() {
       </template>
 
       <!-- Fixed Sections (always at bottom) -->
-      <InviteRSVP
-        v-if="eventData.invite"
-        :invite="eventData.invite"
-        :type="type"
-        :slug="slug"
-        :invite-code="inviteCode"
-        @rsvp-updated="loadEventData"
-      />
+      <div v-if="eventData.invite" id="section-rsvp">
+        <InviteRSVP
+          :invite="eventData.invite"
+          :type="type"
+          :slug="slug"
+          :invite-code="inviteCode"
+          @rsvp-updated="loadEventData"
+        />
+      </div>
 
       <ConfirmedGuests
         v-if="confirmedGuests"
         :guests="confirmedGuests.guests"
         :count="confirmedGuests.count"
       />
+
+      <GuestBottomNav />
     </template>
   </div>
 </template>

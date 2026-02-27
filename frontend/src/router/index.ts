@@ -13,14 +13,14 @@ const router = createRouter({
       name: 'event-landing',
       component: () => import('@/views/EventLandingView.vue'),
       props: true,
-      meta: { hideFooter: true },
+      meta: { hideFooter: true, hideNavbar: true },
     },
     {
       path: '/:type(wedding|birthday|party)/:slug/guest',
       name: 'guest',
       component: () => import('@/views/GuestView.vue'),
       props: true,
-      meta: { hideFooter: true },
+      meta: { hideFooter: true, hideNavbar: true },
     },
     {
       path: '/host/login',

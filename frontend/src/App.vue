@@ -7,6 +7,7 @@ import Footer from '@/components/Footer.vue'
 
 const route = useRoute()
 const authStore = useAuthStore()
+const showNavbar = computed(() => !route.meta.hideNavbar)
 const showFooter = computed(() => !route.meta.hideFooter)
 
 onMounted(() => {
@@ -16,7 +17,7 @@ onMounted(() => {
 
 <template>
   <div class="min-h-screen flex flex-col bg-[#ececec]">
-    <Navbar />
+    <Navbar v-if="showNavbar" />
     <main class="flex-1">
       <RouterView />
     </main>
