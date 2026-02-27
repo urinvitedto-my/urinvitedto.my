@@ -13,9 +13,11 @@ const navbarVisible = ref(true)
 let lastScrollY = 0
 
 /**
- * Check if current page is the home page (needs light text on dark hero).
+ * Pages that need light (white) nav text over dark backgrounds.
  */
-const isHomePage = computed(() => route.path === '/')
+const useLightNav = computed(() =>
+  ['home', 'event-landing', 'guest'].includes(route.name as string),
+)
 
 let authSubscription: { unsubscribe: () => void } | null = null
 
@@ -119,7 +121,7 @@ async function handleLogout() {
           to="/"
           :class="[
             'text-2xl font-bold transition-colors',
-            isHomePage ? 'text-white' : 'text-[#14213d]',
+            useLightNav ? 'text-white' : 'text-[#14213d]',
           ]"
         >
           urinvitedto.my
@@ -131,7 +133,7 @@ async function handleLogout() {
           to="/host/login"
           :class="[
             'hidden md:block font-bold uppercase tracking-wide transition-colors',
-            isHomePage
+            useLightNav
               ? 'text-white hover:text-white/80'
               : 'text-[#14213d] hover:text-[#14213d]/80',
           ]"
@@ -145,7 +147,7 @@ async function handleLogout() {
             @click.stop="menuOpen = !menuOpen"
             :class="[
               'cursor-pointer p-1.5 rounded-md transition-colors',
-              isHomePage
+              useLightNav
                 ? 'text-white hover:bg-white/10'
                 : 'text-gray-600 hover:bg-gray-100',
             ]"
