@@ -7,11 +7,11 @@ defineProps<{
 </script>
 
 <template>
-  <section class="monetary-gifts bg-[#ececec] py-12 px-4">
+  <section class="monetary-gifts py-16 px-4">
     <div class="max-w-3xl mx-auto text-center">
-      <h2 class="text-2xl font-bold text-[#14213d] mb-4">Gift</h2>
+      <h2 class="text-2xl font-bold text-[#2c2c2c] mb-4">Gift</h2>
 
-      <div class="bg-white rounded-lg shadow-sm p-8">
+      <div class="bg-white/80 backdrop-blur rounded-xl border border-[#e5e5e5]/50 shadow-sm p-8">
         <!-- QR Code -->
         <div v-if="config.qrCodeUrl" class="mb-6">
           <img

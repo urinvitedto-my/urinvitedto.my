@@ -7,15 +7,15 @@ defineProps<{
 </script>
 
 <template>
-  <section class="gift-guide bg-white py-12 px-4">
+  <section class="gift-guide py-16 px-4">
     <div class="max-w-3xl mx-auto">
-      <h2 class="text-2xl font-bold text-[#14213d] text-center mb-8">Gift Guide</h2>
+      <h2 class="text-2xl font-bold text-[#2c2c2c] text-center mb-8">Gift Guide</h2>
 
       <div class="grid md:grid-cols-2 gap-4">
         <div
           v-for="gift in gifts"
           :key="gift.id"
-          class="bg-[#ececec] rounded-lg p-6"
+          class="bg-white/80 backdrop-blur border border-[#e5e5e5]/50 shadow-sm rounded-xl p-6"
         >
           <div class="flex items-start gap-4">
             <div class="w-10 h-10 bg-[#14213d] rounded-full flex items-center justify-center shrink-0">

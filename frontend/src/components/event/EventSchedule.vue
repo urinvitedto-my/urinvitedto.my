@@ -18,13 +18,13 @@ function formatTime(dateStr: string): string {
 </script>
 
 <template>
-  <section class="event-schedule bg-[#ececec] py-12 px-4">
+  <section class="event-schedule py-16 px-4">
     <div class="max-w-3xl mx-auto">
-      <h2 class="text-2xl font-bold text-[#14213d] text-center mb-8">Schedule</h2>
+      <h2 class="text-2xl font-bold text-[#2c2c2c] text-center mb-8">Schedule</h2>
 
       <div class="relative">
         <!-- Timeline line -->
-        <div class="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-[#e5e5e5] transform md:-translate-x-1/2"></div>
+        <div class="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-gray-300 transform md:-translate-x-1/2"></div>
 
         <!-- Items -->
         <div class="space-y-8">
@@ -39,14 +39,14 @@ function formatTime(dateStr: string): string {
             <!-- Content -->
             <div
               :class="[
-                'ml-10 md:ml-0 bg-white rounded-lg shadow-sm p-6 flex-1',
+                'ml-10 md:ml-0 bg-white/80 backdrop-blur rounded-xl border border-[#e5e5e5]/50 shadow-sm p-6 flex-1',
                 index % 2 === 0 ? 'md:mr-[52%]' : 'md:ml-[52%]',
               ]"
             >
               <div class="text-[#fca311] font-semibold mb-1">
                 {{ formatTime(item.time) }}
               </div>
-              <h3 class="text-lg font-semibold text-[#14213d] mb-2">
+              <h3 class="text-lg font-semibold text-[#2c2c2c] mb-2">
                 {{ item.title }}
               </h3>
               <p v-if="item.description" class="text-gray-600">

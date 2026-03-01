@@ -8,11 +8,11 @@ defineProps<{
 
 <template>
   <section
-    class="custom-section py-12 px-4"
-    :style="{ backgroundColor: section.bgColor || '#ececec' }"
+    class="custom-section py-16 px-4"
+    :style="section.bgColor ? { backgroundColor: section.bgColor } : {}"
   >
     <div class="max-w-3xl mx-auto">
-      <h2 class="text-2xl font-bold text-[#14213d] text-center mb-6">
+      <h2 class="text-2xl font-bold text-[#2c2c2c] text-center mb-6">
         {{ section.title }}
       </h2>
 

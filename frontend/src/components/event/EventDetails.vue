@@ -24,10 +24,10 @@ function formatDate(dateStr?: string): string {
 </script>
 
 <template>
-  <section class="event-details bg-white py-12 px-4">
+  <section class="event-details py-16 px-4">
     <div class="max-w-3xl mx-auto text-center">
       <!-- Title -->
-      <h1 class="text-3xl md:text-5xl font-bold text-[#14213d] mb-6">
+      <h1 class="text-3xl md:text-5xl font-bold text-[#2c2c2c] mb-6">
         {{ event.title }}
       </h1>
 

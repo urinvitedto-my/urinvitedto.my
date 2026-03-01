@@ -8,9 +8,9 @@ defineProps<{
 </script>
 
 <template>
-  <section class="event-map bg-white py-12 px-4">
+  <section class="event-map py-16 px-4">
     <div class="max-w-3xl mx-auto">
-      <h2 class="text-2xl font-bold text-[#14213d] text-center mb-6">Venue</h2>
+      <h2 class="text-2xl font-bold text-[#2c2c2c] text-center mb-6">Venue</h2>
 
       <!-- Map embed -->
       <div v-if="locationDetails.mapEmbedUrl" class="aspect-video rounded-lg overflow-hidden mb-6">

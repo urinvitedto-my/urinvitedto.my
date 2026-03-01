@@ -235,4 +235,17 @@ async function loadEventData() {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.guest-view {
+  background-color: #faf8f5;
+  color: #4a4a4a;
+}
+
+.guest-view :deep(h1),
+.guest-view :deep(h2) {
+  font-family: 'Cormorant Garamond', 'Playfair Display', 'Georgia', serif;
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+</style>

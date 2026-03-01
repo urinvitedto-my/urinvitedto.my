@@ -37,9 +37,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section class="countdown-timer bg-[#14213d] text-white py-12 px-4">
+  <section class="countdown-timer py-16 px-4">
     <div class="max-w-3xl mx-auto text-center">
-      <p v-if="customMessage" class="text-lg mb-6 text-[#e5e5e5]">
+      <p v-if="customMessage" class="text-lg mb-6 text-gray-500">
         {{ customMessage }}
       </p>
 
@@ -52,25 +52,25 @@ onUnmounted(() => {
           <div class="text-4xl md:text-6xl font-bold text-[#fca311]">
             {{ timeLeft.days }}
           </div>
-          <div class="text-sm text-[#e5e5e5] mt-2">Days</div>
+          <div class="text-sm text-gray-500 mt-2 uppercase tracking-wider">Days</div>
         </div>
         <div class="text-center">
           <div class="text-4xl md:text-6xl font-bold text-[#fca311]">
             {{ timeLeft.hours }}
           </div>
-          <div class="text-sm text-[#e5e5e5] mt-2">Hours</div>
+          <div class="text-sm text-gray-500 mt-2 uppercase tracking-wider">Hours</div>
         </div>
         <div class="text-center">
           <div class="text-4xl md:text-6xl font-bold text-[#fca311]">
             {{ timeLeft.minutes }}
           </div>
-          <div class="text-sm text-[#e5e5e5] mt-2">Minutes</div>
+          <div class="text-sm text-gray-500 mt-2 uppercase tracking-wider">Minutes</div>
         </div>
         <div class="text-center">
           <div class="text-4xl md:text-6xl font-bold text-[#fca311]">
             {{ timeLeft.seconds }}
           </div>
-          <div class="text-sm text-[#e5e5e5] mt-2">Seconds</div>
+          <div class="text-sm text-gray-500 mt-2 uppercase tracking-wider">Seconds</div>
         </div>
       </div>
     </div>

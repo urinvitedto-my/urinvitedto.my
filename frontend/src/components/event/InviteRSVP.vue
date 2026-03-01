@@ -86,10 +86,10 @@ async function handleSubmit(guest: Guest) {
 </script>
 
 <template>
-  <section class="invite-rsvp bg-[#14213d] py-12 px-4">
+  <section class="invite-rsvp py-16 px-4">
     <div class="max-w-3xl mx-auto">
-      <h2 class="text-2xl font-bold text-white text-center mb-2">Your Invitation</h2>
-      <p v-if="invite.label" class="text-[#e5e5e5] text-center mb-8">
+      <h2 class="text-2xl font-bold text-[#2c2c2c] text-center mb-2">Your Invitation</h2>
+      <p v-if="invite.label" class="text-gray-500 text-center mb-8">
         {{ invite.label }}
       </p>
 
@@ -97,10 +97,10 @@ async function handleSubmit(guest: Guest) {
         <div
           v-for="guest in invite.guests"
           :key="guest.id"
-          class="bg-white rounded-lg p-6"
+          class="bg-white/80 backdrop-blur border border-[#e5e5e5]/50 shadow-sm rounded-xl p-6"
         >
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-[#14213d]">{{ guest.displayName }}</h3>
+            <h3 class="text-lg font-semibold text-[#2c2c2c]">{{ guest.displayName }}</h3>
             <span
               v-if="getState(guest.id).submitted"
               :class="[
