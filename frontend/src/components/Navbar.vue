@@ -97,7 +97,7 @@ async function handleLogout() {
 
         <!-- Desktop: LOGIN link when not logged in -->
         <RouterLink
-          v-if="!isLoggedIn"
+          v-if="authStore.initialized && !isLoggedIn"
           to="/host/login"
           :class="[
             'hidden md:block font-bold uppercase tracking-wide transition-colors',
@@ -110,7 +110,7 @@ async function handleLogout() {
         </RouterLink>
 
         <!-- Burger button + desktop dropdown -->
-        <div data-navbar-menu :class="['relative', isLoggedIn ? '' : 'md:hidden']">
+        <div data-navbar-menu :class="['relative', authStore.initialized && isLoggedIn ? '' : 'md:hidden']">
           <button
             @click.stop="menuOpen = !menuOpen"
             :class="[
@@ -135,7 +135,7 @@ async function handleLogout() {
             v-if="menuOpen"
             class="hidden md:block absolute right-0 top-full mt-2 min-w-[240px] bg-white rounded-xl py-2 shadow-xl ring-1 ring-black/5"
           >
-            <template v-if="isLoggedIn">
+            <template v-if="authStore.initialized && isLoggedIn">
               <div class="px-4 py-2.5 border-b border-gray-100">
                 <p class="text-xs text-gray-400 leading-none">Signed in as</p>
                 <p class="text-sm text-[#14213d] font-medium truncate mt-1">
@@ -169,7 +169,7 @@ async function handleLogout() {
               </div>
             </template>
             <RouterLink
-              v-else
+              v-else-if="authStore.initialized"
               to="/host/login"
               class="block px-4 py-2.5 text-[#14213d] font-bold uppercase transition-colors hover:bg-gray-50"
               @click="menuOpen = false"
@@ -186,7 +186,7 @@ async function handleLogout() {
         data-navbar-menu
         class="md:hidden bg-white rounded-xl mt-2 py-3 shadow-xl ring-1 ring-black/5"
       >
-        <template v-if="isLoggedIn">
+        <template v-if="authStore.initialized && isLoggedIn">
           <div class="px-5 py-3 border-b border-gray-100 text-center">
             <p class="text-xs text-gray-400 leading-none">Signed in as</p>
             <p class="text-base text-[#14213d] font-medium truncate mt-1">
@@ -220,7 +220,7 @@ async function handleLogout() {
           </div>
         </template>
         <RouterLink
-          v-else
+          v-else-if="authStore.initialized"
           to="/host/login"
           class="block px-5 py-3 text-base text-center text-[#14213d] font-bold uppercase transition-colors hover:bg-gray-50"
           @click="menuOpen = false"

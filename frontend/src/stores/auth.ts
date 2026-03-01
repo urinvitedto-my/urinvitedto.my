@@ -35,6 +35,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   let initPromise: Promise<void> | null = null
+  let subscription: ReturnType<typeof supabase.auth.onAuthStateChange>['data']['subscription'] | null = null
 
   /**
    * Subscribes to auth changes and sets initial state. Call once in App.vue.
@@ -56,7 +57,7 @@ export const useAuthStore = defineStore('auth', () => {
       await checkAdmin(currentSession.user.email)
     }
 
-    onAuthStateChange(async (_event, newSession) => {
+    const { data } = onAuthStateChange(async (_event, newSession) => {
       session.value = newSession
       user.value = newSession?.user ?? null
 
@@ -66,8 +67,15 @@ export const useAuthStore = defineStore('auth', () => {
         isAdmin.value = false
       }
     })
+    subscription = data.subscription
 
     initialized.value = true
+  }
+
+  /** Unsubscribes from auth state changes. Call in App.vue onUnmounted. */
+  function cleanup() {
+    subscription?.unsubscribe()
+    subscription = null
   }
 
   /**
@@ -103,5 +111,6 @@ export const useAuthStore = defineStore('auth', () => {
     init,
     login,
     logout,
+    cleanup,
   }
 })

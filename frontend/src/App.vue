@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import Navbar from '@/components/Navbar.vue'
@@ -12,6 +12,10 @@ const showFooter = computed(() => !route.meta.hideFooter)
 
 onMounted(() => {
   authStore.init()
+})
+
+onUnmounted(() => {
+  authStore.cleanup()
 })
 </script>
 
