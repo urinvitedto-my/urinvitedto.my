@@ -21,6 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   /**
    * Queries the admins table to check if the email has admin access.
+   * Preserves existing admin status on transient failures (network, refresh race).
    */
   async function checkAdmin(email: string) {
     try {
@@ -29,9 +30,11 @@ export const useAuthStore = defineStore('auth', () => {
         .select('email')
         .eq('email', email)
         .maybeSingle()
-      isAdmin.value = !error && !!data
+      if (!error) {
+        isAdmin.value = !!data
+      }
     } catch {
-      isAdmin.value = false
+      // keep current isAdmin value on transient failures
     }
   }
 
@@ -59,6 +62,8 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     const { data } = onAuthStateChange(async (event, newSession) => {
+      if (event === 'INITIAL_SESSION') return
+
       if (event === 'SIGNED_OUT') {
         session.value = null
         user.value = null
@@ -70,7 +75,7 @@ export const useAuthStore = defineStore('auth', () => {
         session.value = newSession
         user.value = newSession.user ?? null
 
-        if (newSession.user?.email) {
+        if (event === 'SIGNED_IN' && newSession.user?.email) {
           await checkAdmin(newSession.user.email)
         }
       }
