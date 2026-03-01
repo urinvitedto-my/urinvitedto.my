@@ -128,12 +128,6 @@ function formatDate(dateStr?: string): string {
       <!-- Event Info -->
       <div class="max-w-2xl mx-auto py-8 px-4">
         <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div class="flex items-center gap-2 text-gray-600 mb-4">
-            <span class="inline-block px-3 py-1 bg-[#fca311] text-black text-sm font-medium rounded-full capitalize">
-              {{ eventSummary.type }}
-            </span>
-          </div>
-
           <div v-if="eventSummary.startsAt" class="flex items-center gap-3 text-gray-700 mb-3">
             <svg class="w-5 h-5 text-[#14213d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -155,9 +149,6 @@ function formatDate(dateStr?: string): string {
           <h2 class="text-xl font-semibold text-[#14213d] mb-4 text-center">
             Enter Your Invite Code
           </h2>
-          <p class="text-gray-600 text-center mb-6">
-            Please enter the 6-character code from your invitation.
-          </p>
 
           <form @submit.prevent="handleInviteSubmit" class="space-y-4">
             <div>
@@ -178,7 +169,7 @@ function formatDate(dateStr?: string): string {
               :disabled="submitting"
               class="w-full bg-[#fca311] text-black font-semibold py-3 rounded-lg hover:bg-[#e5930f] transition-colors disabled:opacity-50"
             >
-              {{ submitting ? 'Checking...' : 'Open Invite' }}
+              {{ submitting ? 'Checking...' : 'Open Invitation' }}
             </button>
           </form>
         </div>
@@ -194,7 +185,7 @@ function formatDate(dateStr?: string): string {
             :to="{ name: 'guest', params: { type, slug } }"
             class="block w-full bg-[#fca311] text-black font-semibold py-3 rounded-lg hover:bg-[#e5930f] transition-colors text-center"
           >
-            View Event
+            Open Invitation
           </RouterLink>
         </div>
       </div>

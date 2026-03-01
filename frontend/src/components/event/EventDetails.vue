@@ -26,11 +26,6 @@ function formatDate(dateStr?: string): string {
 <template>
   <section class="event-details bg-white py-12 px-4">
     <div class="max-w-3xl mx-auto text-center">
-      <!-- Type badge -->
-      <span class="inline-block px-4 py-1 bg-[#fca311] text-black text-sm font-medium rounded-full capitalize mb-4">
-        {{ event.type }}
-      </span>
-
       <!-- Title -->
       <h1 class="text-3xl md:text-5xl font-bold text-[#14213d] mb-6">
         {{ event.title }}
