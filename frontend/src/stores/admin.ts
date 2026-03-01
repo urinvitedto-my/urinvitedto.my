@@ -113,6 +113,14 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
+  /** Clears all admin state. Called on logout. */
+  function $reset() {
+    events.value = []
+    selectedEventId.value = null
+    loading.value = false
+    error.value = ''
+  }
+
   return {
     events,
     selectedEventId,
@@ -125,5 +133,6 @@ export const useAdminStore = defineStore('admin', () => {
     deleteEvent,
     addHost,
     deleteHost,
+    $reset,
   }
 })

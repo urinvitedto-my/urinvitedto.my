@@ -29,6 +29,27 @@ async function getAuthToken(): Promise<string | null> {
 }
 
 /**
+ * Wrapper for authenticated fetch. Injects the auth token, checks for 401,
+ * and signs out via Supabase if the session is invalid.
+ */
+async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  const token = await getAuthToken()
+  if (!token) throw new Error('Not authenticated')
+
+  const headers = new Headers(options.headers)
+  headers.set('Authorization', `Bearer ${token}`)
+
+  const res = await fetch(url, { ...options, headers })
+
+  if (res.status === 401) {
+    await supabase.auth.signOut()
+    throw new Error('Session expired')
+  }
+
+  return res
+}
+
+/**
  * Fetches event summary (basic info to determine public/private).
  */
 export async function getEventSummary(type: string, slug: string): Promise<EventSummary> {
@@ -102,12 +123,7 @@ export async function submitRSVP(
  * Fetches all events for admin dashboard.
  */
 export async function adminListEvents(): Promise<{ events: AdminEvent[] }> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events`, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events`)
   if (!res.ok) {
     const err = await res.json()
     throw new Error(err.message || 'Failed to list events')
@@ -126,15 +142,9 @@ export async function adminCreateEvent(data: {
   startsAt?: string
   location?: string
 }): Promise<AdminEvent> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
   if (!res.ok) {
@@ -151,15 +161,9 @@ export async function adminAddHost(
   eventId: string,
   data: { email: string; displayName: string }
 ): Promise<AdminHost> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/hosts`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/hosts`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
   if (!res.ok) {
@@ -173,12 +177,8 @@ export async function adminAddHost(
  * Removes a host from an event.
  */
 export async function adminDeleteHost(eventId: string, hostId: string): Promise<void> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/hosts/${hostId}`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/hosts/${hostId}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
   })
   if (!res.ok) {
     const err = await res.json()
@@ -204,15 +204,9 @@ export async function adminUpdateEvent(
     musicUrl?: string | null
   }
 ): Promise<AdminEvent> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
   if (!res.ok) {
@@ -226,12 +220,8 @@ export async function adminUpdateEvent(
  * Deletes an event and all related data.
  */
 export async function adminDeleteEvent(eventId: string): Promise<void> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
   })
   if (!res.ok) {
     const err = await res.json()
@@ -245,12 +235,7 @@ export async function adminDeleteEvent(eventId: string): Promise<void> {
  * Fetches all invites with guests for an event.
  */
 export async function adminListInvites(eventId: string): Promise<{ invites: AdminInvite[] }> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/invites`, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/invites`)
   if (!res.ok) {
     const err = await res.json()
     throw new Error(err.message || 'Failed to list invites')
@@ -265,15 +250,9 @@ export async function adminCreateInvite(
   eventId: string,
   data: { label?: string | null }
 ): Promise<AdminInvite> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/invites`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/invites`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
   if (!res.ok) {
@@ -287,12 +266,8 @@ export async function adminCreateInvite(
  * Deletes an invite and all its guests.
  */
 export async function adminDeleteInvite(eventId: string, inviteId: string): Promise<void> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/invites/${inviteId}`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/invites/${inviteId}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
   })
   if (!res.ok) {
     const err = await res.json()
@@ -308,15 +283,9 @@ export async function adminAddGuest(
   inviteId: string,
   data: { displayName: string }
 ): Promise<AdminGuest> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/invites/${inviteId}/guests`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/invites/${inviteId}/guests`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
   if (!res.ok) {
@@ -334,15 +303,9 @@ export async function adminUpdateGuest(
   guestId: string,
   data: { displayName: string; rsvpStatus: string }
 ): Promise<AdminGuest> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/guests/${guestId}`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/guests/${guestId}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
   if (!res.ok) {
@@ -356,12 +319,8 @@ export async function adminUpdateGuest(
  * Removes a guest.
  */
 export async function adminDeleteGuest(eventId: string, guestId: string): Promise<void> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/guests/${guestId}`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/guests/${guestId}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
   })
   if (!res.ok) {
     const err = await res.json()
@@ -375,12 +334,7 @@ export async function adminDeleteGuest(eventId: string, guestId: string): Promis
  * Fetches all schedule items for an event.
  */
 export async function adminListSchedule(eventId: string): Promise<{ items: AdminScheduleItem[] }> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/schedule`, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/schedule`)
   if (!res.ok) {
     const err = await res.json()
     throw new Error(err.message || 'Failed to list schedule')
@@ -395,15 +349,9 @@ export async function adminCreateScheduleItem(
   eventId: string,
   data: { time: string; title: string; description?: string | null; orderIndex?: number | null }
 ): Promise<AdminScheduleItem> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/schedule`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/schedule`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
   if (!res.ok) {
@@ -421,15 +369,9 @@ export async function adminUpdateScheduleItem(
   itemId: string,
   data: { time: string; title: string; description?: string | null; orderIndex?: number | null }
 ): Promise<AdminScheduleItem> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/schedule/${itemId}`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/schedule/${itemId}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
   if (!res.ok) {
@@ -443,12 +385,8 @@ export async function adminUpdateScheduleItem(
  * Deletes a schedule item.
  */
 export async function adminDeleteScheduleItem(eventId: string, itemId: string): Promise<void> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/schedule/${itemId}`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/schedule/${itemId}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
   })
   if (!res.ok) {
     const err = await res.json()
@@ -462,12 +400,7 @@ export async function adminDeleteScheduleItem(eventId: string, itemId: string): 
  * Fetches all FAQs for an event.
  */
 export async function adminListFAQs(eventId: string): Promise<{ items: AdminFAQ[] }> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/faqs`, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/faqs`)
   if (!res.ok) {
     const err = await res.json()
     throw new Error(err.message || 'Failed to list FAQs')
@@ -482,15 +415,9 @@ export async function adminCreateFAQ(
   eventId: string,
   data: { question: string; answer: string; orderIndex?: number | null }
 ): Promise<AdminFAQ> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/faqs`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/faqs`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
   if (!res.ok) {
@@ -508,15 +435,9 @@ export async function adminUpdateFAQ(
   itemId: string,
   data: { question: string; answer: string; orderIndex?: number | null }
 ): Promise<AdminFAQ> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/faqs/${itemId}`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/faqs/${itemId}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
   if (!res.ok) {
@@ -530,12 +451,8 @@ export async function adminUpdateFAQ(
  * Deletes a FAQ.
  */
 export async function adminDeleteFAQ(eventId: string, itemId: string): Promise<void> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/faqs/${itemId}`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/faqs/${itemId}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
   })
   if (!res.ok) {
     const err = await res.json()
@@ -549,12 +466,7 @@ export async function adminDeleteFAQ(eventId: string, itemId: string): Promise<v
  * Fetches all gifts for an event.
  */
 export async function adminListGifts(eventId: string): Promise<{ items: AdminGift[] }> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/gifts`, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/gifts`)
   if (!res.ok) {
     const err = await res.json()
     throw new Error(err.message || 'Failed to list gifts')
@@ -575,15 +487,9 @@ export async function adminCreateGift(
     orderIndex?: number | null
   }
 ): Promise<AdminGift> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/gifts`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/gifts`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
   if (!res.ok) {
@@ -607,15 +513,9 @@ export async function adminUpdateGift(
     orderIndex?: number | null
   }
 ): Promise<AdminGift> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/gifts/${itemId}`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/gifts/${itemId}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
   if (!res.ok) {
@@ -629,12 +529,8 @@ export async function adminUpdateGift(
  * Deletes a gift.
  */
 export async function adminDeleteGift(eventId: string, itemId: string): Promise<void> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/gifts/${itemId}`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/gifts/${itemId}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
   })
   if (!res.ok) {
     const err = await res.json()
@@ -650,12 +546,7 @@ export async function adminDeleteGift(eventId: string, itemId: string): Promise<
 export async function adminListGallery(
   eventId: string,
 ): Promise<{ items: AdminGalleryItem[] }> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/gallery`, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/gallery`)
   if (!res.ok) {
     const err = await res.json()
     throw new Error(err.message || 'Failed to list gallery')
@@ -675,15 +566,9 @@ export async function adminCreateGalleryItem(
     orderIndex?: number | null
   },
 ): Promise<AdminGalleryItem> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/gallery`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/gallery`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
   if (!res.ok) {
@@ -704,15 +589,9 @@ export async function adminUpdateGalleryItem(
     orderIndex?: number | null
   },
 ): Promise<AdminGalleryItem> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/gallery/${itemId}`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/gallery/${itemId}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
   if (!res.ok) {
@@ -726,12 +605,8 @@ export async function adminUpdateGalleryItem(
  * Deletes a gallery item.
  */
 export async function adminDeleteGalleryItem(eventId: string, itemId: string): Promise<void> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/gallery/${itemId}`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/gallery/${itemId}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
   })
   if (!res.ok) {
     const err = await res.json()
@@ -745,12 +620,7 @@ export async function adminDeleteGalleryItem(eventId: string, itemId: string): P
  * Fetches the custom_content JSONB for an event.
  */
 export async function adminGetCustomContent(eventId: string): Promise<CustomContent> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/custom-content`, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/custom-content`)
   if (!res.ok) {
     const err = await res.json()
     throw new Error(err.message || 'Failed to get custom content')
@@ -765,15 +635,9 @@ export async function adminUpdateCustomContent(
   eventId: string,
   data: CustomContent,
 ): Promise<CustomContent> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/custom-content`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/custom-content`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
   if (!res.ok) {
@@ -789,12 +653,7 @@ export async function adminUpdateCustomContent(
  * Fetches the enabled_components JSONB for an event.
  */
 export async function adminGetEnabledComponents(eventId: string): Promise<EnabledComponents> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/enabled-components`, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/enabled-components`)
   if (!res.ok) {
     const err = await res.json()
     throw new Error(err.message || 'Failed to get enabled components')
@@ -809,15 +668,9 @@ export async function adminUpdateEnabledComponents(
   eventId: string,
   data: EnabledComponents,
 ): Promise<EnabledComponents> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/admin/events/${eventId}/enabled-components`, {
+  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/enabled-components`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
   if (!res.ok) {
@@ -844,12 +697,7 @@ export interface HostEvent {
  * Fetches events for the authenticated host.
  */
 export async function getHostEvents(): Promise<{ events: HostEvent[] }> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/host/events`, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
+  const res = await authFetch(`${API_BASE}/api/v1/host/events`)
   if (!res.ok) {
     const err = await res.json()
     throw new Error(err.message || 'Failed to fetch events')
@@ -869,12 +717,7 @@ export interface HostGuest {
  * Fetches guests for an event. Requires the user to be a host of that event.
  */
 export async function getHostGuests(eventId: string): Promise<{ guests: HostGuest[] }> {
-  const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
-
-  const res = await fetch(`${API_BASE}/api/v1/host/events/${eventId}/guests`, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
+  const res = await authFetch(`${API_BASE}/api/v1/host/events/${eventId}/guests`)
   if (!res.ok) {
     const err = await res.json()
     throw new Error(err.message || 'Failed to fetch guests')

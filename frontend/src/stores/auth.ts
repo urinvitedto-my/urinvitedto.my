@@ -7,6 +7,7 @@ import {
   getSession,
   onAuthStateChange,
 } from '@/services/supabase'
+import { useAdminStore } from '@/stores/admin'
 import type { User, Session } from '@supabase/supabase-js'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -57,14 +58,21 @@ export const useAuthStore = defineStore('auth', () => {
       await checkAdmin(currentSession.user.email)
     }
 
-    const { data } = onAuthStateChange(async (_event, newSession) => {
-      session.value = newSession
-      user.value = newSession?.user ?? null
-
-      if (newSession?.user?.email) {
-        await checkAdmin(newSession.user.email)
-      } else {
+    const { data } = onAuthStateChange(async (event, newSession) => {
+      if (event === 'SIGNED_OUT') {
+        session.value = null
+        user.value = null
         isAdmin.value = false
+        return
+      }
+
+      if (newSession) {
+        session.value = newSession
+        user.value = newSession.user ?? null
+
+        if (newSession.user?.email) {
+          await checkAdmin(newSession.user.email)
+        }
       }
     })
     subscription = data.subscription
@@ -92,13 +100,18 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
-   * Signs out the current user and resets state.
+   * Signs out the current user and resets all auth + dependent store state.
    */
   async function logout() {
     await authSignOut()
     user.value = null
     session.value = null
     isAdmin.value = false
+    initialized.value = false
+    initPromise = null
+
+    const adminStore = useAdminStore()
+    adminStore.$reset()
   }
 
   return {
