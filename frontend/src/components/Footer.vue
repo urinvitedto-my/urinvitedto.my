@@ -3,16 +3,23 @@ const currentYear = new Date().getFullYear()
 </script>
 
 <template>
-  <footer class="bg-[#14213d] text-white py-8 px-4">
+  <footer class="bg-[#ececec] text-[#14213d] py-8 px-4">
     <div class="max-w-6xl mx-auto">
       <div class="flex flex-col md:flex-row items-center justify-between gap-4">
         <div class="text-center md:text-left">
-          <div class="font-bold text-lg mb-1">urinvitedto.my</div>
-          <div class="text-[#e5e5e5] text-sm">Beautiful digital invitations</div>
+          <div class="h-10 w-40 overflow-hidden rounded mb-1">
+            <img
+              src="/nav_logo.png"
+              alt="urinvitedto.my"
+              class="h-full w-full object-cover object-center"
+            />
+          </div>
+          <div class="text-[#14213d] text-sm pl-2">Digital invitations</div>
         </div>
 
-        <div class="text-[#e5e5e5] text-sm">
-          &copy; {{ currentYear }} urinvitedto.my. All rights reserved.
+        <div class="text-[#14213d] text-sm text-center md:text-right">
+          <p>&copy; {{ currentYear }} urinvitedto.my</p>
+          <p>All rights reserved</p>
         </div>
       </div>
     </div>

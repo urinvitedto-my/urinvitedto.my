@@ -5,10 +5,10 @@
 <template>
   <div class="landing-view">
     <!-- Hero Section -->
-    <section class="bg-[#14213d] text-white pt-34 pb-20 px-4">
+    <section class="bg-[#14213d] text-white pt-34 pb-20 px-4 mt-16">
       <div class="max-w-4xl mx-auto text-center">
         <h1 class="text-4xl md:text-6xl font-bold mb-6">
-          Beautiful Digital Invitations
+          Digital Invitations
         </h1>
         <p class="text-xl md:text-2xl text-[#e5e5e5] mb-8">
           Create e-invitations for weddings, birthdays, and parties.
