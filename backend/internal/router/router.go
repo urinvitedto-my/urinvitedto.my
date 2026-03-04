@@ -120,6 +120,12 @@ func (rm *Router) SetupRouter() *chi.Mux {
 			ar.Put("/events/{id}/enabled-components", h.UpdateEnabledComponents)
 		})
 
+		// auth routes (protected - any authenticated user)
+		api.Route("/auth", func(authR chi.Router) {
+			authR.Use(rm.mw.Auth)
+			authR.Get("/me", h.GetMe)
+		})
+
 		// host routes (protected - any authenticated user)
 		api.Route("/host", func(hr chi.Router) {
 			hr.Use(rm.mw.Auth)
