@@ -7,6 +7,7 @@ import {
   submitRSVP as apiSubmitRSVP,
 } from '@/services/api'
 import type {
+  EventType,
   EventSummary,
   EventDetailsResponse,
   ConfirmedGuestsResponse,
@@ -14,6 +15,7 @@ import type {
   RSVPResponse,
   ComponentConfig,
 } from '@/types'
+import { errorMsg } from '@/utils/error'
 
 export const useEventStore = defineStore('event', () => {
   const eventSummary = ref<EventSummary | null>(null)
@@ -59,13 +61,13 @@ export const useEventStore = defineStore('event', () => {
   /**
    * Fetches the lightweight event summary (used by landing page).
    */
-  async function fetchSummary(type: string, slug: string) {
+  async function fetchSummary(type: EventType, slug: string) {
     loading.value = true
     error.value = ''
     try {
       eventSummary.value = await getEventSummary(type, slug)
-    } catch (e: any) {
-      error.value = e.message || 'Failed to fetch event summary'
+    } catch (e: unknown) {
+      error.value = errorMsg(e, 'Failed to fetch event summary')
       throw e
     } finally {
       loading.value = false
@@ -75,13 +77,13 @@ export const useEventStore = defineStore('event', () => {
   /**
    * Fetches full event details. Optionally include invite code for private events.
    */
-  async function fetchDetails(type: string, slug: string, inviteCode?: string) {
+  async function fetchDetails(type: EventType, slug: string, inviteCode?: string) {
     loading.value = true
     error.value = ''
     try {
       eventDetails.value = await getEventDetails(type, slug, inviteCode)
-    } catch (e: any) {
-      error.value = e.message || 'Failed to fetch event details'
+    } catch (e: unknown) {
+      error.value = errorMsg(e, 'Failed to fetch event details')
       throw e
     } finally {
       loading.value = false
@@ -91,12 +93,15 @@ export const useEventStore = defineStore('event', () => {
   /**
    * Fetches the confirmed guest list for display.
    */
-  async function fetchConfirmedGuests(type: string, slug: string) {
+  async function fetchConfirmedGuests(type: EventType, slug: string) {
+    loading.value = true
     try {
       confirmedGuests.value = await getConfirmedGuests(type, slug)
-    } catch (e: any) {
-      error.value = e.message || 'Failed to fetch confirmed guests'
+    } catch (e: unknown) {
+      error.value = errorMsg(e, 'Failed to fetch confirmed guests')
       throw e
+    } finally {
+      loading.value = false
     }
   }
 
@@ -104,7 +109,7 @@ export const useEventStore = defineStore('event', () => {
    * Submits an RSVP response for a guest.
    */
   async function submitRSVP(
-    type: string,
+    type: EventType,
     slug: string,
     data: RSVPRequest,
   ): Promise<RSVPResponse> {

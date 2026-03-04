@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { submitRSVP } from '@/services/api'
-import type { Invite, Guest } from '@/types'
+import { ref, watch } from 'vue'
+import { useEventStore } from '@/stores/event'
+import type { EventType, Invite, Guest } from '@/types'
+
+const eventStore = useEventStore()
 
 const props = defineProps<{
   invite: Invite
-  type: string
+  type: EventType
   slug: string
   inviteCode: string
 }>()
@@ -25,17 +27,9 @@ interface GuestState {
 // track RSVP state per guest
 const guestStates = ref<Record<string, GuestState>>({})
 
-/**
- * Returns the RSVP state for a guest, with a safe fallback.
- */
-function getState(guestId: string): GuestState {
-  return guestStates.value[guestId] ?? {
-    status: null, message: '', submitting: false, submitted: false, error: '',
-  }
-}
-
-// initialize state for each guest
-props.invite.guests.forEach((guest) => {
+/** Initializes RSVP state for a guest if not already tracked. */
+function initGuest(guest: Guest) {
+  if (guestStates.value[guest.id]) return
   guestStates.value[guest.id] = {
     status: guest.rsvpStatus === 'pending' ? null : (guest.rsvpStatus as 'yes' | 'no'),
     message: guest.rsvpMessage || '',
@@ -43,7 +37,21 @@ props.invite.guests.forEach((guest) => {
     submitted: guest.rsvpStatus !== 'pending',
     error: '',
   }
-})
+}
+
+/** Returns the RSVP state for a guest, lazily initializing if missing. */
+function getState(guestId: string): GuestState {
+  if (!guestStates.value[guestId]) {
+    guestStates.value[guestId] = {
+      status: null, message: '', submitting: false, submitted: false, error: '',
+    }
+  }
+  return guestStates.value[guestId]
+}
+
+props.invite.guests.forEach(initGuest)
+
+watch(() => props.invite.guests, (guests) => guests.forEach(initGuest))
 
 /**
  * Selects RSVP status for a guest.
@@ -69,7 +77,7 @@ async function handleSubmit(guest: Guest) {
   state.error = ''
 
   try {
-    await submitRSVP(props.type, props.slug, {
+    await eventStore.submitRSVP(props.type, props.slug, {
       inviteCode: props.inviteCode,
       guestId: guest.id,
       status: state.status,
@@ -77,8 +85,8 @@ async function handleSubmit(guest: Guest) {
     })
     state.submitted = true
     emit('rsvpUpdated')
-  } catch (e: any) {
-    state.error = e.message || 'Failed to submit RSVP'
+  } catch (e: unknown) {
+    state.error = e instanceof Error ? e.message : 'Failed to submit RSVP'
   } finally {
     state.submitting = false
   }
@@ -88,7 +96,7 @@ async function handleSubmit(guest: Guest) {
 <template>
   <section class="invite-rsvp py-16 px-4">
     <div class="max-w-3xl mx-auto">
-      <h2 class="text-2xl font-bold text-[#2c2c2c] text-center mb-2">Your Invitation</h2>
+      <h2 class="text-2xl font-bold text-heading text-center mb-2">Your Invitation</h2>
       <p v-if="invite.label" class="text-gray-500 text-center mb-8">
         {{ invite.label }}
       </p>
@@ -97,10 +105,10 @@ async function handleSubmit(guest: Guest) {
         <div
           v-for="guest in invite.guests"
           :key="guest.id"
-          class="bg-white/80 backdrop-blur border border-[#e5e5e5]/50 shadow-sm rounded-xl p-6"
+          class="bg-white/80 backdrop-blur border border-muted/50 shadow-sm rounded-xl p-6"
         >
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-[#2c2c2c]">{{ guest.displayName }}</h3>
+            <h3 class="text-lg font-semibold text-heading">{{ guest.displayName }}</h3>
             <span
               v-if="getState(guest.id).submitted"
               :class="[
@@ -123,7 +131,7 @@ async function handleSubmit(guest: Guest) {
                   'flex-1 py-3 rounded-lg font-semibold transition-colors',
                   getState(guest.id).status === 'yes'
                     ? 'bg-green-500 text-white'
-                    : 'bg-[#ececec] text-gray-700 hover:bg-[#e5e5e5]',
+                    : 'bg-surface text-gray-700 hover:bg-muted',
                 ]"
                 :disabled="getState(guest.id).submitting"
               >
@@ -135,7 +143,7 @@ async function handleSubmit(guest: Guest) {
                   'flex-1 py-3 rounded-lg font-semibold transition-colors',
                   getState(guest.id).status === 'no'
                     ? 'bg-red-500 text-white'
-                    : 'bg-[#ececec] text-gray-700 hover:bg-[#e5e5e5]',
+                    : 'bg-surface text-gray-700 hover:bg-muted',
                 ]"
                 :disabled="getState(guest.id).submitting"
               >
@@ -149,7 +157,7 @@ async function handleSubmit(guest: Guest) {
                 v-model="getState(guest.id).message"
                 placeholder="Leave a message (optional)"
                 rows="2"
-                class="w-full px-4 py-3 border border-[#e5e5e5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fca311] resize-none"
+                class="w-full px-4 py-3 border border-muted rounded-lg focus:outline-none focus:ring-2 focus:ring-accent resize-none"
                 :disabled="getState(guest.id).submitting"
               ></textarea>
             </div>
@@ -164,7 +172,7 @@ async function handleSubmit(guest: Guest) {
               v-if="getState(guest.id).status"
               @click="handleSubmit(guest)"
               :disabled="getState(guest.id).submitting"
-              class="w-full bg-[#fca311] text-black font-semibold py-3 rounded-lg hover:bg-[#e5930f] transition-colors disabled:opacity-50"
+              class="w-full bg-accent text-black font-semibold py-3 rounded-lg hover:bg-accent-dark transition-colors disabled:opacity-50"
             >
               {{ getState(guest.id).submitting ? 'Submitting...' : 'Confirm RSVP' }}
             </button>
@@ -179,5 +187,3 @@ async function handleSubmit(guest: Guest) {
     </div>
   </section>
 </template>
-
-<style scoped></style>

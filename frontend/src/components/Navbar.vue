@@ -1,25 +1,24 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+const { isLoggedIn, userEmail, isAdmin } = storeToRefs(authStore)
 const menuOpen = ref(false)
 const navbarVisible = ref(true)
 let lastScrollY = 0
 
-const isLoggedIn = computed(() => authStore.isLoggedIn)
-const userEmail = computed(() => authStore.userEmail)
-const isAdmin = computed(() => authStore.isAdmin)
-
 /**
  * Pages that need light (white) nav text over dark backgrounds.
  */
-const useLightNav = computed(() =>
-  ['event-landing', 'guest'].includes(route.name as string),
-)
+const useLightNav = computed(() => {
+  const name = route.name
+  return typeof name === 'string' && ['event-landing', 'guest'].includes(name)
+})
 
 /**
  * Handles scroll to hide/show navbar. Only reappears near the top
@@ -67,7 +66,8 @@ async function handleLogout() {
     await authStore.logout()
   } finally {
     menuOpen.value = false
-    const isPublicRoute = ['event-landing', 'guest'].includes(route.name as string)
+    const name = route.name
+    const isPublicRoute = typeof name === 'string' && ['event-landing', 'guest'].includes(name)
     if (!isPublicRoute) {
       router.push('/')
     }
@@ -101,7 +101,7 @@ async function handleLogout() {
             'hidden md:block font-bold uppercase tracking-wide transition-colors',
             useLightNav
               ? 'text-white hover:text-white/80'
-              : 'text-[#14213d] hover:text-[#14213d]/80',
+              : 'text-primary hover:text-primary/80',
           ]"
         >
           LOGIN
@@ -114,6 +114,7 @@ async function handleLogout() {
         >
           <button
             @click.stop="menuOpen = !menuOpen"
+            :aria-label="menuOpen ? 'Close menu' : 'Open menu'"
             :class="[
               'cursor-pointer p-1.5 rounded-md transition-colors',
               useLightNav
@@ -139,13 +140,13 @@ async function handleLogout() {
             <template v-if="authStore.initialized && isLoggedIn">
               <div class="px-4 py-2.5 border-b border-gray-300">
                 <div class="flex items-center gap-2">
-                  <span class="w-5 h-5 shrink-0 rounded-full border border-[#14213d] bg-white inline-flex items-center justify-center">
-                    <svg class="w-3 h-3 text-[#14213d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span class="w-5 h-5 shrink-0 rounded-full border border-primary bg-white inline-flex items-center justify-center">
+                    <svg class="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                     </svg>
                   </span>
-                  <p class="text-sm text-[#14213d] font-medium truncate mt-1">
+                  <p class="text-sm text-primary font-medium truncate mt-1">
                     {{ userEmail }}
                   </p>
                 </div>
@@ -191,7 +192,7 @@ async function handleLogout() {
             <RouterLink
               v-else-if="authStore.initialized"
               to="/host/login"
-              class="block px-4 py-2.5 text-[#14213d] font-bold uppercase transition-colors hover:bg-gray-50"
+              class="block px-4 py-2.5 text-primary font-bold uppercase transition-colors hover:bg-gray-50"
               @click="menuOpen = false"
             >
               LOGIN
@@ -209,13 +210,13 @@ async function handleLogout() {
         <template v-if="authStore.initialized && isLoggedIn">
           <div class="px-5 py-3 border-b border-gray-300 text-center">
             <div class="flex items-center justify-center gap-2 mt-1">
-              <span class="w-5 h-5 shrink-0 rounded-full border border-[#14213d] bg-white inline-flex items-center justify-center">
-                <svg class="w-3 h-3 text-[#14213d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span class="w-5 h-5 shrink-0 rounded-full border border-primary bg-white inline-flex items-center justify-center">
+                <svg class="w-3 h-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                 </svg>
               </span>
-              <p class="text-base text-[#14213d] font-medium truncate">
+              <p class="text-base text-primary font-medium truncate">
                 {{ userEmail }}
               </p>
             </div>
@@ -261,7 +262,7 @@ async function handleLogout() {
         <RouterLink
           v-else-if="authStore.initialized"
           to="/host/login"
-          class="block px-5 py-3 text-base text-center text-[#14213d] font-bold uppercase transition-colors hover:bg-gray-50"
+          class="block px-5 py-3 text-base text-center text-primary font-bold uppercase transition-colors hover:bg-gray-50"
           @click="menuOpen = false"
         >
           LOGIN
@@ -270,5 +271,3 @@ async function handleLogout() {
     </div>
   </nav>
 </template>
-
-<style scoped></style>

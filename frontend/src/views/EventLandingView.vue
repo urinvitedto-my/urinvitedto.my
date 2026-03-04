@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { useEventStore } from '@/stores/event'
-import { getEventDetails } from '@/services/api'
+import type { EventType } from '@/types'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
 
 const props = defineProps<{
-  type: string
+  type: EventType
   slug: string
 }>()
 
@@ -16,8 +18,7 @@ const submitting = ref(false)
 
 const loading = ref(true)
 const error = ref('')
-const eventSummary = computed(() => eventStore.eventSummary)
-const eventDetails = computed(() => eventStore.eventDetails)
+const { eventSummary, eventDetails } = storeToRefs(eventStore)
 
 onMounted(async () => {
   await loadEvent()
@@ -27,9 +28,7 @@ onUnmounted(() => {
   eventStore.$reset()
 })
 
-/**
- * Loads event summary, then details if public.
- */
+/** Loads event summary, then details if public. */
 async function loadEvent() {
   loading.value = true
   error.value = ''
@@ -40,16 +39,14 @@ async function loadEvent() {
     if (eventStore.eventSummary?.isPublic) {
       await eventStore.fetchDetails(props.type, props.slug)
     }
-  } catch (e: any) {
-    error.value = e.message || 'Failed to load event'
+  } catch (e: unknown) {
+    error.value = e instanceof Error ? e.message : 'Failed to load event'
   } finally {
     loading.value = false
   }
 }
 
-/**
- * Handles invite code submission for private events.
- */
+/** Handles invite code submission for private events. */
 async function handleInviteSubmit() {
   if (!inviteCode.value.trim()) {
     error.value = 'Please enter your invite code'
@@ -60,33 +57,32 @@ async function handleInviteSubmit() {
   error.value = ''
 
   try {
-    await getEventDetails(props.type, props.slug, inviteCode.value.toUpperCase())
+    await eventStore.fetchDetails(props.type, props.slug, inviteCode.value.toUpperCase())
     router.push({
       name: 'guest',
       params: { type: props.type, slug: props.slug },
       query: { invite: inviteCode.value.toUpperCase() },
     })
-  } catch (e: any) {
-    error.value = e.message || 'Invalid invite code'
+  } catch (e: unknown) {
+    error.value = e instanceof Error ? e.message : 'Invalid invite code'
   } finally {
     submitting.value = false
   }
 }
-
 </script>
 
 <template>
   <div class="event-landing-view">
     <!-- Loading -->
-    <div v-if="loading" class="landing-fullscreen bg-[#14213d] flex items-center justify-center">
-      <div class="animate-spin rounded-full h-12 w-12 border-4 border-[#fca311] border-t-transparent"></div>
+    <div v-if="loading" class="landing-fullscreen bg-primary flex items-center justify-center">
+      <LoadingSpinner />
     </div>
 
     <!-- Error (no event loaded) -->
-    <div v-else-if="error && !eventSummary" class="landing-fullscreen bg-[#14213d] flex items-center justify-center">
+    <div v-else-if="error && !eventSummary" class="landing-fullscreen bg-primary flex items-center justify-center">
       <div class="text-center px-4">
         <p class="text-red-400 mb-4">{{ error }}</p>
-        <button @click="loadEvent" class="text-[#fca311] hover:underline">Try again</button>
+        <button @click="loadEvent" class="text-accent hover:underline">Try again</button>
       </div>
     </div>
 
@@ -94,14 +90,14 @@ async function handleInviteSubmit() {
     <div
       v-else-if="eventSummary"
       class="landing-fullscreen bg-cover bg-center"
+      :class="{ 'bg-primary': !eventSummary.coverImageUrl }"
       :style="eventSummary.coverImageUrl
         ? { backgroundImage: `url(${eventSummary.coverImageUrl})` }
-        : { backgroundColor: '#14213d' }"
+        : undefined"
     >
       <div class="absolute inset-0 bg-black/40"></div>
 
       <div class="relative z-10 flex flex-col items-center justify-center h-full px-4 text-center">
-        <!-- Title -->
         <h1 class="landing-title text-white">
           {{ eventSummary.title }}
         </h1>
@@ -146,7 +142,6 @@ async function handleInviteSubmit() {
               {{ submitting ? 'Checking Guest List...' : 'Open Invitation' }}
             </button>
 
-
             <p v-if="error" class="text-red-300 text-center text-sm">{{ error }}</p>
           </form>
         </div>
@@ -180,8 +175,8 @@ async function handleInviteSubmit() {
   gap: 0.5rem;
   width: 100%;
   padding: 0.875rem 2rem;
-  background-color: rgb(252 163 17 / 0.9);
-  color: #000;
+  background-color: color-mix(in srgb, var(--color-accent) 90%, transparent);
+  color: black;
   font-size: 1.05rem;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -191,7 +186,7 @@ async function handleInviteSubmit() {
 }
 
 .landing-btn:hover {
-  background-color: rgb(252 163 17 / 1);
+  background-color: var(--color-accent);
 }
 
 .landing-btn:disabled {

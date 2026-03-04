@@ -3,7 +3,7 @@ const currentYear = new Date().getFullYear()
 </script>
 
 <template>
-  <footer class="bg-[#ececec] text-[#14213d] py-8 px-4">
+  <footer class="bg-surface text-primary py-8 px-4">
     <div class="max-w-6xl mx-auto">
       <div class="flex flex-col md:flex-row items-center justify-between gap-4">
         <div class="text-center md:text-left">
@@ -14,10 +14,10 @@ const currentYear = new Date().getFullYear()
               class="h-full w-full object-cover object-center"
             />
           </div>
-          <div class="text-[#14213d] text-sm pl-2">Digital invitations</div>
+          <div class="text-primary text-sm pl-2">Digital invitations</div>
         </div>
 
-        <div class="text-[#14213d] text-sm text-center md:text-right">
+        <div class="text-primary text-sm text-center md:text-right">
           <p>&copy; {{ currentYear }} urinvitedto.my</p>
           <p>All rights reserved</p>
         </div>
@@ -25,5 +25,3 @@ const currentYear = new Date().getFullYear()
     </div>
   </footer>
 </template>
-
-<style scoped></style>

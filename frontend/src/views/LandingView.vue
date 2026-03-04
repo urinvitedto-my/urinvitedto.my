@@ -5,33 +5,33 @@
 <template>
   <div class="landing-view">
     <!-- Hero Section -->
-    <section class="bg-[#14213d] text-white pt-34 pb-20 px-4 mt-16">
+    <section class="bg-primary text-white pt-34 pb-20 px-4 mt-16">
       <div class="max-w-4xl mx-auto text-center">
         <h1 class="text-4xl md:text-6xl font-bold mb-6">
           Digital Invitations
         </h1>
-        <p class="text-xl md:text-2xl text-[#e5e5e5] mb-8">
+        <p class="text-xl md:text-2xl text-border mb-8">
           Create e-invitations for weddings, birthdays, and parties.
         </p>
-        <a
-          href="/host/login"
-          class="inline-block bg-[#fca311] text-black font-semibold px-8 py-4 rounded-lg hover:bg-[#e5930f] transition-colors"
+        <RouterLink
+          to="/host/login"
+          class="inline-block bg-accent text-black font-semibold px-8 py-4 rounded-lg hover:bg-accent-dark transition-colors"
         >
           Get Started
-        </a>
+        </RouterLink>
       </div>
     </section>
 
     <!-- Features Section -->
     <section class="py-24 px-4">
       <div class="max-w-6xl mx-auto">
-        <h2 class="text-3xl font-bold text-center text-[#14213d] mb-12">
+        <h2 class="text-3xl font-bold text-center text-primary mb-12">
           Why Choose Us
         </h2>
         <div class="grid md:grid-cols-3 gap-8">
           <div class="bg-white p-6 rounded-lg shadow-sm text-center">
             <div
-              class="w-16 h-16 bg-[#fca311] rounded-full flex items-center justify-center mx-auto mb-4"
+              class="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4"
             >
               <svg
                 class="w-8 h-8 text-white"
@@ -47,12 +47,12 @@
                 />
               </svg>
             </div>
-            <h3 class="text-xl font-semibold text-[#14213d] mb-2">Easy to Create</h3>
+            <h3 class="text-xl font-semibold text-primary mb-2">Easy to Create</h3>
             <p class="text-gray-600">Simple setup with beautiful templates</p>
           </div>
           <div class="bg-white p-6 rounded-lg shadow-sm text-center">
             <div
-              class="w-16 h-16 bg-[#fca311] rounded-full flex items-center justify-center mx-auto mb-4"
+              class="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4"
             >
               <svg
                 class="w-8 h-8 text-white"
@@ -68,12 +68,12 @@
                 />
               </svg>
             </div>
-            <h3 class="text-xl font-semibold text-[#14213d] mb-2">Mobile First</h3>
+            <h3 class="text-xl font-semibold text-primary mb-2">Mobile First</h3>
             <p class="text-gray-600">Perfect on any device, anywhere</p>
           </div>
           <div class="bg-white p-6 rounded-lg shadow-sm text-center">
             <div
-              class="w-16 h-16 bg-[#fca311] rounded-full flex items-center justify-center mx-auto mb-4"
+              class="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4"
             >
               <svg
                 class="w-8 h-8 text-white"
@@ -89,7 +89,7 @@
                 />
               </svg>
             </div>
-            <h3 class="text-xl font-semibold text-[#14213d] mb-2">Track RSVPs</h3>
+            <h3 class="text-xl font-semibold text-primary mb-2">Track RSVPs</h3>
             <p class="text-gray-600">Know who's coming in real-time</p>
           </div>
         </div>
@@ -97,5 +97,3 @@
     </section>
   </div>
 </template>
-
-<style scoped></style>

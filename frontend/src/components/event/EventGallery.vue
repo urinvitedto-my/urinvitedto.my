@@ -157,7 +157,7 @@ onUnmounted(() => {
 <template>
   <section class="event-gallery py-16 px-4">
     <div class="max-w-5xl mx-auto">
-      <h2 class="text-2xl font-bold text-[#2c2c2c] text-center mb-8">Gallery</h2>
+      <h2 class="text-2xl font-bold text-heading text-center mb-8">Gallery</h2>
 
       <!-- Carousel -->
       <div
@@ -169,7 +169,8 @@ onUnmounted(() => {
         <button
           v-if="items.length > 1"
           @click="step(-1)"
-          class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur shadow border border-[#e5e5e5]/50 text-[#2c2c2c] hover:text-[#fca311] transition-colors"
+          aria-label="Previous image"
+          class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur shadow border border-muted/50 text-heading hover:text-accent transition-colors"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -200,7 +201,7 @@ onUnmounted(() => {
               :style="{ width: `${100 / cloned.length}%` }"
               @click="handleItemClick(idx)"
             >
-              <div class="aspect-4/5 overflow-hidden rounded-xl shadow-sm border border-[#e5e5e5]/50 bg-white/80 backdrop-blur">
+              <div class="aspect-4/5 overflow-hidden rounded-xl shadow-sm border border-muted/50 bg-white/80 backdrop-blur">
                 <img
                   v-if="item.mediaType === 'photo'"
                   :src="item.mediaUrl"
@@ -211,9 +212,9 @@ onUnmounted(() => {
                 />
                 <div
                   v-else
-                  class="w-full h-full bg-[#14213d] flex items-center justify-center group-hover:bg-[#1a2a4d] transition-colors"
+                  class="w-full h-full bg-primary flex items-center justify-center group-hover:bg-primary-dark transition-colors"
                 >
-                  <svg class="w-12 h-12 text-[#fca311] pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-12 h-12 text-accent pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 </div>
@@ -226,7 +227,8 @@ onUnmounted(() => {
         <button
           v-if="items.length > 1"
           @click="step(1)"
-          class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur shadow border border-[#e5e5e5]/50 text-[#2c2c2c] hover:text-[#fca311] transition-colors"
+          aria-label="Next image"
+          class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur shadow border border-muted/50 text-heading hover:text-accent transition-colors"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -243,7 +245,8 @@ onUnmounted(() => {
     >
       <button
         @click="closeLightbox"
-        class="absolute top-4 right-4 text-white hover:text-[#fca311] transition-colors"
+        aria-label="Close lightbox"
+        class="absolute top-4 right-4 text-white hover:text-accent transition-colors"
       >
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -253,7 +256,8 @@ onUnmounted(() => {
       <button
         v-if="items.length > 1"
         @click="navigateLightbox(-1)"
-        class="absolute left-4 text-white hover:text-[#fca311] transition-colors"
+        aria-label="Previous image"
+        class="absolute left-4 text-white hover:text-accent transition-colors"
       >
         <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -262,7 +266,8 @@ onUnmounted(() => {
       <button
         v-if="items.length > 1"
         @click="navigateLightbox(1)"
-        class="absolute right-4 text-white hover:text-[#fca311] transition-colors"
+        aria-label="Next image"
+        class="absolute right-4 text-white hover:text-accent transition-colors"
       >
         <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -289,5 +294,3 @@ onUnmounted(() => {
     </div>
   </section>
 </template>
-
-<style scoped></style>

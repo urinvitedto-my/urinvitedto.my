@@ -14,6 +14,10 @@ const timeLeft = computed(() => {
   const diff = target - now.value
 
   if (diff <= 0) {
+    if (interval) {
+      clearInterval(interval)
+      interval = null
+    }
     return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true }
   }
 
@@ -43,31 +47,31 @@ onUnmounted(() => {
         {{ customMessage }}
       </p>
 
-      <div v-if="timeLeft.expired" class="text-2xl font-bold text-[#fca311]">
+      <div v-if="timeLeft.expired" class="text-2xl font-bold text-accent">
         The event has started!
       </div>
 
       <div v-else class="grid grid-cols-4 gap-4 max-w-md mx-auto">
         <div class="text-center">
-          <div class="text-4xl md:text-6xl font-bold text-[#fca311]">
+          <div class="text-4xl md:text-6xl font-bold text-accent">
             {{ timeLeft.days }}
           </div>
           <div class="text-sm text-gray-500 mt-2 uppercase tracking-wider">Days</div>
         </div>
         <div class="text-center">
-          <div class="text-4xl md:text-6xl font-bold text-[#fca311]">
+          <div class="text-4xl md:text-6xl font-bold text-accent">
             {{ timeLeft.hours }}
           </div>
           <div class="text-sm text-gray-500 mt-2 uppercase tracking-wider">Hours</div>
         </div>
         <div class="text-center">
-          <div class="text-4xl md:text-6xl font-bold text-[#fca311]">
+          <div class="text-4xl md:text-6xl font-bold text-accent">
             {{ timeLeft.minutes }}
           </div>
           <div class="text-sm text-gray-500 mt-2 uppercase tracking-wider">Minutes</div>
         </div>
         <div class="text-center">
-          <div class="text-4xl md:text-6xl font-bold text-[#fca311]">
+          <div class="text-4xl md:text-6xl font-bold text-accent">
             {{ timeLeft.seconds }}
           </div>
           <div class="text-sm text-gray-500 mt-2 uppercase tracking-wider">Seconds</div>
@@ -76,5 +80,3 @@ onUnmounted(() => {
     </div>
   </section>
 </template>
-
-<style scoped></style>

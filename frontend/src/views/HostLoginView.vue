@@ -10,9 +10,7 @@ const password = ref('')
 const loading = ref(false)
 const error = ref('')
 
-/**
- * Handles login form submission.
- */
+/** Handles login form submission. */
 async function handleLogin() {
   if (!email.value || !password.value) {
     error.value = 'Please enter email and password'
@@ -25,8 +23,8 @@ async function handleLogin() {
   try {
     await authStore.login(email.value, password.value)
     router.push('/host/dashboard')
-  } catch (e: any) {
-    error.value = e.message || 'Login failed'
+  } catch (e: unknown) {
+    error.value = e instanceof Error ? e.message : 'Login failed'
   } finally {
     loading.value = false
   }
@@ -37,7 +35,7 @@ async function handleLogin() {
   <div class="host-login-view min-h-screen flex items-center justify-center pt-24 pb-12 px-4">
     <div class="max-w-md w-full">
       <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-[#14213d]">Host Login</h1>
+        <h1 class="text-3xl font-bold text-primary">Host Login</h1>
         <p class="text-gray-600 mt-2">Sign in to view your event dashboard</p>
       </div>
 
@@ -51,7 +49,7 @@ async function handleLogin() {
             v-model="email"
             type="email"
             required
-            class="w-full px-4 py-3 border border-[#e5e5e5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fca311]"
+            class="w-full px-4 py-3 border border-muted rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
             :disabled="loading"
           />
         </div>
@@ -65,7 +63,7 @@ async function handleLogin() {
             v-model="password"
             type="password"
             required
-            class="w-full px-4 py-3 border border-[#e5e5e5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fca311]"
+            class="w-full px-4 py-3 border border-muted rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
             :disabled="loading"
           />
         </div>
@@ -75,7 +73,7 @@ async function handleLogin() {
         <button
           type="submit"
           :disabled="loading"
-          class="w-full bg-[#fca311] text-black font-semibold py-3 rounded-lg hover:bg-[#e5930f] transition-colors disabled:opacity-50"
+          class="w-full bg-accent text-black font-semibold py-3 rounded-lg hover:bg-accent-dark transition-colors disabled:opacity-50"
         >
           {{ loading ? 'Signing in...' : 'Sign In' }}
         </button>
@@ -83,5 +81,3 @@ async function handleLogin() {
     </div>
   </div>
 </template>
-
-<style scoped></style>

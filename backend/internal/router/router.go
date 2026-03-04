@@ -43,7 +43,7 @@ func (rm *Router) SetupRouter() *chi.Mux {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(httprate.LimitByRealIP(60, time.Minute))
+	r.Use(httprate.LimitByRealIP(120, time.Minute))
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(middleware.Compress(5))
 
@@ -118,6 +118,12 @@ func (rm *Router) SetupRouter() *chi.Mux {
 			ar.Put("/events/{id}/custom-content", h.UpdateCustomContent)
 			ar.Get("/events/{id}/enabled-components", h.GetEnabledComponents)
 			ar.Put("/events/{id}/enabled-components", h.UpdateEnabledComponents)
+		})
+
+		// auth routes (protected - any authenticated user)
+		api.Route("/auth", func(authR chi.Router) {
+			authR.Use(rm.mw.Auth)
+			authR.Get("/me", h.GetMe)
 		})
 
 		// host routes (protected - any authenticated user)

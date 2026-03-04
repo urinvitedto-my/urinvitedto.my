@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import {
-  supabase,
   signIn as authSignIn,
   signOut as authSignOut,
   getSession,
   onAuthStateChange,
 } from '@/services/supabase'
+import { getMe } from '@/services/api'
 import { useAdminStore } from '@/stores/admin'
 import type { User, Session } from '@supabase/supabase-js'
 
@@ -20,26 +20,22 @@ export const useAuthStore = defineStore('auth', () => {
   const userEmail = computed(() => user.value?.email ?? '')
 
   /**
-   * Queries the admins table to check if the email has admin access.
-   * Preserves existing admin status on transient failures (network, refresh race).
+   * Checks admin status via the backend /auth/me endpoint.
+   * Falls back silently on transient failures to preserve current state.
    */
-  async function checkAdmin(email: string) {
+  async function checkAdmin() {
     try {
-      const { data, error } = await supabase
-        .from('admins')
-        .select('email')
-        .eq('email', email)
-        .maybeSingle()
-      if (!error) {
-        isAdmin.value = !!data
-      }
+      const me = await getMe()
+      isAdmin.value = me.isAdmin
     } catch {
       // keep current isAdmin value on transient failures
     }
   }
 
   let initPromise: Promise<void> | null = null
-  let subscription: ReturnType<typeof supabase.auth.onAuthStateChange>['data']['subscription'] | null = null
+  let subscription:
+    | ReturnType<typeof onAuthStateChange>['data']['subscription']
+    | null = null
 
   /**
    * Subscribes to auth changes and sets initial state. Call once in App.vue.
@@ -58,7 +54,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = currentSession?.user ?? null
 
     if (currentSession?.user?.email) {
-      await checkAdmin(currentSession.user.email)
+      await checkAdmin()
     }
 
     const { data } = onAuthStateChange(async (event, newSession) => {
@@ -76,7 +72,7 @@ export const useAuthStore = defineStore('auth', () => {
         user.value = newSession.user ?? null
 
         if (event === 'SIGNED_IN' && newSession.user?.email) {
-          await checkAdmin(newSession.user.email)
+          await checkAdmin()
         }
       }
     })
@@ -91,32 +87,30 @@ export const useAuthStore = defineStore('auth', () => {
     subscription = null
   }
 
-  /**
-   * Signs in with email/password via Supabase auth.
-   */
+  /** Signs in with email/password via Supabase auth. */
   async function login(email: string, password: string) {
     const data = await authSignIn(email, password)
     session.value = data.session
     user.value = data.user
 
     if (data.user?.email) {
-      await checkAdmin(data.user.email)
+      await checkAdmin()
     }
   }
 
-  /**
-   * Signs out the current user and resets all auth + dependent store state.
-   */
+  /** Signs out the current user and resets all auth + dependent store state. */
   async function logout() {
     await authSignOut()
     user.value = null
     session.value = null
     isAdmin.value = false
-    initialized.value = false
-    initPromise = null
 
     const adminStore = useAdminStore()
     adminStore.$reset()
+
+    const { useHostStore } = await import('@/stores/host')
+    const hostStore = useHostStore()
+    hostStore.$reset()
   }
 
   return {

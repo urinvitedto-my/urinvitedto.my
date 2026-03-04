@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { adminGetCustomContent, adminUpdateCustomContent } from '@/services/api'
+import { ref, computed, onMounted } from 'vue'
+import { useAdminStore } from '@/stores/admin'
+import { useToast } from '@/composables/useToast'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import type { CustomContent, CustomSection } from '@/types'
 
 const props = defineProps<{
@@ -10,10 +12,13 @@ const props = defineProps<{
 
 const emit = defineEmits<{ toggle: [] }>()
 
-const loading = ref(false)
+const adminStore = useAdminStore()
+const toast = useToast()
+
+const loading = computed(() => adminStore.isSubLoading('customContent', props.eventId))
+const error = computed(() => adminStore.getSubError('customContent', props.eventId))
+
 const saving = ref(false)
-const error = ref('')
-const saveMsg = ref('')
 
 const dressCodeEnabled = ref(false)
 const dressCode = ref({ title: '', description: '', notes: '', examples: [] as string[] })
@@ -31,32 +36,18 @@ const countdown = ref({ customMessage: '' })
 
 const customSections = ref<CustomSection[]>([])
 const showAddSection = ref(false)
-const newSection = ref({ title: '', content: '', image: '', bgColor: '#ececec' })
+const DEFAULT_SECTION_BG = '#ececec'
+const newSection = ref({ title: '', content: '', image: '', bgColor: DEFAULT_SECTION_BG })
 const editingSectionId = ref<string | null>(null)
 const editSection = ref({ title: '', content: '', image: '', bgColor: '', order: 0 })
 
-onMounted(() => loadContent())
+onMounted(async () => {
+  await adminStore.fetchCustomContent(props.eventId)
+  const data = adminStore.getCustomContent(props.eventId)
+  if (data) populateFromData(data)
+})
 
-/**
- * Loads custom content from the API.
- */
-async function loadContent() {
-  loading.value = true
-  error.value = ''
-
-  try {
-    const data = await adminGetCustomContent(props.eventId)
-    populateFromData(data)
-  } catch (e: any) {
-    error.value = e.message || 'Failed to load custom content'
-  } finally {
-    loading.value = false
-  }
-}
-
-/**
- * Populates form refs from fetched data.
- */
+/** Populates form refs from fetched data. */
 function populateFromData(data: CustomContent) {
   if (data.dressCode) {
     dressCodeEnabled.value = true
@@ -94,9 +85,7 @@ function populateFromData(data: CustomContent) {
   customSections.value = data.customSections || []
 }
 
-/**
- * Builds the CustomContent object from form state.
- */
+/** Builds the CustomContent object from form state. */
 function buildPayload(): CustomContent {
   const payload: CustomContent = {}
 
@@ -136,28 +125,22 @@ function buildPayload(): CustomContent {
   return payload
 }
 
-/**
- * Saves all custom content to the API.
- */
+/** Saves all custom content via the store. */
 async function handleSave() {
   saving.value = true
-  saveMsg.value = ''
 
   try {
-    const saved = await adminUpdateCustomContent(props.eventId, buildPayload())
+    const saved = await adminStore.saveCustomContent(props.eventId, buildPayload())
     populateFromData(saved)
-    saveMsg.value = 'Saved'
-    setTimeout(() => { saveMsg.value = '' }, 2000)
-  } catch (e: any) {
-    alert(e.message || 'Failed to save')
+    toast.success('Custom content saved')
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Failed to save')
   } finally {
     saving.value = false
   }
 }
 
-/**
- * Adds an example to the dress code list.
- */
+/** Adds an example to the dress code list. */
 function addExample() {
   const val = newExample.value.trim()
   if (!val) return
@@ -165,16 +148,12 @@ function addExample() {
   newExample.value = ''
 }
 
-/**
- * Removes an example from the dress code list.
- */
+/** Removes an example from the dress code list. */
 function removeExample(index: number) {
   dressCode.value.examples.splice(index, 1)
 }
 
-/**
- * Adds a monetary account.
- */
+/** Adds a monetary account. */
 function addAccount() {
   if (!newAccount.value.method.trim() || !newAccount.value.number.trim()) return
   monetary.value.accounts.push({
@@ -185,16 +164,12 @@ function addAccount() {
   newAccount.value = { method: '', number: '', name: '' }
 }
 
-/**
- * Removes a monetary account.
- */
+/** Removes a monetary account. */
 function removeAccount(index: number) {
   monetary.value.accounts.splice(index, 1)
 }
 
-/**
- * Adds a custom section.
- */
+/** Adds a custom section. */
 function addCustomSection() {
   if (!newSection.value.title.trim()) return
   customSections.value.push({
@@ -202,30 +177,26 @@ function addCustomSection() {
     title: newSection.value.title.trim(),
     content: newSection.value.content.trim(),
     image: newSection.value.image.trim() || undefined,
-    bgColor: newSection.value.bgColor || '#ececec',
+    bgColor: newSection.value.bgColor || DEFAULT_SECTION_BG,
     order: customSections.value.length,
   })
-  newSection.value = { title: '', content: '', image: '', bgColor: '#ececec' }
+  newSection.value = { title: '', content: '', image: '', bgColor: DEFAULT_SECTION_BG }
   showAddSection.value = false
 }
 
-/**
- * Starts editing a custom section.
- */
+/** Starts editing a custom section. */
 function startEditSection(section: CustomSection) {
   editingSectionId.value = section.id
   editSection.value = {
     title: section.title,
     content: section.content,
     image: section.image || '',
-    bgColor: section.bgColor || '#ececec',
+    bgColor: section.bgColor || DEFAULT_SECTION_BG,
     order: section.order,
   }
 }
 
-/**
- * Saves edits to a custom section.
- */
+/** Saves edits to a custom section. */
 function saveEditSection() {
   if (!editingSectionId.value) return
   const idx = customSections.value.findIndex((s) => s.id === editingSectionId.value)
@@ -235,16 +206,14 @@ function saveEditSection() {
       title: editSection.value.title.trim(),
       content: editSection.value.content.trim(),
       image: editSection.value.image.trim() || undefined,
-      bgColor: editSection.value.bgColor || '#ececec',
+      bgColor: editSection.value.bgColor || DEFAULT_SECTION_BG,
       order: editSection.value.order,
     }
   }
   editingSectionId.value = null
 }
 
-/**
- * Removes a custom section.
- */
+/** Removes a custom section. */
 function removeSection(id: string) {
   customSections.value = customSections.value.filter((s) => s.id !== id)
 }
@@ -255,7 +224,7 @@ function removeSection(id: string) {
     <div class="flex items-center justify-between mb-3">
       <button
         @click="emit('toggle')"
-        class="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-[#14213d] transition-colors"
+        class="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-primary transition-colors"
       >
         <span
           class="inline-block transition-transform duration-200"
@@ -266,9 +235,8 @@ function removeSection(id: string) {
     </div>
 
     <template v-if="!collapsed">
-      <!-- Loading -->
       <div v-if="loading" class="flex items-center justify-center py-4">
-        <div class="animate-spin rounded-full h-6 w-6 border-2 border-[#fca311] border-t-transparent"></div>
+        <LoadingSpinner size="sm" />
       </div>
 
       <p v-else-if="error" class="text-red-600 text-sm mb-3">{{ error }}</p>
@@ -277,7 +245,7 @@ function removeSection(id: string) {
         <!-- Dress Code -->
         <div class="bg-gray-50 rounded-lg p-4">
           <div class="flex items-center justify-between mb-3">
-            <h4 class="text-sm font-medium text-[#14213d]">Dress Code</h4>
+            <h4 class="text-sm font-medium text-primary">Dress Code</h4>
             <label class="flex items-center gap-2 cursor-pointer">
               <input v-model="dressCodeEnabled" type="checkbox" class="rounded" />
               <span class="text-xs text-gray-500">{{ dressCodeEnabled ? 'Enabled' : 'Disabled' }}</span>
@@ -289,19 +257,19 @@ function removeSection(id: string) {
                 v-model="dressCode.title"
                 type="text"
                 placeholder="e.g., Semi-Formal"
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
               />
               <textarea
                 v-model="dressCode.description"
                 rows="2"
                 placeholder="Description"
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
               ></textarea>
               <input
                 v-model="dressCode.notes"
                 type="text"
                 placeholder="Notes (optional)"
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
               />
               <div>
                 <p class="text-xs text-gray-500 mb-1">Examples</p>
@@ -320,10 +288,10 @@ function removeSection(id: string) {
                     v-model="newExample"
                     type="text"
                     placeholder="Add example"
-                    class="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                    class="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
                     @keyup.enter="addExample"
                   />
-                  <button @click="addExample" class="text-xs text-[#14213d] hover:underline">Add</button>
+                  <button @click="addExample" class="text-xs text-primary hover:underline">Add</button>
                 </div>
               </div>
             </div>
@@ -333,7 +301,7 @@ function removeSection(id: string) {
         <!-- Location Details -->
         <div class="bg-gray-50 rounded-lg p-4">
           <div class="flex items-center justify-between mb-3">
-            <h4 class="text-sm font-medium text-[#14213d]">Location Details</h4>
+            <h4 class="text-sm font-medium text-primary">Location Details</h4>
             <label class="flex items-center gap-2 cursor-pointer">
               <input v-model="locationEnabled" type="checkbox" class="rounded" />
               <span class="text-xs text-gray-500">{{ locationEnabled ? 'Enabled' : 'Disabled' }}</span>
@@ -345,19 +313,19 @@ function removeSection(id: string) {
                 v-model="location.mapEmbedUrl"
                 type="url"
                 placeholder="Google Maps embed URL"
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
               />
               <textarea
                 v-model="location.parkingInfo"
                 rows="2"
                 placeholder="Parking information"
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
               ></textarea>
               <textarea
                 v-model="location.accessibilityNotes"
                 rows="2"
                 placeholder="Accessibility notes"
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
               ></textarea>
             </div>
           </template>
@@ -366,7 +334,7 @@ function removeSection(id: string) {
         <!-- Monetary Gifts -->
         <div class="bg-gray-50 rounded-lg p-4">
           <div class="flex items-center justify-between mb-3">
-            <h4 class="text-sm font-medium text-[#14213d]">Monetary Gifts</h4>
+            <h4 class="text-sm font-medium text-primary">Monetary Gifts</h4>
             <label class="flex items-center gap-2 cursor-pointer">
               <input v-model="monetaryEnabled" type="checkbox" class="rounded" />
               <span class="text-xs text-gray-500">{{ monetaryEnabled ? 'Enabled' : 'Disabled' }}</span>
@@ -378,13 +346,13 @@ function removeSection(id: string) {
                 v-model="monetary.qrCodeUrl"
                 type="url"
                 placeholder="QR code image URL"
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
               />
               <textarea
                 v-model="monetary.instructions"
                 rows="2"
                 placeholder="Payment instructions"
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
               ></textarea>
               <div>
                 <p class="text-xs text-gray-500 mb-1">Payment Accounts</p>
@@ -403,22 +371,22 @@ function removeSection(id: string) {
                     v-model="newAccount.method"
                     type="text"
                     placeholder="Method (e.g., GCash)"
-                    class="px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                    class="px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
                   />
                   <input
                     v-model="newAccount.number"
                     type="text"
                     placeholder="Account number"
-                    class="px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                    class="px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
                   />
                   <div class="flex gap-1">
                     <input
                       v-model="newAccount.name"
                       type="text"
                       placeholder="Name"
-                      class="flex-1 min-w-0 px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                      class="flex-1 min-w-0 px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
                     />
-                    <button @click="addAccount" class="text-xs text-[#14213d] hover:underline shrink-0">Add</button>
+                    <button @click="addAccount" class="text-xs text-primary hover:underline shrink-0">Add</button>
                   </div>
                 </div>
               </div>
@@ -429,7 +397,7 @@ function removeSection(id: string) {
         <!-- Countdown Timer -->
         <div class="bg-gray-50 rounded-lg p-4">
           <div class="flex items-center justify-between mb-3">
-            <h4 class="text-sm font-medium text-[#14213d]">Countdown Timer</h4>
+            <h4 class="text-sm font-medium text-primary">Countdown Timer</h4>
             <label class="flex items-center gap-2 cursor-pointer">
               <input v-model="countdownEnabled" type="checkbox" class="rounded" />
               <span class="text-xs text-gray-500">{{ countdownEnabled ? 'Enabled' : 'Disabled' }}</span>
@@ -440,7 +408,7 @@ function removeSection(id: string) {
               v-model="countdown.customMessage"
               type="text"
               placeholder="Custom message above the countdown"
-              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
             />
           </template>
         </div>
@@ -448,13 +416,13 @@ function removeSection(id: string) {
         <!-- Custom Sections -->
         <div class="bg-gray-50 rounded-lg p-4">
           <div class="flex items-center justify-between mb-3">
-            <h4 class="text-sm font-medium text-[#14213d]">
+            <h4 class="text-sm font-medium text-primary">
               Custom Sections
               <span v-if="customSections.length > 0" class="text-gray-400 font-normal">({{ customSections.length }})</span>
             </h4>
             <button
               @click="showAddSection = !showAddSection"
-              class="text-xs text-[#14213d] hover:underline"
+              class="text-xs text-primary hover:underline"
             >
               {{ showAddSection ? 'Cancel' : '+ Add Section' }}
             </button>
@@ -466,20 +434,20 @@ function removeSection(id: string) {
               v-model="newSection.title"
               type="text"
               placeholder="Section title"
-              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
             />
             <textarea
               v-model="newSection.content"
               rows="3"
               placeholder="Content (HTML supported)"
-              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
             ></textarea>
             <div class="grid grid-cols-2 gap-2">
               <input
                 v-model="newSection.image"
                 type="url"
                 placeholder="Image URL (optional)"
-                class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
               />
               <div class="flex items-center gap-2">
                 <label class="text-xs text-gray-500 shrink-0">Background</label>
@@ -489,7 +457,7 @@ function removeSection(id: string) {
             </div>
             <button
               @click="addCustomSection"
-              class="text-xs bg-[#14213d] text-white px-3 py-1.5 rounded-lg hover:bg-[#1a2a4d]"
+              class="text-xs bg-primary text-white px-3 py-1.5 rounded-lg hover:bg-primary-dark"
             >
               Add Section
             </button>
@@ -505,11 +473,11 @@ function removeSection(id: string) {
               <template v-if="editingSectionId !== section.id">
                 <div class="flex items-center justify-between">
                   <div class="min-w-0">
-                    <span class="text-sm font-medium text-[#14213d]">{{ section.title }}</span>
+                    <span class="text-sm font-medium text-primary">{{ section.title }}</span>
                     <p v-if="section.content" class="text-xs text-gray-500 truncate mt-0.5">{{ section.content.slice(0, 80) }}</p>
                   </div>
                   <div class="flex items-center gap-2 shrink-0 ml-3">
-                    <button @click="startEditSection(section)" class="text-xs text-[#14213d] hover:underline">Edit</button>
+                    <button @click="startEditSection(section)" class="text-xs text-primary hover:underline">Edit</button>
                     <button @click="removeSection(section.id)" class="text-xs text-red-500 hover:text-red-700">Delete</button>
                   </div>
                 </div>
@@ -519,19 +487,19 @@ function removeSection(id: string) {
                   <input
                     v-model="editSection.title"
                     type="text"
-                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
                   />
                   <textarea
                     v-model="editSection.content"
                     rows="3"
-                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
                   ></textarea>
                   <div class="grid grid-cols-3 gap-2">
                     <input
                       v-model="editSection.image"
                       type="url"
                       placeholder="Image URL"
-                      class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                      class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
                     />
                     <div class="flex items-center gap-2">
                       <label class="text-xs text-gray-500 shrink-0">BG</label>
@@ -543,14 +511,14 @@ function removeSection(id: string) {
                         v-model.number="editSection.order"
                         type="number"
                         min="0"
-                        class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                        class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
                       />
                     </div>
                   </div>
                   <div class="flex gap-2">
                     <button
                       @click="saveEditSection"
-                      class="text-xs bg-[#14213d] text-white px-3 py-1.5 rounded-lg hover:bg-[#1a2a4d]"
+                      class="text-xs bg-primary text-white px-3 py-1.5 rounded-lg hover:bg-primary-dark"
                     >
                       Save
                     </button>
@@ -573,11 +541,10 @@ function removeSection(id: string) {
           <button
             @click="handleSave"
             :disabled="saving"
-            class="bg-[#14213d] text-white font-medium px-4 py-2 rounded-lg hover:bg-[#1a2a4d] transition-colors disabled:opacity-50 text-sm"
+            class="bg-primary text-white font-medium px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 text-sm"
           >
             {{ saving ? 'Saving...' : 'Save Custom Content' }}
           </button>
-          <span v-if="saveMsg" class="text-sm text-green-600">{{ saveMsg }}</span>
         </div>
       </div>
     </template>
