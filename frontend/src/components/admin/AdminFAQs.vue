@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import {
-  adminListFAQs,
-  adminCreateFAQ,
-  adminUpdateFAQ,
-  adminDeleteFAQ,
-} from '@/services/api'
+import { ref, computed, onMounted } from 'vue'
+import { useAdminStore } from '@/stores/admin'
+import { useToast } from '@/composables/useToast'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import type { AdminFAQ } from '@/types'
 
 const props = defineProps<{
@@ -15,9 +12,12 @@ const props = defineProps<{
 
 const emit = defineEmits<{ toggle: [] }>()
 
-const items = ref<AdminFAQ[]>([])
-const loading = ref(false)
-const error = ref('')
+const adminStore = useAdminStore()
+const toast = useToast()
+
+const items = computed(() => adminStore.getFAQs(props.eventId))
+const loading = computed(() => adminStore.isSubLoading('faqs', props.eventId))
+const error = computed(() => adminStore.getSubError('faqs', props.eventId))
 
 const showCreateForm = ref(false)
 const createForm = ref({ question: '', answer: '' })
@@ -27,53 +27,27 @@ const editingItemId = ref<string | null>(null)
 const editForm = ref({ question: '', answer: '', orderIndex: 0 })
 const editLoading = ref(false)
 
-onMounted(() => loadFAQs())
+onMounted(() => adminStore.fetchFAQs(props.eventId))
 
-/**
- * Loads all FAQs for this event.
- */
-async function loadFAQs() {
-  loading.value = true
-  error.value = ''
-
-  try {
-    const data = await adminListFAQs(props.eventId)
-    items.value = data.items
-  } catch (e: any) {
-    error.value = e.message || 'Failed to load FAQs'
-  } finally {
-    loading.value = false
-  }
-}
-
-/**
- * Creates a new FAQ.
- */
+/** Creates a new FAQ. */
 async function handleCreate() {
   if (!createForm.value.question.trim() || !createForm.value.answer.trim()) return
-
   createLoading.value = true
-
   try {
-    const newItem = await adminCreateFAQ(props.eventId, {
+    await adminStore.createFAQItem(props.eventId, {
       question: createForm.value.question.trim(),
       answer: createForm.value.answer.trim(),
     })
-
-    items.value.push(newItem)
-    items.value.sort((a, b) => a.orderIndex - b.orderIndex)
     showCreateForm.value = false
     createForm.value = { question: '', answer: '' }
-  } catch (e: any) {
-    alert(e.message || 'Failed to create FAQ')
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Failed to create FAQ')
   } finally {
     createLoading.value = false
   }
 }
 
-/**
- * Opens edit mode for a FAQ.
- */
+/** Opens edit mode for a FAQ. */
 function startEdit(item: AdminFAQ) {
   editingItemId.value = item.id
   editForm.value = {
@@ -83,79 +57,52 @@ function startEdit(item: AdminFAQ) {
   }
 }
 
-/**
- * Saves edits to a FAQ.
- */
+/** Saves edits to a FAQ. */
 async function handleUpdate() {
   if (!editingItemId.value || !editForm.value.question.trim() || !editForm.value.answer.trim()) return
-
   editLoading.value = true
-
   try {
-    const updated = await adminUpdateFAQ(props.eventId, editingItemId.value, {
+    await adminStore.updateFAQItem(props.eventId, editingItemId.value, {
       question: editForm.value.question.trim(),
       answer: editForm.value.answer.trim(),
       orderIndex: editForm.value.orderIndex,
     })
-
-    const idx = items.value.findIndex((i) => i.id === editingItemId.value)
-    if (idx !== -1) items.value[idx] = updated
-    items.value.sort((a, b) => a.orderIndex - b.orderIndex)
     editingItemId.value = null
-  } catch (e: any) {
-    alert(e.message || 'Failed to update FAQ')
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Failed to update FAQ')
   } finally {
     editLoading.value = false
   }
 }
 
-/**
- * Deletes a FAQ.
- */
+/** Deletes a FAQ. */
 async function handleDelete(itemId: string) {
-  if (!confirm('Delete this FAQ?')) return
-
+  if (!(await toast.confirm('Delete this FAQ?'))) return
   try {
-    await adminDeleteFAQ(props.eventId, itemId)
-    items.value = items.value.filter((i) => i.id !== itemId)
-  } catch (e: any) {
-    alert(e.message || 'Failed to delete FAQ')
+    await adminStore.deleteFAQItem(props.eventId, itemId)
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Failed to delete FAQ')
   }
 }
 
-/**
- * Moves an item up or down in the order.
- */
+/** Moves an item up or down in the order. */
 async function moveItem(itemId: string, direction: 'up' | 'down') {
-  const idx = items.value.findIndex((i) => i.id === itemId)
-  if (idx === -1) return
-
-  const swapIdx = direction === 'up' ? idx - 1 : idx + 1
-  if (swapIdx < 0 || swapIdx >= items.value.length) return
-
-  const current = items.value[idx]
-  const swap = items.value[swapIdx]
-  if (!current || !swap) return
-
   try {
-    const [updatedCurrent, updatedSwap] = await Promise.all([
-      adminUpdateFAQ(props.eventId, current.id, {
-        question: current.question,
-        answer: current.answer,
-        orderIndex: swap.orderIndex,
-      }),
-      adminUpdateFAQ(props.eventId, swap.id, {
-        question: swap.question,
-        answer: swap.answer,
-        orderIndex: current.orderIndex,
-      }),
-    ])
-
-    items.value[idx] = updatedCurrent
-    items.value[swapIdx] = updatedSwap
-    items.value.sort((a, b) => a.orderIndex - b.orderIndex)
-  } catch (e: any) {
-    alert(e.message || 'Failed to reorder')
+    await adminStore.swapOrder(
+      items.value,
+      itemId,
+      direction,
+      (id, orderIndex) => {
+        const item = items.value.find((i) => i.id === id)!
+        return adminStore.updateFAQItem(props.eventId, id, {
+          question: item.question,
+          answer: item.answer,
+          orderIndex,
+        })
+      },
+    )
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Failed to reorder')
   }
 }
 </script>
@@ -165,7 +112,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
     <div class="flex items-center justify-between mb-3">
       <button
         @click="emit('toggle')"
-        class="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-[#14213d] transition-colors"
+        class="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-primary transition-colors"
       >
         <span
           class="inline-block transition-transform duration-200"
@@ -177,7 +124,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
       <button
         v-if="!collapsed"
         @click="showCreateForm = !showCreateForm"
-        class="text-sm text-[#14213d] hover:underline"
+        class="text-sm text-primary hover:underline"
       >
         {{ showCreateForm ? 'Cancel' : '+ Add FAQ' }}
       </button>
@@ -194,7 +141,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
             type="text"
             placeholder="e.g., What should I wear?"
             required
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
           />
         </div>
         <div>
@@ -204,13 +151,13 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
             placeholder="Your answer here..."
             required
             rows="2"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
           ></textarea>
         </div>
         <button
           type="submit"
           :disabled="createLoading"
-          class="bg-[#14213d] text-white font-medium px-4 py-2 rounded-lg hover:bg-[#1a2a4d] transition-colors disabled:opacity-50"
+          class="bg-primary text-white font-medium px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
         >
           {{ createLoading ? 'Adding...' : 'Add FAQ' }}
         </button>
@@ -219,7 +166,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
 
     <!-- Loading -->
     <div v-if="loading" class="flex items-center justify-center py-4">
-      <div class="animate-spin rounded-full h-6 w-6 border-2 border-[#fca311] border-t-transparent"></div>
+      <LoadingSpinner size="sm" />
     </div>
 
     <!-- Error -->
@@ -254,12 +201,12 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
                 >▼</button>
               </div>
               <div class="min-w-0">
-                <p class="text-sm font-medium text-[#14213d]">{{ item.question }}</p>
+                <p class="text-sm font-medium text-primary">{{ item.question }}</p>
                 <p class="text-xs text-gray-600 mt-1">{{ item.answer }}</p>
               </div>
             </div>
             <div class="flex items-center gap-2 shrink-0 ml-3">
-              <button @click="startEdit(item)" class="text-xs text-[#14213d] hover:underline">Edit</button>
+              <button @click="startEdit(item)" class="text-xs text-primary hover:underline">Edit</button>
               <button @click="handleDelete(item.id)" class="text-xs text-red-500 hover:text-red-700">Delete</button>
             </div>
           </div>
@@ -274,7 +221,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
                 v-model="editForm.question"
                 type="text"
                 required
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
               />
             </div>
             <div class="grid md:grid-cols-2 gap-3">
@@ -284,7 +231,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
                   v-model="editForm.answer"
                   required
                   rows="2"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
                 ></textarea>
               </div>
               <div>
@@ -293,7 +240,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
                   v-model.number="editForm.orderIndex"
                   type="number"
                   min="0"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
                 />
               </div>
             </div>
@@ -301,7 +248,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
               <button
                 type="submit"
                 :disabled="editLoading"
-                class="text-sm bg-[#14213d] text-white px-3 py-1.5 rounded-lg hover:bg-[#1a2a4d] disabled:opacity-50"
+                class="text-sm bg-primary text-white px-3 py-1.5 rounded-lg hover:bg-primary-dark disabled:opacity-50"
               >
                 {{ editLoading ? 'Saving...' : 'Save' }}
               </button>

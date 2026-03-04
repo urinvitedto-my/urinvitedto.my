@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import {
-  adminListSchedule,
-  adminCreateScheduleItem,
-  adminUpdateScheduleItem,
-  adminDeleteScheduleItem,
-} from '@/services/api'
+import { ref, computed, onMounted } from 'vue'
+import { useAdminStore } from '@/stores/admin'
+import { useToast } from '@/composables/useToast'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import { toISO, toDatetimeLocal, formatTime } from '@/utils/date'
 import type { AdminScheduleItem } from '@/types'
 
 const props = defineProps<{
@@ -15,9 +13,12 @@ const props = defineProps<{
 
 const emit = defineEmits<{ toggle: [] }>()
 
-const items = ref<AdminScheduleItem[]>([])
-const loading = ref(false)
-const error = ref('')
+const adminStore = useAdminStore()
+const toast = useToast()
+
+const items = computed(() => adminStore.getSchedule(props.eventId))
+const loading = computed(() => adminStore.isSubLoading('schedule', props.eventId))
+const error = computed(() => adminStore.getSubError('schedule', props.eventId))
 
 const showCreateForm = ref(false)
 const createForm = ref({ time: '', title: '', description: '' })
@@ -27,82 +28,28 @@ const editingItemId = ref<string | null>(null)
 const editForm = ref({ time: '', title: '', description: '', orderIndex: 0 })
 const editLoading = ref(false)
 
-onMounted(() => loadSchedule())
+onMounted(() => adminStore.fetchSchedule(props.eventId))
 
-/**
- * Loads all schedule items for this event.
- */
-async function loadSchedule() {
-  loading.value = true
-  error.value = ''
-
-  try {
-    const data = await adminListSchedule(props.eventId)
-    items.value = data.items
-  } catch (e: any) {
-    error.value = e.message || 'Failed to load schedule'
-  } finally {
-    loading.value = false
-  }
-}
-
-/**
- * Converts datetime-local value to ISO 8601.
- */
-function toISO(value: string): string {
-  return new Date(value).toISOString()
-}
-
-/**
- * Converts ISO string to datetime-local input format.
- */
-function toDatetimeLocal(isoStr: string): string {
-  const d = new Date(isoStr)
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
-}
-
-/**
- * Formats time for display.
- */
-function formatTime(isoStr: string): string {
-  return new Date(isoStr).toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  })
-}
-
-/**
- * Creates a new schedule item.
- */
+/** Creates a new schedule item. */
 async function handleCreate() {
   if (!createForm.value.title.trim() || !createForm.value.time) return
-
   createLoading.value = true
-
   try {
-    const newItem = await adminCreateScheduleItem(props.eventId, {
+    await adminStore.createScheduleItem(props.eventId, {
       time: toISO(createForm.value.time),
       title: createForm.value.title.trim(),
       description: createForm.value.description.trim() || null,
     })
-
-    items.value.push(newItem)
-    items.value.sort((a, b) => a.orderIndex - b.orderIndex)
     showCreateForm.value = false
     createForm.value = { time: '', title: '', description: '' }
-  } catch (e: any) {
-    alert(e.message || 'Failed to create schedule item')
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Failed to create schedule item')
   } finally {
     createLoading.value = false
   }
 }
 
-/**
- * Opens edit mode for a schedule item.
- */
+/** Opens edit mode for a schedule item. */
 function startEdit(item: AdminScheduleItem) {
   editingItemId.value = item.id
   editForm.value = {
@@ -113,82 +60,54 @@ function startEdit(item: AdminScheduleItem) {
   }
 }
 
-/**
- * Saves edits to a schedule item.
- */
+/** Saves edits to a schedule item. */
 async function handleUpdate() {
   if (!editingItemId.value || !editForm.value.title.trim() || !editForm.value.time) return
-
   editLoading.value = true
-
   try {
-    const updated = await adminUpdateScheduleItem(props.eventId, editingItemId.value, {
+    await adminStore.updateScheduleItem(props.eventId, editingItemId.value, {
       time: toISO(editForm.value.time),
       title: editForm.value.title.trim(),
       description: editForm.value.description.trim() || null,
       orderIndex: editForm.value.orderIndex,
     })
-
-    const idx = items.value.findIndex((i) => i.id === editingItemId.value)
-    if (idx !== -1) items.value[idx] = updated
-    items.value.sort((a, b) => a.orderIndex - b.orderIndex)
     editingItemId.value = null
-  } catch (e: any) {
-    alert(e.message || 'Failed to update schedule item')
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Failed to update schedule item')
   } finally {
     editLoading.value = false
   }
 }
 
-/**
- * Deletes a schedule item.
- */
+/** Deletes a schedule item. */
 async function handleDelete(itemId: string) {
-  if (!confirm('Delete this schedule item?')) return
-
+  if (!(await toast.confirm('Delete this schedule item?'))) return
   try {
-    await adminDeleteScheduleItem(props.eventId, itemId)
-    items.value = items.value.filter((i) => i.id !== itemId)
-  } catch (e: any) {
-    alert(e.message || 'Failed to delete schedule item')
+    await adminStore.deleteScheduleItem(props.eventId, itemId)
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Failed to delete schedule item')
   }
 }
 
-/**
- * Moves an item up or down in the order.
- */
+/** Moves an item up or down in the order. */
 async function moveItem(itemId: string, direction: 'up' | 'down') {
-  const idx = items.value.findIndex((i) => i.id === itemId)
-  if (idx === -1) return
-
-  const swapIdx = direction === 'up' ? idx - 1 : idx + 1
-  if (swapIdx < 0 || swapIdx >= items.value.length) return
-
-  const current = items.value[idx]
-  const swap = items.value[swapIdx]
-  if (!current || !swap) return
-
   try {
-    const [updatedCurrent, updatedSwap] = await Promise.all([
-      adminUpdateScheduleItem(props.eventId, current.id, {
-        time: current.time,
-        title: current.title,
-        description: current.description || null,
-        orderIndex: swap.orderIndex,
-      }),
-      adminUpdateScheduleItem(props.eventId, swap.id, {
-        time: swap.time,
-        title: swap.title,
-        description: swap.description || null,
-        orderIndex: current.orderIndex,
-      }),
-    ])
-
-    items.value[idx] = updatedCurrent
-    items.value[swapIdx] = updatedSwap
-    items.value.sort((a, b) => a.orderIndex - b.orderIndex)
-  } catch (e: any) {
-    alert(e.message || 'Failed to reorder')
+    await adminStore.swapOrder(
+      items.value,
+      itemId,
+      direction,
+      (id, orderIndex) => {
+        const item = items.value.find((i) => i.id === id)!
+        return adminStore.updateScheduleItem(props.eventId, id, {
+          time: item.time,
+          title: item.title,
+          description: item.description || null,
+          orderIndex,
+        })
+      },
+    )
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Failed to reorder')
   }
 }
 </script>
@@ -198,7 +117,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
     <div class="flex items-center justify-between mb-3">
       <button
         @click="emit('toggle')"
-        class="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-[#14213d] transition-colors"
+        class="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-primary transition-colors"
       >
         <span
           class="inline-block transition-transform duration-200"
@@ -210,7 +129,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
       <button
         v-if="!collapsed"
         @click="showCreateForm = !showCreateForm"
-        class="text-sm text-[#14213d] hover:underline"
+        class="text-sm text-primary hover:underline"
       >
         {{ showCreateForm ? 'Cancel' : '+ Add Item' }}
       </button>
@@ -227,7 +146,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
               v-model="createForm.time"
               type="datetime-local"
               required
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
             />
           </div>
           <div>
@@ -237,7 +156,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
               type="text"
               placeholder="e.g., Ceremony"
               required
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
             />
           </div>
         </div>
@@ -247,13 +166,13 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
             v-model="createForm.description"
             type="text"
             placeholder="Brief description"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
           />
         </div>
         <button
           type="submit"
           :disabled="createLoading"
-          class="bg-[#14213d] text-white font-medium px-4 py-2 rounded-lg hover:bg-[#1a2a4d] transition-colors disabled:opacity-50"
+          class="bg-primary text-white font-medium px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
         >
           {{ createLoading ? 'Adding...' : 'Add to Schedule' }}
         </button>
@@ -262,7 +181,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
 
     <!-- Loading -->
     <div v-if="loading" class="flex items-center justify-center py-4">
-      <div class="animate-spin rounded-full h-6 w-6 border-2 border-[#fca311] border-t-transparent"></div>
+      <LoadingSpinner size="sm" />
     </div>
 
     <!-- Error -->
@@ -299,13 +218,13 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
               <div class="min-w-0">
                 <div class="flex items-center gap-2">
                   <span class="text-xs text-gray-500 shrink-0">{{ formatTime(item.time) }}</span>
-                  <span class="text-sm font-medium text-[#14213d]">{{ item.title }}</span>
+                  <span class="text-sm font-medium text-primary">{{ item.title }}</span>
                 </div>
                 <p v-if="item.description" class="text-xs text-gray-500 mt-0.5 truncate">{{ item.description }}</p>
               </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-              <button @click="startEdit(item)" class="text-xs text-[#14213d] hover:underline">Edit</button>
+              <button @click="startEdit(item)" class="text-xs text-primary hover:underline">Edit</button>
               <button @click="handleDelete(item.id)" class="text-xs text-red-500 hover:text-red-700">Delete</button>
             </div>
           </div>
@@ -321,7 +240,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
                   v-model="editForm.time"
                   type="datetime-local"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
                 />
               </div>
               <div>
@@ -330,7 +249,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
                   v-model="editForm.title"
                   type="text"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
                 />
               </div>
             </div>
@@ -340,7 +259,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
                 <input
                   v-model="editForm.description"
                   type="text"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
                 />
               </div>
               <div>
@@ -349,7 +268,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
                   v-model.number="editForm.orderIndex"
                   type="number"
                   min="0"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
                 />
               </div>
             </div>
@@ -357,7 +276,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
               <button
                 type="submit"
                 :disabled="editLoading"
-                class="text-sm bg-[#14213d] text-white px-3 py-1.5 rounded-lg hover:bg-[#1a2a4d] disabled:opacity-50"
+                class="text-sm bg-primary text-white px-3 py-1.5 rounded-lg hover:bg-primary-dark disabled:opacity-50"
               >
                 {{ editLoading ? 'Saving...' : 'Save' }}
               </button>

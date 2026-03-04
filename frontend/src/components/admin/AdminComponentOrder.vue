@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { adminGetEnabledComponents, adminUpdateEnabledComponents } from '@/services/api'
+import { ref, computed, onMounted } from 'vue'
+import { useAdminStore } from '@/stores/admin'
+import { useToast } from '@/composables/useToast'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import type { ComponentConfig } from '@/types'
 
 const props = defineProps<{
@@ -10,11 +12,13 @@ const props = defineProps<{
 
 const emit = defineEmits<{ toggle: [] }>()
 
-const loading = ref(false)
-const saving = ref(false)
-const error = ref('')
-const saveMsg = ref('')
+const adminStore = useAdminStore()
+const toast = useToast()
 
+const loading = computed(() => adminStore.isSubLoading('enabledComponents', props.eventId))
+const error = computed(() => adminStore.getSubError('enabledComponents', props.eventId))
+
+const saving = ref(false)
 const components = ref<ComponentConfig[]>([])
 
 const DEFAULT_COMPONENTS: ComponentConfig[] = [
@@ -45,62 +49,39 @@ const DISPLAY_NAMES: Record<string, string> = {
   CustomSections: 'Custom Sections',
 }
 
-onMounted(() => loadComponents())
+onMounted(async () => {
+  await adminStore.fetchEnabledComponents(props.eventId)
+  const storeData = adminStore.getEnabledComponents(props.eventId)
+  components.value = storeData.length > 0
+    ? [...storeData]
+    : [...DEFAULT_COMPONENTS]
+})
 
-/**
- * Loads enabled components from the API.
- */
-async function loadComponents() {
-  loading.value = true
-  error.value = ''
-
-  try {
-    const data = await adminGetEnabledComponents(props.eventId)
-    if (data.components?.length) {
-      components.value = data.components.sort((a, b) => a.order - b.order)
-    } else {
-      components.value = [...DEFAULT_COMPONENTS]
-    }
-  } catch (e: any) {
-    error.value = e.message || 'Failed to load component config'
-  } finally {
-    loading.value = false
-  }
-}
-
-/**
- * Saves enabled components to the API.
- */
+/** Saves enabled components via the store. */
 async function handleSave() {
   saving.value = true
-  saveMsg.value = ''
 
   try {
-    const saved = await adminUpdateEnabledComponents(props.eventId, {
+    const saved = await adminStore.saveEnabledComponents(props.eventId, {
       components: components.value,
     })
     if (saved.components?.length) {
       components.value = saved.components.sort((a, b) => a.order - b.order)
     }
-    saveMsg.value = 'Saved'
-    setTimeout(() => { saveMsg.value = '' }, 2000)
-  } catch (e: any) {
-    alert(e.message || 'Failed to save')
+    toast.success('Component order saved')
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Failed to save')
   } finally {
     saving.value = false
   }
 }
 
-/**
- * Resets to default component configuration.
- */
+/** Resets to default component configuration. */
 function resetToDefaults() {
   components.value = [...DEFAULT_COMPONENTS]
 }
 
-/**
- * Moves a component up or down in order.
- */
+/** Moves a component up or down in order. */
 function moveComponent(index: number, direction: 'up' | 'down') {
   const swapIndex = direction === 'up' ? index - 1 : index + 1
   if (swapIndex < 0 || swapIndex >= components.value.length) return
@@ -112,9 +93,7 @@ function moveComponent(index: number, direction: 'up' | 'down') {
   components.value.sort((a, b) => a.order - b.order)
 }
 
-/**
- * Returns a readable name for a component key.
- */
+/** Returns a readable name for a component key. */
 function displayName(name: string): string {
   return DISPLAY_NAMES[name] || name
 }
@@ -125,7 +104,7 @@ function displayName(name: string): string {
     <div class="flex items-center justify-between mb-3">
       <button
         @click="emit('toggle')"
-        class="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-[#14213d] transition-colors"
+        class="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-primary transition-colors"
       >
         <span
           class="inline-block transition-transform duration-200"
@@ -136,9 +115,8 @@ function displayName(name: string): string {
     </div>
 
     <template v-if="!collapsed">
-      <!-- Loading -->
       <div v-if="loading" class="flex items-center justify-center py-4">
-        <div class="animate-spin rounded-full h-6 w-6 border-2 border-[#fca311] border-t-transparent"></div>
+        <LoadingSpinner size="sm" />
       </div>
 
       <p v-else-if="error" class="text-red-600 text-sm mb-3">{{ error }}</p>
@@ -169,11 +147,11 @@ function displayName(name: string): string {
                 title="Move down"
               >▼</button>
             </div>
-            <span class="text-sm text-[#14213d]">{{ displayName(comp.name) }}</span>
+            <span class="text-sm text-primary">{{ displayName(comp.name) }}</span>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input v-model="comp.enabled" type="checkbox" class="sr-only peer" />
-            <div class="w-9 h-5 bg-gray-300 rounded-full peer peer-checked:bg-[#fca311] transition-colors after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
+            <div class="w-9 h-5 bg-gray-300 rounded-full peer peer-checked:bg-accent transition-colors after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
           </label>
         </div>
 
@@ -181,7 +159,7 @@ function displayName(name: string): string {
           <button
             @click="handleSave"
             :disabled="saving"
-            class="bg-[#14213d] text-white font-medium px-4 py-2 rounded-lg hover:bg-[#1a2a4d] transition-colors disabled:opacity-50 text-sm"
+            class="bg-primary text-white font-medium px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 text-sm"
           >
             {{ saving ? 'Saving...' : 'Save Component Order' }}
           </button>
@@ -191,7 +169,6 @@ function displayName(name: string): string {
           >
             Reset to defaults
           </button>
-          <span v-if="saveMsg" class="text-sm text-green-600">{{ saveMsg }}</span>
         </div>
       </div>
     </template>

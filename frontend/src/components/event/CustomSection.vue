@@ -12,11 +12,11 @@ defineProps<{
     :style="section.bgColor ? { backgroundColor: section.bgColor } : {}"
   >
     <div class="max-w-3xl mx-auto">
-      <h2 class="text-2xl font-bold text-[#2c2c2c] text-center mb-6">
+      <h2 class="text-2xl font-bold text-heading text-center mb-6">
         {{ section.title }}
       </h2>
 
-      <!-- HTML content -->
+      <!-- Admin-authored HTML content (only editable by admins, no sanitization needed) -->
       <div
         class="prose max-w-none mb-6"
         v-html="section.content"
@@ -33,5 +33,3 @@ defineProps<{
     </div>
   </section>
 </template>
-
-<style scoped></style>

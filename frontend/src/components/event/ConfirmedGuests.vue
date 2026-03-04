@@ -8,7 +8,7 @@ defineProps<{
 <template>
   <section class="confirmed-guests py-16 px-4">
     <div class="max-w-3xl mx-auto">
-      <h2 class="text-2xl font-bold text-[#2c2c2c] text-center mb-2">Who's Coming</h2>
+      <h2 class="text-2xl font-bold text-heading text-center mb-2">Who's Coming</h2>
       <p class="text-gray-500 text-center mb-8">{{ count }} guest{{ count !== 1 ? 's' : '' }} attending</p>
 
       <div v-if="guests.length === 0" class="text-center text-gray-400 py-8">
@@ -27,5 +27,3 @@ defineProps<{
     </div>
   </section>
 </template>
-
-<style scoped></style>

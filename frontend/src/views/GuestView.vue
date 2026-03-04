@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { useEventStore } from '@/stores/event'
+import type { EventType } from '@/types'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
 
 import EventDetails from '@/components/event/EventDetails.vue'
 import LocationPhoto from '@/components/event/LocationPhoto.vue'
@@ -19,18 +22,15 @@ import ConfirmedGuests from '@/components/event/ConfirmedGuests.vue'
 import GuestBottomNav from '@/components/GuestBottomNav.vue'
 
 const props = defineProps<{
-  type: string
+  type: EventType
   slug: string
 }>()
 
 const route = useRoute()
 const eventStore = useEventStore()
 
-const loading = computed(() => eventStore.loading)
-const error = computed(() => eventStore.error)
-const eventData = computed(() => eventStore.eventDetails)
-const confirmedGuests = computed(() => eventStore.confirmedGuests)
-const orderedComponents = computed(() => eventStore.orderedComponents)
+const { loading, error, eventDetails: eventData, confirmedGuests, orderedComponents } =
+  storeToRefs(eventStore)
 
 const inviteCode = computed(() => {
   const code = route.query.invite
@@ -41,18 +41,14 @@ const isMuted = ref(false)
 let audioEl: HTMLAudioElement | null = null
 const activationEvents = ['scroll', 'click', 'touchstart', 'keydown'] as const
 
-/**
- * Starts music on first user interaction (works across all browsers).
- */
+/** Starts music on first user interaction. */
 function startMusic() {
   if (!audioEl) return
   audioEl.play().catch(() => {})
   activationEvents.forEach((evt) => window.removeEventListener(evt, startMusic))
 }
 
-/**
- * Toggles background music mute state.
- */
+/** Toggles background music mute state. */
 function toggleMute() {
   if (!audioEl) return
   isMuted.value = !isMuted.value
@@ -62,9 +58,7 @@ function toggleMute() {
   }
 }
 
-/**
- * Sets up the audio element if the event has a music URL.
- */
+/** Sets up the audio element if the event has a music URL. */
 function initAudio() {
   const musicSrc = eventData.value?.event.musicUrl
   if (!musicSrc) return
@@ -77,9 +71,7 @@ function initAudio() {
   )
 }
 
-/**
- * Tears down audio and removes any lingering listeners.
- */
+/** Tears down audio and removes any lingering listeners. */
 function cleanupAudio() {
   activationEvents.forEach((evt) => window.removeEventListener(evt, startMusic))
   if (audioEl) {
@@ -99,9 +91,7 @@ onUnmounted(() => {
   eventStore.$reset()
 })
 
-/**
- * Loads event details and confirmed guests in parallel.
- */
+/** Loads event details and confirmed guests in parallel. */
 async function loadEventData() {
   try {
     const code = inviteCode.value || undefined
@@ -121,8 +111,9 @@ async function loadEventData() {
     <button
       v-if="eventData?.event.musicUrl"
       @click="toggleMute"
-      class="fixed top-4 right-4 z-50 p-2.5 text-[#14213d] transition-opacity hover:opacity-70"
+      class="fixed top-4 right-4 z-50 p-2.5 text-primary transition-opacity hover:opacity-70"
       :title="isMuted ? 'Unmute music' : 'Mute music'"
+      :aria-label="isMuted ? 'Unmute music' : 'Mute music'"
     >
       <svg v-if="!isMuted" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M11 5L6 9H2v6h4l5 4V5z" />
@@ -134,13 +125,13 @@ async function loadEventData() {
 
     <!-- Loading -->
     <div v-if="loading" class="flex items-center justify-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-4 border-[#fca311] border-t-transparent"></div>
+      <LoadingSpinner />
     </div>
 
     <!-- Error -->
     <div v-else-if="error" class="max-w-md mx-auto py-20 px-4 text-center">
       <p class="text-red-600 mb-4">{{ error }}</p>
-      <RouterLink :to="`/${type}/${slug}`" class="text-[#fca311] hover:underline">
+      <RouterLink :to="`/${type}/${slug}`" class="text-accent hover:underline">
         Go back
       </RouterLink>
     </div>
@@ -152,7 +143,6 @@ async function loadEventData() {
         <EventDetails
           v-if="comp.name === 'EventDetails'"
           :event="eventData.event"
-          :hosts="eventData.hosts"
         />
 
         <LocationPhoto
@@ -237,8 +227,8 @@ async function loadEventData() {
 
 <style scoped>
 .guest-view {
-  background-color: #faf8f5;
-  color: #4a4a4a;
+  background-color: var(--color-guest-bg);
+  color: var(--color-guest-text);
 }
 
 .guest-view :deep(h1),

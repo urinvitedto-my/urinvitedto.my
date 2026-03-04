@@ -1,8 +1,10 @@
 // API response types matching backend models
 
+export type EventType = 'wedding' | 'birthday' | 'party'
+
 export interface EventSummary {
   id: string
-  type: string
+  type: EventType
   slug: string
   title: string
   isPublic: boolean
@@ -14,7 +16,7 @@ export interface EventSummary {
 
 export interface Event {
   id: string
-  type: string
+  type: EventType
   slug: string
   title: string
   description?: string
@@ -106,7 +108,7 @@ export interface RSVPRequest {
 export interface RSVPResponse {
   id: string
   displayName: string
-  rsvpStatus: string
+  rsvpStatus: 'pending' | 'yes' | 'no'
   rsvpMessage?: string
   rsvpAt?: string
 }
@@ -169,9 +171,25 @@ export interface EnabledComponents {
   components: ComponentConfig[]
 }
 
-export interface ErrorResponse {
-  error: string
-  message?: string
+// --- Host Types ---
+
+export interface HostEvent {
+  id: string
+  type: EventType
+  slug: string
+  title: string
+  isPublic: boolean
+  startsAt?: string
+  location?: string
+  createdAt: string
+}
+
+export interface HostGuest {
+  id: string
+  displayName: string
+  rsvpStatus: 'pending' | 'yes' | 'no'
+  rsvpMessage: string | null
+  rsvpAt: string | null
 }
 
 // --- Admin Types ---
@@ -238,7 +256,7 @@ export interface AdminGalleryItem {
 
 export interface AdminEvent {
   id: string
-  type: string
+  type: EventType
   slug: string
   title: string
   description?: string

@@ -1,14 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import {
-  adminListInvites,
-  adminCreateInvite,
-  adminDeleteInvite,
-  adminAddGuest,
-  adminUpdateGuest,
-  adminDeleteGuest,
-} from '@/services/api'
-import type { AdminInvite, AdminGuest } from '@/types'
+import { ref, computed, onMounted } from 'vue'
+import { useAdminStore } from '@/stores/admin'
+import { useToast } from '@/composables/useToast'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import type { AdminGuest } from '@/types'
 
 const props = defineProps<{
   eventId: string
@@ -17,158 +12,108 @@ const props = defineProps<{
 
 const emit = defineEmits<{ toggle: [] }>()
 
-const invites = ref<AdminInvite[]>([])
-const loading = ref(false)
-const error = ref('')
+const adminStore = useAdminStore()
+const toast = useToast()
 
-// create invite form
+const invites = computed(() => adminStore.getInvites(props.eventId))
+const loading = computed(() => adminStore.isSubLoading('invites', props.eventId))
+const error = computed(() => adminStore.getSubError('invites', props.eventId))
+
 const showCreateForm = ref(false)
 const createLabel = ref('')
 const createLoading = ref(false)
 
-// add guest form (per invite)
 const addingGuestInviteId = ref<string | null>(null)
 const guestName = ref('')
 const guestLoading = ref(false)
 
-// edit guest
+type RsvpStatus = 'pending' | 'yes' | 'no'
+
 const editingGuestId = ref<string | null>(null)
-const editGuestForm = ref({ displayName: '', rsvpStatus: 'pending' })
+const editGuestForm = ref<{ displayName: string; rsvpStatus: RsvpStatus }>({
+  displayName: '', rsvpStatus: 'pending',
+})
 const editGuestLoading = ref(false)
 
-onMounted(() => loadInvites())
+onMounted(() => adminStore.fetchInvites(props.eventId))
 
-/**
- * Loads all invites with guests for this event.
- */
-async function loadInvites() {
-  loading.value = true
-  error.value = ''
-
-  try {
-    const data = await adminListInvites(props.eventId)
-    invites.value = data.invites
-  } catch (e: any) {
-    error.value = e.message || 'Failed to load invites'
-  } finally {
-    loading.value = false
-  }
-}
-
-/**
- * Creates a new invite with auto-generated code.
- */
+/** Creates a new invite with auto-generated code. */
 async function handleCreateInvite() {
   createLoading.value = true
-
   try {
-    const newInvite = await adminCreateInvite(props.eventId, {
+    await adminStore.createInvite(props.eventId, {
       label: createLabel.value || null,
     })
-    invites.value.unshift(newInvite)
     showCreateForm.value = false
     createLabel.value = ''
-  } catch (e: any) {
-    alert(e.message || 'Failed to create invite')
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Failed to create invite')
   } finally {
     createLoading.value = false
   }
 }
 
-/**
- * Deletes an invite and all its guests.
- */
+/** Deletes an invite and all its guests. */
 async function handleDeleteInvite(inviteId: string) {
-  if (!confirm('Delete this invite and all its guests?')) return
-
+  if (!(await toast.confirm('Delete this invite and all its guests?'))) return
   try {
-    await adminDeleteInvite(props.eventId, inviteId)
-    invites.value = invites.value.filter((i) => i.id !== inviteId)
-  } catch (e: any) {
-    alert(e.message || 'Failed to delete invite')
+    await adminStore.deleteInvite(props.eventId, inviteId)
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Failed to delete invite')
   }
 }
 
-/**
- * Adds a guest to an invite.
- */
+/** Adds a guest to an invite. */
 async function handleAddGuest(inviteId: string) {
   if (!guestName.value.trim()) return
-
   guestLoading.value = true
-
   try {
-    const newGuest = await adminAddGuest(props.eventId, inviteId, {
+    await adminStore.addGuestToInvite(props.eventId, inviteId, {
       displayName: guestName.value.trim(),
     })
-    const invite = invites.value.find((i) => i.id === inviteId)
-    if (invite) invite.guests.push(newGuest)
     guestName.value = ''
-  } catch (e: any) {
-    alert(e.message || 'Failed to add guest')
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Failed to add guest')
   } finally {
     guestLoading.value = false
   }
 }
 
-/**
- * Opens edit mode for a guest.
- */
+/** Opens edit mode for a guest. */
 function startEditGuest(guest: AdminGuest) {
   editingGuestId.value = guest.id
-  editGuestForm.value = {
-    displayName: guest.displayName,
-    rsvpStatus: guest.rsvpStatus,
-  }
+  editGuestForm.value.displayName = guest.displayName
+  editGuestForm.value.rsvpStatus = guest.rsvpStatus
 }
 
-/**
- * Saves guest edits.
- */
+/** Saves guest edits. */
 async function handleUpdateGuest(inviteId: string) {
   if (!editingGuestId.value) return
-
   editGuestLoading.value = true
-
   try {
-    const updated = await adminUpdateGuest(props.eventId, editingGuestId.value, {
+    await adminStore.updateGuestInInvite(props.eventId, inviteId, editingGuestId.value, {
       displayName: editGuestForm.value.displayName,
       rsvpStatus: editGuestForm.value.rsvpStatus,
     })
-
-    const invite = invites.value.find((i) => i.id === inviteId)
-    if (invite) {
-      const idx = invite.guests.findIndex((g) => g.id === editingGuestId.value)
-      if (idx !== -1) invite.guests[idx] = updated
-    }
     editingGuestId.value = null
-  } catch (e: any) {
-    alert(e.message || 'Failed to update guest')
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Failed to update guest')
   } finally {
     editGuestLoading.value = false
   }
 }
 
-/**
- * Deletes a guest.
- */
+/** Deletes a guest. */
 async function handleDeleteGuest(inviteId: string, guestId: string) {
-  if (!confirm('Remove this guest?')) return
-
+  if (!(await toast.confirm('Remove this guest?'))) return
   try {
-    await adminDeleteGuest(props.eventId, guestId)
-    const invite = invites.value.find((i) => i.id === inviteId)
-    if (invite) {
-      invite.guests = invite.guests.filter((g) => g.id !== guestId)
-    }
-  } catch (e: any) {
-    alert(e.message || 'Failed to delete guest')
+    await adminStore.deleteGuestFromInvite(props.eventId, inviteId, guestId)
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Failed to delete guest')
   }
 }
 
-/**
- * Returns a CSS class for RSVP status badges.
- */
+/** Returns a CSS class for RSVP status badges. */
 function rsvpClass(status: string): string {
   switch (status) {
     case 'yes': return 'bg-green-100 text-green-700'
@@ -183,7 +128,7 @@ function rsvpClass(status: string): string {
     <div class="flex items-center justify-between mb-3">
       <button
         @click="emit('toggle')"
-        class="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-[#14213d] transition-colors"
+        class="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-primary transition-colors"
       >
         <span
           class="inline-block transition-transform duration-200"
@@ -195,7 +140,7 @@ function rsvpClass(status: string): string {
       <button
         v-if="!collapsed"
         @click="showCreateForm = !showCreateForm"
-        class="text-sm text-[#14213d] hover:underline"
+        class="text-sm text-primary hover:underline"
       >
         {{ showCreateForm ? 'Cancel' : '+ Add Invite' }}
       </button>
@@ -211,13 +156,13 @@ function rsvpClass(status: string): string {
             v-model="createLabel"
             type="text"
             placeholder='e.g., "Smith Family"'
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
           />
         </div>
         <button
           type="submit"
           :disabled="createLoading"
-          class="bg-[#14213d] text-white font-medium px-4 py-2 rounded-lg hover:bg-[#1a2a4d] transition-colors disabled:opacity-50 shrink-0"
+          class="bg-primary text-white font-medium px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 shrink-0"
         >
           {{ createLoading ? 'Creating...' : 'Create Invite' }}
         </button>
@@ -227,7 +172,7 @@ function rsvpClass(status: string): string {
 
     <!-- Loading -->
     <div v-if="loading" class="flex items-center justify-center py-4">
-      <div class="animate-spin rounded-full h-6 w-6 border-2 border-[#fca311] border-t-transparent"></div>
+      <LoadingSpinner size="sm" />
     </div>
 
     <!-- Error -->
@@ -284,7 +229,7 @@ function rsvpClass(status: string): string {
                 </span>
               </div>
               <div class="flex items-center gap-2 shrink-0">
-                <button @click="startEditGuest(guest)" class="text-xs text-[#14213d] hover:underline">Edit</button>
+                <button @click="startEditGuest(guest)" class="text-xs text-primary hover:underline">Edit</button>
                 <button @click="handleDeleteGuest(invite.id, guest.id)" class="text-xs text-red-500 hover:text-red-700">Remove</button>
               </div>
             </template>
@@ -296,11 +241,11 @@ function rsvpClass(status: string): string {
                   v-model="editGuestForm.displayName"
                   type="text"
                   required
-                  class="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                  class="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-accent focus:outline-none"
                 />
                 <select
                   v-model="editGuestForm.rsvpStatus"
-                  class="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                  class="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-accent focus:outline-none"
                 >
                   <option value="pending">Pending</option>
                   <option value="yes">Yes</option>
@@ -309,7 +254,7 @@ function rsvpClass(status: string): string {
                 <button
                   type="submit"
                   :disabled="editGuestLoading"
-                  class="text-xs bg-[#14213d] text-white px-2 py-1 rounded hover:bg-[#1a2a4d] disabled:opacity-50"
+                  class="text-xs bg-primary text-white px-2 py-1 rounded hover:bg-primary-dark disabled:opacity-50"
                 >
                   Save
                 </button>
@@ -334,12 +279,12 @@ function rsvpClass(status: string): string {
                 type="text"
                 placeholder="Guest name"
                 required
-                class="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fca311] focus:outline-none"
+                class="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
               />
               <button
                 type="submit"
                 :disabled="guestLoading"
-                class="text-sm bg-[#14213d] text-white px-3 py-1.5 rounded-lg hover:bg-[#1a2a4d] disabled:opacity-50 shrink-0"
+                class="text-sm bg-primary text-white px-3 py-1.5 rounded-lg hover:bg-primary-dark disabled:opacity-50 shrink-0"
               >
                 {{ guestLoading ? 'Adding...' : 'Add' }}
               </button>
@@ -355,7 +300,7 @@ function rsvpClass(status: string): string {
           <button
             v-else
             @click="addingGuestInviteId = invite.id"
-            class="text-xs text-[#14213d] hover:underline"
+            class="text-xs text-primary hover:underline"
           >
             + Add Guest
           </button>

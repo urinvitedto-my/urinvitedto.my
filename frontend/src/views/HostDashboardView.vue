@@ -1,128 +1,63 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter, RouterLink } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import { getHostEvents, getHostGuests, type HostEvent, type HostGuest } from '@/services/api'
+import { onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useHostStore } from '@/stores/host'
+import { formatDate } from '@/utils/date'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
 
-const router = useRouter()
-const authStore = useAuthStore()
-const loading = ref(true)
-const events = ref<HostEvent[]>([])
-const selectedEvent = ref<HostEvent | null>(null)
-const guests = ref<HostGuest[]>([])
-const showAllGuests = ref(false)
-const error = ref('')
+const hostStore = useHostStore()
+const {
+  events,
+  selectedEvent,
+  eventsLoading,
+  guestsLoading,
+  error,
+  showAllGuests,
+  filteredGuests,
+} = storeToRefs(hostStore)
 
-onMounted(async () => {
-  await checkAuthAndLoadData()
+onMounted(() => {
+  hostStore.fetchEvents()
 })
-
-/**
- * Checks auth and loads host events.
- */
-async function checkAuthAndLoadData() {
-  loading.value = true
-  error.value = ''
-
-  try {
-    if (!authStore.initialized) {
-      await authStore.init()
-    }
-
-    if (!authStore.isLoggedIn) {
-      router.push('/host/login')
-      return
-    }
-
-    const data = await getHostEvents()
-    events.value = data.events
-  } catch (e: any) {
-    error.value = e.message || 'Failed to load events'
-  } finally {
-    loading.value = false
-  }
-}
-
-/**
- * Selects an event and loads its guests via API (works for hosts linked by email or auth).
- */
-async function selectEvent(event: HostEvent) {
-  selectedEvent.value = event
-  loading.value = true
-  error.value = ''
-
-  try {
-    const data = await getHostGuests(event.id)
-    guests.value = data.guests || []
-  } catch (e: any) {
-    error.value = e.message || 'Failed to load guests'
-    guests.value = []
-  } finally {
-    loading.value = false
-  }
-}
-
-/**
- * Filters guests based on toggle.
- */
-function filteredGuests(): HostGuest[] {
-  if (showAllGuests.value) return guests.value
-  return guests.value.filter((g) => g.rsvpStatus === 'yes')
-}
-
-/**
- * Formats date for display.
- */
-function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  })
-}
 </script>
 
 <template>
   <div class="host-dashboard-view min-h-screen pt-24 pb-8 px-4">
     <div class="max-w-6xl mx-auto">
-      <!-- Header -->
       <div class="mb-8">
-        <h1 class="text-2xl font-bold text-[#14213d]">Host Dashboard</h1>
+        <h1 class="text-2xl font-bold text-primary">Host Dashboard</h1>
       </div>
 
-      <!-- Loading -->
-      <div v-if="loading && !selectedEvent" class="flex items-center justify-center py-20">
-        <div class="animate-spin rounded-full h-12 w-12 border-4 border-[#fca311] border-t-transparent"></div>
+      <div v-if="eventsLoading && !selectedEvent" class="flex items-center justify-center py-20">
+        <LoadingSpinner />
       </div>
 
-      <!-- Error -->
       <div v-else-if="error" class="text-center py-20">
         <p class="text-red-600 mb-4">{{ error }}</p>
-        <button @click="checkAuthAndLoadData" class="text-[#fca311] hover:underline">
+        <button @click="hostStore.fetchEvents()" class="text-accent hover:underline">
           Try again
         </button>
       </div>
 
-      <!-- Content -->
       <div v-else class="grid md:grid-cols-3 gap-8">
-        <!-- Events List -->
         <div class="bg-white rounded-lg shadow-sm p-6">
-          <h2 class="text-lg font-semibold text-[#14213d] mb-4">Your Events</h2>
+          <h2 class="text-lg font-semibold text-primary mb-4">Your Events</h2>
           <div v-if="events.length === 0" class="text-gray-500 text-center py-8">
             No events found
           </div>
           <ul v-else class="space-y-2">
             <li v-for="event in events" :key="event.id">
-              <button
-                @click="selectEvent(event)"
+              <div
+                role="button"
+                tabindex="0"
+                @click="hostStore.selectEvent(event)"
+                @keydown.enter="hostStore.selectEvent(event)"
                 :class="[
-                  'w-full text-left px-4 py-3 rounded-lg transition-colors',
+                  'w-full text-left px-4 py-3 rounded-lg transition-colors cursor-pointer',
                   selectedEvent?.id === event.id
-                    ? 'bg-[#fca311] text-black'
-                    : 'bg-[#ececec] hover:bg-[#e5e5e5]',
+                    ? 'bg-accent text-black'
+                    : 'bg-surface hover:bg-muted',
                 ]"
               >
                 <div class="flex items-center justify-between">
@@ -135,20 +70,19 @@ function formatDate(dateStr: string | null | undefined): string {
                     View page
                   </RouterLink>
                 </div>
-                <div class="text-sm opacity-75">{{ formatDate(event.startsAt) }}</div>
-              </button>
+                <div class="text-sm opacity-75">{{ formatDate(event.startsAt, true) }}</div>
+              </div>
             </li>
           </ul>
         </div>
 
-        <!-- Guests List -->
         <div class="md:col-span-2 bg-white rounded-lg shadow-sm p-6">
           <div v-if="!selectedEvent" class="text-gray-500 text-center py-20">
             Select an event to view guests
           </div>
           <template v-else>
             <div class="flex items-center justify-between mb-6">
-              <h2 class="text-lg font-semibold text-[#14213d]">
+              <h2 class="text-lg font-semibold text-primary">
                 {{ selectedEvent.title }} - Guests
               </h2>
               <label class="flex items-center gap-2 text-sm">
@@ -157,18 +91,18 @@ function formatDate(dateStr: string | null | undefined): string {
               </label>
             </div>
 
-            <div v-if="loading" class="flex items-center justify-center py-12">
-              <div class="animate-spin rounded-full h-8 w-8 border-4 border-[#fca311] border-t-transparent"></div>
+            <div v-if="guestsLoading" class="flex items-center justify-center py-12">
+              <LoadingSpinner size="md" />
             </div>
 
-            <div v-else-if="filteredGuests().length === 0" class="text-gray-500 text-center py-12">
+            <div v-else-if="filteredGuests.length === 0" class="text-gray-500 text-center py-12">
               {{ showAllGuests ? 'No guests yet' : 'No confirmed guests yet' }}
             </div>
 
             <div v-else class="overflow-x-auto">
               <table class="w-full">
                 <thead>
-                  <tr class="border-b border-[#e5e5e5]">
+                  <tr class="border-b border-muted">
                     <th class="text-left py-3 px-4 font-medium text-gray-600">Name</th>
                     <th class="text-left py-3 px-4 font-medium text-gray-600">Status</th>
                     <th class="text-left py-3 px-4 font-medium text-gray-600">Message</th>
@@ -177,9 +111,9 @@ function formatDate(dateStr: string | null | undefined): string {
                 </thead>
                 <tbody>
                   <tr
-                    v-for="guest in filteredGuests()"
+                    v-for="guest in filteredGuests"
                     :key="guest.id"
-                    class="border-b border-[#ececec]"
+                    class="border-b border-surface"
                   >
                     <td class="py-3 px-4">{{ guest.displayName }}</td>
                     <td class="py-3 px-4">
@@ -200,7 +134,7 @@ function formatDate(dateStr: string | null | undefined): string {
                       {{ guest.rsvpMessage || '-' }}
                     </td>
                     <td class="py-3 px-4 text-gray-600">
-                      {{ formatDate(guest.rsvpAt) }}
+                      {{ formatDate(guest.rsvpAt, true) }}
                     </td>
                   </tr>
                 </tbody>
@@ -212,5 +146,3 @@ function formatDate(dateStr: string | null | undefined): string {
     </div>
   </div>
 </template>
-
-<style scoped></style>
