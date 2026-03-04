@@ -43,7 +43,7 @@ func (rm *Router) SetupRouter() *chi.Mux {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(httprate.LimitByRealIP(60, time.Minute))
+	r.Use(httprate.LimitByRealIP(120, time.Minute))
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(middleware.Compress(5))
 
