@@ -6,9 +6,9 @@ defineProps<{
 </script>
 
 <template>
-  <section class="location-photo">
+  <section class="location-photo py-8 px-4">
     <div
-      class="w-full h-64 md:h-96 bg-cover bg-center relative"
+      class="max-w-5xl mx-auto h-112 md:h-144 rounded-xl bg-cover bg-center relative overflow-hidden"
       :style="{ backgroundImage: `url(${url})` }"
     >
       <div class="absolute inset-0 bg-black/30 flex items-end">

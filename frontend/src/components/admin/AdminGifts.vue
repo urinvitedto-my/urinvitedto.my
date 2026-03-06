@@ -139,7 +139,7 @@ function giftTypeClass(type: 'physical' | 'monetary'): string {
           class="inline-block transition-transform duration-200"
           :class="collapsed ? '' : 'rotate-90'"
         >▶</span>
-        Gifts
+        Gift Guide
         <span v-if="items.length > 0" class="text-gray-400 font-normal">({{ items.length }})</span>
       </button>
       <button

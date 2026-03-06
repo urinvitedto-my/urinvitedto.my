@@ -95,93 +95,88 @@ async function handleSubmit(guest: Guest) {
 
 <template>
   <section class="invite-rsvp py-16 px-4">
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-md mx-auto">
       <h2 class="text-2xl font-bold text-heading text-center mb-2">Your Invitation</h2>
       <p v-if="invite.label" class="text-gray-500 text-center mb-8">
         {{ invite.label }}
       </p>
 
-      <div class="space-y-6">
+      <div class="divide-y divide-muted/50">
         <div
           v-for="guest in invite.guests"
           :key="guest.id"
-          class="bg-white/80 backdrop-blur border border-muted/50 shadow-sm rounded-xl p-6"
+          class="py-4 first:pt-0"
         >
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-heading">{{ guest.displayName }}</h3>
+          <!-- Submitted state -->
+          <div v-if="getState(guest.id).submitted" class="flex items-center justify-between">
+            <span class="font-medium text-heading">{{ guest.displayName }}</span>
             <span
-              v-if="getState(guest.id).submitted"
               :class="[
-                'px-3 py-1 rounded-full text-sm font-medium',
-                getState(guest.id).status === 'yes'
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-red-100 text-red-800',
+                'text-sm font-medium',
+                getState(guest.id).status === 'yes' ? 'text-green-600' : 'text-red-500',
               ]"
             >
               {{ getState(guest.id).status === 'yes' ? 'Attending' : 'Not Attending' }}
             </span>
           </div>
+          <p v-if="getState(guest.id).submitted && getState(guest.id).message" class="text-gray-500 text-sm italic mt-1">
+            "{{ getState(guest.id).message }}"
+          </p>
 
+          <!-- Pending state -->
           <template v-if="!getState(guest.id).submitted">
-            <!-- Status buttons -->
-            <div class="flex gap-4 mb-4">
-              <button
-                @click="selectStatus(guest.id, 'yes')"
-                :class="[
-                  'flex-1 py-3 rounded-lg font-semibold transition-colors',
-                  getState(guest.id).status === 'yes'
-                    ? 'bg-green-500 text-white'
-                    : 'bg-surface text-gray-700 hover:bg-muted',
-                ]"
-                :disabled="getState(guest.id).submitting"
-              >
-                Yes, I'll be there
-              </button>
-              <button
-                @click="selectStatus(guest.id, 'no')"
-                :class="[
-                  'flex-1 py-3 rounded-lg font-semibold transition-colors',
-                  getState(guest.id).status === 'no'
-                    ? 'bg-red-500 text-white'
-                    : 'bg-surface text-gray-700 hover:bg-muted',
-                ]"
-                :disabled="getState(guest.id).submitting"
-              >
-                Sorry, can't make it
-              </button>
+            <div class="flex items-center justify-between">
+              <span class="font-medium text-heading">{{ guest.displayName }}</span>
+              <div class="flex gap-2">
+                <button
+                  @click="selectStatus(guest.id, 'yes')"
+                  :class="[
+                    'px-4 py-1.5 rounded-full text-xs font-semibold transition-colors',
+                    getState(guest.id).status === 'yes'
+                      ? 'bg-green-500 text-white'
+                      : 'bg-surface text-gray-600 hover:bg-muted',
+                  ]"
+                  :disabled="getState(guest.id).submitting"
+                >
+                  Accept
+                </button>
+                <button
+                  @click="selectStatus(guest.id, 'no')"
+                  :class="[
+                    'px-4 py-1.5 rounded-full text-xs font-semibold transition-colors',
+                    getState(guest.id).status === 'no'
+                      ? 'bg-red-500 text-white'
+                      : 'bg-surface text-gray-600 hover:bg-muted',
+                  ]"
+                  :disabled="getState(guest.id).submitting"
+                >
+                  Decline
+                </button>
+              </div>
             </div>
 
-            <!-- Message input -->
-            <div v-if="getState(guest.id).status" class="mb-4">
+            <template v-if="getState(guest.id).status">
               <textarea
                 v-model="getState(guest.id).message"
                 placeholder="Leave a message (optional)"
                 rows="2"
-                class="w-full px-4 py-3 border border-muted rounded-lg focus:outline-none focus:ring-2 focus:ring-accent resize-none"
+                class="w-full mt-3 px-3 py-2 text-sm border border-muted rounded-lg focus:outline-none focus:ring-2 focus:ring-accent resize-none"
                 :disabled="getState(guest.id).submitting"
               ></textarea>
-            </div>
 
-            <!-- Error -->
-            <p v-if="getState(guest.id).error" class="text-red-600 text-sm mb-4">
-              {{ getState(guest.id).error }}
-            </p>
+              <p v-if="getState(guest.id).error" class="text-red-600 text-sm mt-2">
+                {{ getState(guest.id).error }}
+              </p>
 
-            <!-- Submit button -->
-            <button
-              v-if="getState(guest.id).status"
-              @click="handleSubmit(guest)"
-              :disabled="getState(guest.id).submitting"
-              class="w-full bg-accent text-black font-semibold py-3 rounded-lg hover:bg-accent-dark transition-colors disabled:opacity-50"
-            >
-              {{ getState(guest.id).submitting ? 'Submitting...' : 'Confirm RSVP' }}
-            </button>
+              <button
+                @click="handleSubmit(guest)"
+                :disabled="getState(guest.id).submitting"
+                class="w-full mt-2 bg-accent text-black text-sm font-semibold py-2 rounded-lg hover:bg-accent-dark transition-colors disabled:opacity-50"
+              >
+                {{ getState(guest.id).submitting ? 'Submitting...' : 'Confirm RSVP' }}
+              </button>
+            </template>
           </template>
-
-          <!-- Show message if already submitted -->
-          <p v-else-if="getState(guest.id).message" class="text-gray-600 italic">
-            "{{ getState(guest.id).message }}"
-          </p>
         </div>
       </div>
     </div>
