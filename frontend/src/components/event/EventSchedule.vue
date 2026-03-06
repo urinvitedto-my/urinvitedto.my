@@ -12,37 +12,30 @@ defineProps<{
     <div class="max-w-3xl mx-auto">
       <h2 class="text-2xl font-bold text-heading text-center mb-8">Schedule</h2>
 
-      <div class="relative">
+      <div class="relative pl-6">
         <!-- Timeline line -->
-        <div class="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-gray-300 transform md:-translate-x-1/2"></div>
+        <div class="absolute left-[4px] top-2 bottom-2 w-px bg-muted"></div>
 
-        <!-- Items -->
-        <div class="space-y-8">
+        <div class="space-y-5">
           <div
-            v-for="(item, index) in items"
+            v-for="item in items"
             :key="item.id"
-            class="relative flex items-start gap-6 md:gap-0"
+            class="relative flex items-start justify-between gap-4"
           >
             <!-- Timeline dot -->
-            <div class="absolute left-4 md:left-1/2 w-4 h-4 bg-accent rounded-full transform -translate-x-1/2 mt-1.5 z-10"></div>
+            <div class="absolute -left-6 top-1.5 w-[9px] h-[9px] bg-accent rounded-full ring-2 ring-guest-bg"></div>
 
-            <!-- Content -->
-            <div
-              :class="[
-                'ml-10 md:ml-0 bg-white/80 backdrop-blur rounded-xl border border-muted/50 shadow-sm p-6 flex-1',
-                index % 2 === 0 ? 'md:mr-[52%]' : 'md:ml-[52%]',
-              ]"
-            >
-              <div class="text-accent font-semibold mb-1">
-                {{ formatTimeOnly(item.time) }}
-              </div>
-              <h3 class="text-lg font-semibold text-heading mb-2">
+            <div class="flex-1">
+              <h3 class="font-semibold text-heading">
                 {{ item.title }}
               </h3>
-              <p v-if="item.description" class="text-gray-600">
+              <p v-if="item.description" class="text-gray-600 text-sm mt-1">
                 {{ item.description }}
               </p>
             </div>
+            <span class="text-accent text-sm font-semibold shrink-0 pt-0.5">
+              {{ formatTimeOnly(item.time) }}
+            </span>
           </div>
         </div>
       </div>

@@ -25,22 +25,21 @@ function toggle(id: string) {
     <div class="max-w-3xl mx-auto">
       <h2 class="text-2xl font-bold text-heading text-center mb-8">FAQ</h2>
 
-      <div class="space-y-4">
+      <div class="divide-y divide-muted/50">
         <div
           v-for="faq in faqs"
           :key="faq.id"
-          class="border border-muted bg-white/80 backdrop-blur rounded-xl overflow-hidden shadow-sm"
         >
           <button
             @click="toggle(faq.id)"
             :aria-expanded="openItems.has(faq.id)"
             :aria-controls="`faq-answer-${faq.id}`"
-            class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-black/5 transition-colors"
+            class="w-full flex items-center justify-between py-4 text-left transition-colors"
           >
             <span class="font-medium text-heading">{{ faq.question }}</span>
             <svg
               :class="[
-                'w-5 h-5 text-gray-500 transition-transform',
+                'w-5 h-5 text-gray-400 transition-transform shrink-0 ml-4',
                 openItems.has(faq.id) ? 'rotate-180' : '',
               ]"
               fill="none"
@@ -53,7 +52,7 @@ function toggle(id: string) {
           <div
             :id="`faq-answer-${faq.id}`"
             v-show="openItems.has(faq.id)"
-            class="px-6 pb-4 text-gray-600"
+            class="pb-4 text-gray-600"
           >
             {{ faq.answer }}
           </div>
