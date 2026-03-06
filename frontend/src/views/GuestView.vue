@@ -111,7 +111,7 @@ async function loadEventData() {
     <button
       v-if="eventData?.event.musicUrl"
       @click="toggleMute"
-      class="fixed top-4 right-4 z-50 p-2.5 text-primary transition-opacity hover:opacity-70"
+      class="fixed bottom-20 right-4 z-100 p-2.5 text-primary transition-opacity hover:opacity-70"
       :title="isMuted ? 'Unmute music' : 'Mute music'"
       :aria-label="isMuted ? 'Unmute music' : 'Mute music'"
     >
@@ -143,6 +143,7 @@ async function loadEventData() {
         <EventDetails
           v-if="comp.name === 'EventDetails'"
           :event="eventData.event"
+          :gallery="eventData.gallery"
         />
 
         <LocationPhoto
@@ -227,8 +228,9 @@ async function loadEventData() {
 
 <style scoped>
 .guest-view {
-  background-color: var(--color-guest-bg);
+  /* background-color: var(--color-guest-bg); */
   color: var(--color-guest-text);
+  background: linear-gradient(to bottom, var(--color-primary-dark), var(--color-guest-bg) 20%, var(--color-guest-bg) 80%, var(--color-primary-dark));
 }
 
 .guest-view :deep(h1),

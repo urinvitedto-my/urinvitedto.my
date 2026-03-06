@@ -1,22 +1,58 @@
 <script setup lang="ts">
-import type { Event } from '@/types'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import type { Event, GalleryItem } from '@/types'
 import { formatDateFull } from '@/utils/date'
 
-defineProps<{
+const props = defineProps<{
   event: Event
+  gallery: GalleryItem[]
 }>()
+
+const currentIndex = ref(0)
+
+const photos = computed(() =>
+  props.gallery.filter((item) => item.mediaType === 'photo'),
+)
+
+let slideshowTimer: ReturnType<typeof setInterval> | null = null
+
+onMounted(() => {
+  if (photos.value.length > 1) {
+    slideshowTimer = setInterval(() => {
+      currentIndex.value = (currentIndex.value + 1) % photos.value.length
+    }, 5000)
+  }
+})
+
+onUnmounted(() => {
+  if (slideshowTimer) clearInterval(slideshowTimer)
+})
 </script>
 
 <template>
-  <section class="event-details py-16 px-4">
-    <div class="max-w-3xl mx-auto text-center">
+  <section class="event-details relative overflow-hidden py-60 px-4">
+    <!-- Slideshow background -->
+    <template v-if="photos.length">
+      <img
+        v-for="(photo, idx) in photos"
+        :key="photo.id"
+        :src="photo.mediaUrl"
+        :alt="photo.caption || ''"
+        class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+        :class="idx === currentIndex ? 'opacity-100' : 'opacity-0'"
+        aria-hidden="true"
+      />
+      <div class="absolute inset-0 bg-black/60" aria-hidden="true" />
+    </template>
+
+    <div class="relative max-w-3xl mx-auto text-center">
       <!-- Title -->
-      <h1 class="text-3xl md:text-5xl font-bold text-heading mb-6">
+      <h1 class="text-3xl md:text-5xl font-bold text-white mb-6">
         {{ event.title }}
       </h1>
 
       <!-- Date & Location -->
-      <div class="space-y-3 text-gray-600">
+      <div class="space-y-3 text-gray-300">
         <div v-if="event.startsAt" class="flex items-center justify-center gap-2">
           <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -33,7 +69,7 @@ defineProps<{
       </div>
 
       <!-- Description -->
-      <p v-if="event.description" class="mt-8 text-gray-700 whitespace-pre-wrap max-w-2xl mx-auto">
+      <p v-if="event.description" class="mt-8 text-gray-300 whitespace-pre-wrap max-w-2xl mx-auto">
         {{ event.description }}
       </p>
     </div>
