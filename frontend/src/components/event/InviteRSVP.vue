@@ -96,7 +96,7 @@ async function handleSubmit(guest: Guest) {
 <template>
   <section class="invite-rsvp py-16 px-4">
     <div class="max-w-md mx-auto">
-      <h2 class="text-2xl font-bold text-heading text-center mb-2">Your Invitation</h2>
+      <h2 class="text-4xl font-bold text-heading text-center mb-2 font-kaushan">Your Invitation</h2>
       <p v-if="invite.label" class="text-gray-500 text-center mb-8">
         {{ invite.label }}
       </p>

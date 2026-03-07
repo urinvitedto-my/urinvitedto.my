@@ -36,7 +36,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section class="event-details relative overflow-hidden py-10 px-4">
+  <section class="event-details relative overflow-hidden py-10 md:py-24 lg:py-30 px-4">
     <!-- Slideshow background -->
     <template v-if="photos.length">
       <img
@@ -53,7 +53,7 @@ onUnmounted(() => {
 
     <div class="relative max-w-3xl mx-auto text-center">
       <!-- Title -->
-      <h1 class="text-8xl md:text-5xl font-normal text-white mb-6" style="font-family: 'Lavishly Yours', cursive; text-transform: none; letter-spacing: normal;">
+      <h1 class="text-8xl md:text-8xl lg:text-9xl font-normal text-white mb-6" style="font-family: 'Lavishly Yours', cursive; text-transform: none; letter-spacing: normal;">
         <template v-if="titleParts">
           <span v-for="(part, i) in titleParts" :key="i">
             {{ part }}<br v-if="i < titleParts.length - 1" /><span v-if="i < titleParts.length - 1" class="block text-3xl md:text-4xl">&amp;</span>
@@ -63,7 +63,7 @@ onUnmounted(() => {
       </h1>
 
       <!-- Description -->
-      <p v-if="event.description" class="mb-8 text-gray-300 whitespace-pre-wrap max-w-2xl mx-auto">
+      <p v-if="event.description" class="mb-8 text-gray-300 whitespace-pre-wrap max-w-2xl mx-auto" style="font-family: 'Cormorant Garamond', 'Playfair Display', 'Georgia', serif;">
         {{ event.description }}
       </p>
 

@@ -10,7 +10,7 @@ defineProps<{
 <template>
   <section class="event-schedule py-16 px-4">
     <div class="max-w-2xl mx-auto">
-      <h2 class="text-2xl font-bold text-heading text-center mb-8">Schedule</h2>
+      <h2 class="text-4xl font-bold text-heading text-center mb-8 font-kaushan">Schedule</h2>
 
       <div class="relative pl-6">
         <!-- Timeline line -->

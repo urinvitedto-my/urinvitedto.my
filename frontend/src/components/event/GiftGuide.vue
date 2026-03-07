@@ -9,7 +9,7 @@ defineProps<{
 <template>
   <section class="gift-guide py-16 px-4">
     <div class="max-w-3xl mx-auto">
-      <h2 class="text-2xl font-bold text-heading text-center mb-8">Gift Guide</h2>
+      <h2 class="text-4xl font-bold text-heading text-center mb-8 font-kaushan">Gift Guide</h2>
 
       <div class="grid md:grid-cols-2 gap-6">
         <div

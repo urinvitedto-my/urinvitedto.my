@@ -7,7 +7,7 @@ defineProps<{
 
 <template>
   <section class="location-photo py-16 px-4">
-    <h2 class="text-2xl font-bold text-heading text-center mb-6">Venue</h2>
+    <h2 class="text-4xl font-bold text-heading text-center mb-6 font-kaushan">Venue</h2>
     <div
       class="max-w-5xl mx-auto h-112 md:h-144 rounded-xl bg-cover bg-center relative overflow-hidden"
       :style="{ backgroundImage: `url(${url})` }"

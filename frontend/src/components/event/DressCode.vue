@@ -9,7 +9,7 @@ defineProps<{
 <template>
   <section class="dress-code py-16 px-4">
     <div class="max-w-3xl mx-auto text-center">
-      <h2 class="text-2xl font-bold text-heading mb-4">Dress Code</h2>
+      <h2 class="text-4xl font-bold text-heading mb-4 font-kaushan">Dress Code</h2>
 
       <h3 class="text-xl font-semibold text-heading mb-2">
         {{ dressCode.title }}

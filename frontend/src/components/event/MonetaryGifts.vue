@@ -9,7 +9,7 @@ defineProps<{
 <template>
   <section class="monetary-gifts py-16 px-4">
     <div class="max-w-3xl mx-auto text-center">
-      <h2 class="text-2xl font-bold text-heading mb-4">Monetary Gifts</h2>
+      <h2 class="text-4xl font-bold text-heading mb-4 font-kaushan">Monetary Gifts</h2>
 
       <!-- QR Code -->
       <div v-if="config.qrCodeUrl" class="mb-6">

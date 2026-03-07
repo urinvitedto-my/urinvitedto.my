@@ -12,7 +12,7 @@ defineProps<{
     :style="section.bgColor ? { backgroundColor: section.bgColor } : {}"
   >
     <div class="max-w-3xl mx-auto">
-      <h2 v-if="section.title" class="text-2xl font-bold text-heading text-center mb-6">
+      <h2 v-if="section.title" class="text-2xl font-bold text-heading text-center mb-6 font-kaushan">
         {{ section.title }}
       </h2>
 

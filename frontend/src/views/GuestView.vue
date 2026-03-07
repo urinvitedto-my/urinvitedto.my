@@ -29,8 +29,13 @@ const props = defineProps<{
 const route = useRoute()
 const eventStore = useEventStore()
 
-const { loading, error, eventDetails: eventData, confirmedGuests, orderedComponents } =
-  storeToRefs(eventStore)
+const {
+  loading,
+  error,
+  eventDetails: eventData,
+  confirmedGuests,
+  orderedComponents,
+} = storeToRefs(eventStore)
 
 const inviteCode = computed(() => {
   const code = route.query.invite
@@ -115,11 +120,27 @@ async function loadEventData() {
       :title="isMuted ? 'Unmute music' : 'Mute music'"
       :aria-label="isMuted ? 'Unmute music' : 'Mute music'"
     >
-      <svg v-if="!isMuted" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M11 5L6 9H2v6h4l5 4V5z" />
+      <svg
+        v-if="!isMuted"
+        class="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"
+        />
       </svg>
       <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707A1 1 0 0112 5v14a1 1 0 01-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707A1 1 0 0112 5v14a1 1 0 01-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"
+        />
       </svg>
     </button>
 
@@ -152,14 +173,24 @@ async function loadEventData() {
           :location="eventData.event.location"
         />
 
-        <div v-else-if="comp.name === 'CountdownTimer' && eventData.event.startsAt" id="section-countdown">
+        <div
+          v-else-if="comp.name === 'CountdownTimer' && eventData.event.startsAt"
+          id="section-countdown"
+        >
           <CountdownTimer
             :target-date="eventData.event.startsAt"
-            :custom-message="eventData.event.customContent?.countdownTimer?.customMessage"
+            :custom-message="
+              eventData.event.customContent?.countdownTimer?.customMessage
+            "
           />
         </div>
 
-        <div v-else-if="comp.name === 'EventMap' && eventData.event.customContent?.locationDetails" id="section-venue">
+        <div
+          v-else-if="
+            comp.name === 'EventMap' && eventData.event.customContent?.locationDetails
+          "
+          id="section-venue"
+        >
           <EventMap
             :location-details="eventData.event.customContent.locationDetails"
             :address="eventData.event.location"
@@ -171,12 +202,17 @@ async function loadEventData() {
           :items="eventData.schedule"
         />
 
-        <div v-else-if="comp.name === 'EventGallery' && eventData.gallery.length" id="section-gallery">
+        <div
+          v-else-if="comp.name === 'EventGallery' && eventData.gallery.length"
+          id="section-gallery"
+        >
           <EventGallery :items="eventData.gallery" />
         </div>
 
         <DressCode
-          v-else-if="comp.name === 'DressCode' && eventData.event.customContent?.dressCode"
+          v-else-if="
+            comp.name === 'DressCode' && eventData.event.customContent?.dressCode
+          "
           :dress-code="eventData.event.customContent.dressCode"
         />
 
@@ -186,7 +222,10 @@ async function loadEventData() {
         />
 
         <MonetaryGifts
-          v-else-if="comp.name === 'MonetaryGifts' && eventData.event.customContent?.monetaryGifts?.enabled"
+          v-else-if="
+            comp.name === 'MonetaryGifts' &&
+            eventData.event.customContent?.monetaryGifts?.enabled
+          "
           :config="eventData.event.customContent.monetaryGifts"
         />
 
@@ -195,7 +234,12 @@ async function loadEventData() {
           :gifts="eventData.gifts"
         />
 
-        <template v-else-if="comp.name === 'CustomSections' && eventData.event.customContent?.customSections?.length">
+        <template
+          v-else-if="
+            comp.name === 'CustomSections' &&
+            eventData.event.customContent?.customSections?.length
+          "
+        >
           <CustomSection
             v-for="section in eventData.event.customContent.customSections"
             :key="section.id"
@@ -230,14 +274,19 @@ async function loadEventData() {
 .guest-view {
   /* background-color: var(--color-guest-bg); */
   color: var(--color-guest-text);
-  background: linear-gradient(to bottom, var(--color-primary-dark), var(--color-guest-bg) 20%, var(--color-guest-bg) 80%, var(--color-primary-dark));
+  background: linear-gradient(
+    to bottom,
+    var(--color-primary-dark),
+    var(--color-guest-bg) 20%,
+    var(--color-guest-bg) 80%,
+    var(--color-primary-dark)
+  );
 }
 
 .guest-view :deep(h1),
 .guest-view :deep(h2) {
-  font-family: 'Cormorant Garamond', 'Playfair Display', 'Georgia', serif;
+  font-family: 'Kaushan Script', cursive;
   font-weight: 300;
   letter-spacing: 0.15em;
-  text-transform: uppercase;
 }
 </style>
