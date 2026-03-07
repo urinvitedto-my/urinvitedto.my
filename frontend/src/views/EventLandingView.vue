@@ -160,11 +160,11 @@ async function handleInviteSubmit() {
 }
 
 .landing-title {
-  font-family: 'Cormorant Garamond', 'Playfair Display', 'Georgia', serif;
-  font-size: clamp(2rem, 6vw, 4rem);
-  font-weight: 300;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
+  font-family: 'Lavishly Yours', cursive;
+  font-size: clamp(4rem, 14vw, 9rem);
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
   line-height: 1.3;
 }
 

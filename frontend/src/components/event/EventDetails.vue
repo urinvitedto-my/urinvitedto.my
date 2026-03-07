@@ -14,6 +14,12 @@ const photos = computed(() =>
   props.gallery.filter((item) => item.mediaType === 'photo'),
 )
 
+/** Splits title into lines around "&" for stacked display. */
+const titleParts = computed(() => {
+  if (!props.event.title.includes('&')) return null
+  return props.event.title.split('&').map((part) => part.trim())
+})
+
 let slideshowTimer: ReturnType<typeof setInterval> | null = null
 
 onMounted(() => {
@@ -30,7 +36,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section class="event-details relative overflow-hidden py-60 px-4">
+  <section class="event-details relative overflow-hidden py-10 px-4">
     <!-- Slideshow background -->
     <template v-if="photos.length">
       <img
@@ -47,9 +53,19 @@ onUnmounted(() => {
 
     <div class="relative max-w-3xl mx-auto text-center">
       <!-- Title -->
-      <h1 class="text-3xl md:text-5xl font-bold text-white mb-6">
-        {{ event.title }}
+      <h1 class="text-8xl md:text-5xl font-normal text-white mb-6" style="font-family: 'Lavishly Yours', cursive; text-transform: none; letter-spacing: normal;">
+        <template v-if="titleParts">
+          <span v-for="(part, i) in titleParts" :key="i">
+            {{ part }}<br v-if="i < titleParts.length - 1" /><span v-if="i < titleParts.length - 1" class="block text-3xl md:text-4xl">&amp;</span>
+          </span>
+        </template>
+        <template v-else>{{ event.title }}</template>
       </h1>
+
+      <!-- Description -->
+      <p v-if="event.description" class="mb-8 text-gray-300 whitespace-pre-wrap max-w-2xl mx-auto">
+        {{ event.description }}
+      </p>
 
       <!-- Date & Location -->
       <div class="space-y-3 text-gray-300">
@@ -67,11 +83,6 @@ onUnmounted(() => {
           <span>{{ event.location }}</span>
         </div>
       </div>
-
-      <!-- Description -->
-      <p v-if="event.description" class="mt-8 text-gray-300 whitespace-pre-wrap max-w-2xl mx-auto">
-        {{ event.description }}
-      </p>
     </div>
   </section>
 </template>
