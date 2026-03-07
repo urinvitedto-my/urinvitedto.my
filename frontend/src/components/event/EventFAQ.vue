@@ -22,14 +22,11 @@ function toggle(id: string) {
 
 <template>
   <section class="event-faq py-16 px-4">
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-2xl mx-auto">
       <h2 class="text-2xl font-bold text-heading text-center mb-8">FAQ</h2>
 
       <div class="divide-y divide-muted/50">
-        <div
-          v-for="faq in faqs"
-          :key="faq.id"
-        >
+        <div v-for="faq in faqs" :key="faq.id">
           <button
             @click="toggle(faq.id)"
             :aria-expanded="openItems.has(faq.id)"
@@ -46,7 +43,12 @@ function toggle(id: string) {
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
           <div

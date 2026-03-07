@@ -9,12 +9,12 @@ defineProps<{
 
 <template>
   <section class="event-schedule py-16 px-4">
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-2xl mx-auto">
       <h2 class="text-2xl font-bold text-heading text-center mb-8">Schedule</h2>
 
       <div class="relative pl-6">
         <!-- Timeline line -->
-        <div class="absolute left-[4px] top-2 bottom-2 w-px bg-muted"></div>
+        <div class="absolute left-1 top-2 bottom-2 w-px bg-muted"></div>
 
         <div class="space-y-5">
           <div
@@ -23,7 +23,9 @@ defineProps<{
             class="relative flex items-start justify-between gap-4"
           >
             <!-- Timeline dot -->
-            <div class="absolute -left-6 top-1.5 w-[9px] h-[9px] bg-accent rounded-full ring-2 ring-guest-bg"></div>
+            <div
+              class="absolute -left-6 top-1.5 w-[9px] h-[9px] bg-accent rounded-full ring-2 ring-guest-bg"
+            ></div>
 
             <div class="flex-1">
               <h3 class="font-semibold text-heading">
