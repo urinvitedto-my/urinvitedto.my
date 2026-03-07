@@ -130,12 +130,11 @@ export interface LocationDetails {
 
 export interface MonetaryGiftsConfig {
   enabled: boolean
-  qrCodeUrl?: string
-  instructions?: string
   accounts?: {
     method: string
-    number: string
+    number?: string
     name: string
+    qrCodeUrl?: string
   }[]
 }
 

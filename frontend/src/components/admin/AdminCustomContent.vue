@@ -28,8 +28,8 @@ const locationEnabled = ref(false)
 const location = ref({ parkingInfo: '', accessibilityNotes: '', mapEmbedUrl: '' })
 
 const monetaryEnabled = ref(false)
-const monetary = ref({ qrCodeUrl: '', instructions: '', accounts: [] as { method: string; number: string; name: string }[] })
-const newAccount = ref({ method: '', number: '', name: '' })
+const monetary = ref({ accounts: [] as { method: string; number?: string; name: string; qrCodeUrl: string }[] })
+const newAccount = ref({ method: '', number: '', name: '', qrCodeUrl: '' })
 
 const countdownEnabled = ref(false)
 const countdown = ref({ customMessage: '' })
@@ -71,9 +71,12 @@ function populateFromData(data: CustomContent) {
   if (data.monetaryGifts) {
     monetaryEnabled.value = data.monetaryGifts.enabled
     monetary.value = {
-      qrCodeUrl: data.monetaryGifts.qrCodeUrl || '',
-      instructions: data.monetaryGifts.instructions || '',
-      accounts: data.monetaryGifts.accounts || [],
+      accounts: (data.monetaryGifts.accounts || []).map((a) => ({
+        method: a.method,
+        number: a.number,
+        name: a.name,
+        qrCodeUrl: a.qrCodeUrl || '',
+      })),
     }
   }
 
@@ -108,9 +111,14 @@ function buildPayload(): CustomContent {
 
   payload.monetaryGifts = {
     enabled: monetaryEnabled.value,
-    qrCodeUrl: monetary.value.qrCodeUrl.trim() || undefined,
-    instructions: monetary.value.instructions.trim() || undefined,
-    accounts: monetary.value.accounts.length > 0 ? monetary.value.accounts : undefined,
+    accounts: monetary.value.accounts.length > 0
+      ? monetary.value.accounts.map((a) => ({
+          method: a.method,
+          number: a.number,
+          name: a.name,
+          qrCodeUrl: a.qrCodeUrl.trim() || undefined,
+        }))
+      : undefined,
   }
 
   payload.countdownTimer = {
@@ -155,13 +163,14 @@ function removeExample(index: number) {
 
 /** Adds a monetary account. */
 function addAccount() {
-  if (!newAccount.value.method.trim() || !newAccount.value.number.trim()) return
+  if (!newAccount.value.method.trim()) return
   monetary.value.accounts.push({
     method: newAccount.value.method.trim(),
     number: newAccount.value.number.trim(),
     name: newAccount.value.name.trim(),
+    qrCodeUrl: newAccount.value.qrCodeUrl.trim(),
   })
-  newAccount.value = { method: '', number: '', name: '' }
+  newAccount.value = { method: '', number: '', name: '', qrCodeUrl: '' }
 }
 
 /** Removes a monetary account. */
@@ -342,18 +351,6 @@ function removeSection(id: string) {
           </div>
           <template v-if="monetaryEnabled">
             <div class="space-y-2">
-              <input
-                v-model="monetary.qrCodeUrl"
-                type="url"
-                placeholder="QR code image URL"
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
-              />
-              <textarea
-                v-model="monetary.instructions"
-                rows="2"
-                placeholder="Payment instructions"
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
-              ></textarea>
               <div>
                 <p class="text-xs text-gray-500 mb-1">Payment Accounts</p>
                 <div v-if="monetary.accounts.length > 0" class="space-y-1 mb-2">
@@ -362,29 +359,40 @@ function removeSection(id: string) {
                     :key="i"
                     class="flex items-center justify-between bg-white px-3 py-1.5 rounded text-sm border"
                   >
-                    <span>{{ acc.method }} &middot; {{ acc.number }} &middot; {{ acc.name }}</span>
-                    <button @click="removeAccount(i)" class="text-red-400 hover:text-red-600 text-xs">Remove</button>
+                    <div class="min-w-0">
+                      <span>{{ acc.method }} &middot; {{ acc.number }} &middot; {{ acc.name }}</span>
+                      <span v-if="acc.qrCodeUrl" class="text-xs text-gray-400 ml-1">(QR)</span>
+                    </div>
+                    <button @click="removeAccount(i)" class="text-red-400 hover:text-red-600 text-xs shrink-0 ml-2">Remove</button>
                   </div>
                 </div>
-                <div class="grid grid-cols-3 gap-2">
-                  <input
-                    v-model="newAccount.method"
-                    type="text"
-                    placeholder="Method (e.g., GCash)"
-                    class="px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
-                  />
-                  <input
-                    v-model="newAccount.number"
-                    type="text"
-                    placeholder="Account number"
-                    class="px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
-                  />
-                  <div class="flex gap-1">
+                <div class="space-y-2">
+                  <div class="grid grid-cols-3 gap-2">
+                    <input
+                      v-model="newAccount.method"
+                      type="text"
+                      placeholder="Method (e.g., GCash)"
+                      class="px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
+                    />
+                    <input
+                      v-model="newAccount.number"
+                      type="text"
+                      placeholder="Account number"
+                      class="px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
+                    />
                     <input
                       v-model="newAccount.name"
                       type="text"
                       placeholder="Name"
-                      class="flex-1 min-w-0 px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
+                      class="px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
+                    />
+                  </div>
+                  <div class="flex gap-2">
+                    <input
+                      v-model="newAccount.qrCodeUrl"
+                      type="url"
+                      placeholder="QR code image URL (optional)"
+                      class="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
                     />
                     <button @click="addAccount" class="text-xs text-primary hover:underline shrink-0">Add</button>
                   </div>
