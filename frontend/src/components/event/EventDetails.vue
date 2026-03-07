@@ -63,7 +63,7 @@ onUnmounted(() => {
       </h1>
 
       <!-- Description -->
-      <p v-if="event.description" class="mb-8 text-gray-300 whitespace-pre-wrap max-w-2xl mx-auto" style="font-family: 'Cormorant Garamond', 'Playfair Display', 'Georgia', serif;">
+      <p v-if="event.description" class="mb-8 text-gray-300 whitespace-pre-wrap max-w-2xl mx-auto text-xl font-bold" style="font-family: 'Cormorant Garamond', 'Playfair Display', 'Georgia', serif;">
         {{ event.description }}
       </p>
 

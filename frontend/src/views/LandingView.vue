@@ -97,3 +97,9 @@
     </section>
   </div>
 </template>
+
+<style scoped>
+.landing-view {
+  font-family: var(--font-gelasio);
+}
+</style>

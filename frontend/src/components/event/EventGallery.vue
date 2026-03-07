@@ -22,6 +22,14 @@ let resetTimer: ReturnType<typeof setTimeout> | null = null
 
 const isHovered = ref(false)
 
+const MOBILE_BREAKPOINT = 768
+const visibleCount = ref(typeof window !== 'undefined' && window.innerWidth >= MOBILE_BREAKPOINT ? 3 : 2)
+
+/** Updates visible item count based on screen width. */
+function updateVisibleCount() {
+  visibleCount.value = window.innerWidth >= MOBILE_BREAKPOINT ? 3 : 2
+}
+
 // Pointer drag state (covers mouse, touch, trackpad)
 const isDragging = ref(false)
 const dragDelta = ref(0)
@@ -145,10 +153,13 @@ function currentItem(): GalleryItem {
 
 onMounted(() => {
   trackIndex.value = props.items.length
+  updateVisibleCount()
+  window.addEventListener('resize', updateVisibleCount)
   autoTimer = setInterval(() => { if (!isHovered.value) step(1) }, 4000)
 })
 
 onUnmounted(() => {
+  window.removeEventListener('resize', updateVisibleCount)
   if (autoTimer) clearInterval(autoTimer)
   if (resetTimer) clearTimeout(resetTimer)
 })
@@ -157,7 +168,7 @@ onUnmounted(() => {
 <template>
   <section class="event-gallery py-16 px-4">
     <div class="max-w-5xl mx-auto">
-      <h2 class="text-4xl font-bold text-heading text-center mb-8 font-kaushan">Gallery</h2>
+      <h2 class="text-4xl font-bold text-heading text-center mb-8 font-kaushan">Our Prenup</h2>
 
       <!-- Carousel -->
       <div
@@ -189,7 +200,7 @@ onUnmounted(() => {
           <div
             class="flex"
             :style="{
-              width: `${cloned.length / 3 * 100}%`,
+              width: `${cloned.length / visibleCount * 100}%`,
               transform: `translateX(calc(-${trackIndex / cloned.length * 100}% + ${dragDelta}px))`,
               transition: isDragging ? 'none' : (animated ? 'transform 0.7s ease-in-out' : 'none'),
             }"

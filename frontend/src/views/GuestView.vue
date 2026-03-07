@@ -272,7 +272,7 @@ async function loadEventData() {
 
 <style scoped>
 .guest-view {
-  /* background-color: var(--color-guest-bg); */
+  font-family: var(--font-gelasio);
   color: var(--color-guest-text);
   background: linear-gradient(
     to bottom,
