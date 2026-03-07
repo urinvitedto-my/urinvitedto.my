@@ -9,11 +9,15 @@ defineProps<{
 async function downloadQr(url: string, label: string) {
   const res = await fetch(url)
   const blob = await res.blob()
+  const blobUrl = URL.createObjectURL(blob)
   const a = document.createElement('a')
-  a.href = URL.createObjectURL(blob)
+  a.href = blobUrl
   a.download = `${label}-qr-code.png`
+  a.style.display = 'none'
+  document.body.appendChild(a)
   a.click()
-  URL.revokeObjectURL(a.href)
+  document.body.removeChild(a)
+  URL.revokeObjectURL(blobUrl)
 }
 </script>
 
