@@ -36,7 +36,7 @@ const countdown = ref({ customMessage: '' })
 
 const customSections = ref<CustomSection[]>([])
 const showAddSection = ref(false)
-const DEFAULT_SECTION_BG = '#ececec'
+const DEFAULT_SECTION_BG = 'transparent'
 const newSection = ref({ title: '', content: '', image: '', bgColor: DEFAULT_SECTION_BG })
 const editingSectionId = ref<string | null>(null)
 const editSection = ref({ title: '', content: '', image: '', bgColor: '', order: 0 })
