@@ -47,31 +47,31 @@ onUnmounted(() => {
         {{ customMessage }}
       </p>
 
-      <div v-if="timeLeft.expired" class="text-2xl font-bold text-accent">
+      <div v-if="timeLeft.expired" class="text-2xl font-bold text-primary-dark">
         The event has started!
       </div>
 
       <div v-else class="grid grid-cols-4 gap-4 max-w-md mx-auto">
         <div class="text-center">
-          <div class="text-4xl md:text-6xl font-bold text-accent">
+          <div class="text-4xl md:text-6xl font-bold text-primary-dark">
             {{ timeLeft.days }}
           </div>
           <div class="text-sm text-gray-500 mt-2 uppercase tracking-wider">Days</div>
         </div>
         <div class="text-center">
-          <div class="text-4xl md:text-6xl font-bold text-accent">
+          <div class="text-4xl md:text-6xl font-bold text-primary-dark">
             {{ timeLeft.hours }}
           </div>
           <div class="text-sm text-gray-500 mt-2 uppercase tracking-wider">Hours</div>
         </div>
         <div class="text-center">
-          <div class="text-4xl md:text-6xl font-bold text-accent">
+          <div class="text-4xl md:text-6xl font-bold text-primary-dark">
             {{ timeLeft.minutes }}
           </div>
           <div class="text-sm text-gray-500 mt-2 uppercase tracking-wider">Minutes</div>
         </div>
         <div class="text-center">
-          <div class="text-4xl md:text-6xl font-bold text-accent">
+          <div class="text-4xl md:text-6xl font-bold text-primary-dark">
             {{ timeLeft.seconds }}
           </div>
           <div class="text-sm text-gray-500 mt-2 uppercase tracking-wider">Seconds</div>
