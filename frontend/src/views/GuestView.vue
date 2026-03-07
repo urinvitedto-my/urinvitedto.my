@@ -111,7 +111,7 @@ async function loadEventData() {
     <button
       v-if="eventData?.event.musicUrl"
       @click="toggleMute"
-      class="fixed bottom-20 right-4 z-100 p-2.5 text-primary transition-opacity hover:opacity-70"
+      class="fixed right-2 z-100 p-2.5 text-primary transition-opacity hover:opacity-70 bottom-[calc(5rem+env(safe-area-inset-bottom))]"
       :title="isMuted ? 'Unmute music' : 'Mute music'"
       :aria-label="isMuted ? 'Unmute music' : 'Mute music'"
     >
