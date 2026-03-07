@@ -5,19 +5,25 @@ defineProps<{
   config: MonetaryGiftsConfig
 }>()
 
-/** Fetches the image as a blob and triggers a browser download. */
+/** Fetches the image as a blob and triggers a download. Falls back to opening in a new tab. */
 async function downloadQr(url: string, label: string) {
-  const res = await fetch(url)
-  const blob = await res.blob()
-  const blobUrl = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = blobUrl
-  a.download = `${label}-qr-code.png`
-  a.style.display = 'none'
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(blobUrl)
+  try {
+    const res = await fetch(url)
+    const blob = await res.blob()
+    const blobUrl = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = blobUrl
+    a.download = `${label}-qr-code.png`
+    a.style.display = 'none'
+    document.body.appendChild(a)
+    a.click()
+    setTimeout(() => {
+      document.body.removeChild(a)
+      URL.revokeObjectURL(blobUrl)
+    }, 200)
+  } catch {
+    window.open(url, '_blank')
+  }
 }
 </script>
 
@@ -27,7 +33,7 @@ async function downloadQr(url: string, label: string) {
       <h2 class="text-4xl font-bold text-heading mb-4 font-kaushan">Monetary Gifts</h2>
 
       <div v-if="config.accounts?.length" class="space-y-6">
-        <p class="text-xs text-gray-400 mt-1">Click image to download</p>
+        <p class="text-xs text-gray-400 mt-1">Tap image to save</p>
         <div
           v-for="(account, index) in config.accounts"
           :key="index"
