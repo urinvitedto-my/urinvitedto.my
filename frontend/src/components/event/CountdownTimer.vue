@@ -53,30 +53,40 @@ onUnmounted(() => {
 
       <div v-else class="grid grid-cols-4 gap-4 max-w-md mx-auto">
         <div class="text-center">
-          <div class="text-4xl md:text-6xl font-bold text-primary-dark">
+          <div class="text-4xl md:text-6xl font-bold text-primary-dark countdown-number">
             {{ timeLeft.days }}
           </div>
-          <div class="text-sm text-gray-500 mt-2 uppercase tracking-wider">Days</div>
+          <div class="text-sm text-primary-dark mt-2 uppercase tracking-wider">Days</div>
         </div>
         <div class="text-center">
-          <div class="text-4xl md:text-6xl font-bold text-primary-dark">
+          <div class="text-4xl md:text-6xl font-bold text-primary-dark countdown-number">
             {{ timeLeft.hours }}
           </div>
-          <div class="text-sm text-gray-500 mt-2 uppercase tracking-wider">Hours</div>
+          <div class="text-sm text-primary-dark mt-2 uppercase tracking-wider">Hours</div>
         </div>
         <div class="text-center">
-          <div class="text-4xl md:text-6xl font-bold text-primary-dark">
+          <div class="text-4xl md:text-6xl font-bold text-primary-dark countdown-number">
             {{ timeLeft.minutes }}
           </div>
-          <div class="text-sm text-gray-500 mt-2 uppercase tracking-wider">Minutes</div>
+          <div class="text-sm text-primary-dark mt-2 uppercase tracking-wider">Minutes</div>
         </div>
         <div class="text-center">
-          <div class="text-4xl md:text-6xl font-bold text-primary-dark">
+          <div class="text-4xl md:text-6xl font-bold text-primary-dark countdown-number">
             {{ timeLeft.seconds }}
           </div>
-          <div class="text-sm text-gray-500 mt-2 uppercase tracking-wider">Seconds</div>
+          <div class="text-sm text-primary-dark mt-2 uppercase tracking-wider">Seconds</div>
         </div>
       </div>
     </div>
   </section>
 </template>
+
+<style scoped>
+.countdown-number {
+  text-shadow:
+    -1px -1px 0 rgba(255, 255, 255, 0.4),
+     1px -1px 0 rgba(255, 255, 255, 0.4),
+    -1px  1px 0 rgba(255, 255, 255, 0.4),
+     1px  1px 0 rgba(255, 255, 255, 0.4);
+}
+</style>
