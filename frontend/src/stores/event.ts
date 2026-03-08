@@ -36,10 +36,14 @@ export const useEventStore = defineStore('event', () => {
 
   /**
    * Ordered list of enabled components, with a sensible default fallback.
+   * Each custom section gets its own entry (CustomSection:<id>) so they
+   * can be positioned independently among other components.
    */
   const orderedComponents = computed<ComponentConfig[]>(() => {
+    const sections = eventDetails.value?.event?.customContent?.customSections ?? []
+
     if (!enabledComponents.value?.components) {
-      return [
+      const defaults: ComponentConfig[] = [
         { name: 'EventDetails', enabled: true, order: 1 },
         { name: 'LocationPhoto', enabled: true, order: 2 },
         { name: 'CountdownTimer', enabled: true, order: 3 },
@@ -50,9 +54,13 @@ export const useEventStore = defineStore('event', () => {
         { name: 'EventFAQ', enabled: true, order: 8 },
         { name: 'MonetaryGifts', enabled: true, order: 9 },
         { name: 'GiftGuide', enabled: true, order: 10 },
-        { name: 'CustomSections', enabled: true, order: 11 },
       ]
+      sections.forEach((s, i) => {
+        defaults.push({ name: `CustomSection:${s.id}`, enabled: true, order: 11 + i })
+      })
+      return defaults
     }
+
     return enabledComponents.value.components
       .filter((c) => c.enabled)
       .sort((a, b) => a.order - b.order)

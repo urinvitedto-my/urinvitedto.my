@@ -32,7 +32,6 @@ const DEFAULT_COMPONENTS: ComponentConfig[] = [
   { name: 'EventFAQ', enabled: true, order: 8 },
   { name: 'MonetaryGifts', enabled: true, order: 9 },
   { name: 'GiftGuide', enabled: true, order: 10 },
-  { name: 'CustomSections', enabled: true, order: 11 },
 ]
 
 const DISPLAY_NAMES: Record<string, string> = {
@@ -46,16 +45,63 @@ const DISPLAY_NAMES: Record<string, string> = {
   EventFAQ: 'FAQs',
   MonetaryGifts: 'Monetary Gifts',
   GiftGuide: 'Gift Guide',
-  CustomSections: 'Custom Sections',
 }
 
 onMounted(async () => {
-  await adminStore.fetchEnabledComponents(props.eventId)
+  await Promise.all([
+    adminStore.fetchEnabledComponents(props.eventId),
+    adminStore.fetchCustomContent(props.eventId),
+  ])
+
   const storeData = adminStore.getEnabledComponents(props.eventId)
-  components.value = storeData.length > 0
-    ? [...storeData]
-    : [...DEFAULT_COMPONENTS]
+  let comps = storeData.length > 0 ? [...storeData] : [...DEFAULT_COMPONENTS]
+
+  comps = syncCustomSectionEntries(comps)
+  components.value = comps
 })
+
+/**
+ * Syncs component list with actual custom sections:
+ * expands legacy "CustomSections" into individual entries,
+ * adds new sections, and removes stale ones.
+ */
+function syncCustomSectionEntries(comps: ComponentConfig[]): ComponentConfig[] {
+  const sections = adminStore.getCustomContent(props.eventId)?.customSections ?? []
+  const sectionIds = new Set(sections.map((s) => s.id))
+  const result = [...comps]
+
+  const legacyIdx = result.findIndex((c) => c.name === 'CustomSections')
+  if (legacyIdx !== -1) {
+    const legacyComp = result[legacyIdx]!
+    const expanded = sections.map((s, i) => ({
+      name: `CustomSection:${s.id}`,
+      enabled: legacyComp.enabled,
+      order: legacyComp.order + i * 0.001,
+    }))
+    result.splice(legacyIdx, 1, ...expanded)
+  }
+
+  const existingNames = new Set(result.map((c) => c.name))
+  const maxOrder = Math.max(...result.map((c) => c.order), 0)
+  sections.forEach((s, i) => {
+    const name = `CustomSection:${s.id}`
+    if (!existingNames.has(name)) {
+      result.push({ name, enabled: true, order: maxOrder + 1 + i })
+    }
+  })
+
+  const filtered = result.filter((c) => {
+    if (c.name.startsWith('CustomSection:')) {
+      return sectionIds.has(c.name.slice(14))
+    }
+    return true
+  })
+
+  filtered.sort((a, b) => a.order - b.order)
+  filtered.forEach((c, i) => { c.order = i + 1 })
+
+  return filtered
+}
 
 /** Saves enabled components via the store. */
 async function handleSave() {
@@ -78,7 +124,7 @@ async function handleSave() {
 
 /** Resets to default component configuration. */
 function resetToDefaults() {
-  components.value = [...DEFAULT_COMPONENTS]
+  components.value = syncCustomSectionEntries([...DEFAULT_COMPONENTS])
 }
 
 /** Moves a component up or down in order. */
@@ -95,6 +141,12 @@ function moveComponent(index: number, direction: 'up' | 'down') {
 
 /** Returns a readable name for a component key. */
 function displayName(name: string): string {
+  if (name.startsWith('CustomSection:')) {
+    const sectionId = name.slice(14)
+    const sections = adminStore.getCustomContent(props.eventId)?.customSections ?? []
+    const section = sections.find((s) => s.id === sectionId)
+    return section ? `Custom: ${section.title}` : 'Custom Section'
+  }
   return DISPLAY_NAMES[name] || name
 }
 </script>

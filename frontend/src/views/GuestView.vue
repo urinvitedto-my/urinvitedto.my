@@ -42,6 +42,12 @@ const inviteCode = computed(() => {
   return typeof code === 'string' ? code.toUpperCase() : ''
 })
 
+/** Maps custom section IDs to their data for quick lookup in the template. */
+const customSectionsMap = computed(() => {
+  const sections = eventData.value?.event.customContent?.customSections ?? []
+  return Object.fromEntries(sections.map((s) => [s.id, s]))
+})
+
 const isMuted = ref(false)
 let audioEl: HTMLAudioElement | null = null
 const activationEvents = ['scroll', 'click', 'touchstart', 'keydown'] as const
@@ -234,19 +240,13 @@ async function loadEventData() {
           :gifts="eventData.gifts"
         />
 
-        <template
+        <CustomSection
           v-else-if="
-            comp.name === 'CustomSections' &&
-            eventData.event.customContent?.customSections?.length
+            comp.name.startsWith('CustomSection:') &&
+            customSectionsMap[comp.name.slice(14)]
           "
-        >
-          <CustomSection
-            v-for="section in eventData.event.customContent.customSections"
-            :key="section.id"
-            :section="section"
-          />
-        </template>
-      </template>
+          :section="customSectionsMap[comp.name.slice(14)]!"
+        />      </template>
 
       <!-- Fixed Sections (always at bottom) -->
       <div v-if="eventData.invite" id="section-rsvp">
