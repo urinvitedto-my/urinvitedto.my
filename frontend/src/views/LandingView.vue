@@ -26,6 +26,11 @@
         >
           Invite<br />beautifully
         </h1>
+        <p class="text-base md:text-lg text-primary max-w-xs mb-2">
+          Have an event?
+          <span class="text-accent">urinvitedto.my@gmail.com</span><br>
+          <span class="text-sm text-primary underline">COMING SOON</span>
+        </p>
         <RouterLink
           to="/host/login"
           class="inline-block bg-accent text-white font-semibold px-10 py-4 rounded-full hover:bg-accent-dark transition-colors text-xl"
@@ -36,6 +41,7 @@
     </section>
 
     <!-- How It Works -->
+    <!--
     <section class="py-28 px-6 bg-white">
       <div class="max-w-5xl mx-auto">
         <p
@@ -92,8 +98,10 @@
         </div>
       </div>
     </section>
+    -->
 
     <!-- Event Types -->
+    <!--
     <section class="py-28 px-6">
       <div class="max-w-5xl mx-auto">
         <p
@@ -186,8 +194,10 @@
         </div>
       </div>
     </section>
+    -->
 
     <!-- CTA -->
+    <!--
     <section class="py-28 px-6 bg-primary">
       <div class="max-w-2xl mx-auto text-center">
         <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -205,6 +215,7 @@
         <p class="mt-6 text-xl text-accent">urinvitedto.my@gmail.com</p>
       </div>
     </section>
+    -->
   </div>
 </template>
 
