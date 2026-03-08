@@ -102,26 +102,36 @@ export const useEventStore = defineStore('event', () => {
    * Fetches the confirmed guest list for display.
    */
   async function fetchConfirmedGuests(type: EventType, slug: string) {
-    loading.value = true
     try {
       confirmedGuests.value = await getConfirmedGuests(type, slug)
     } catch (e: unknown) {
       error.value = errorMsg(e, 'Failed to fetch confirmed guests')
       throw e
-    } finally {
-      loading.value = false
     }
   }
 
   /**
-   * Submits an RSVP response for a guest.
+   * Submits an RSVP response for a guest, then patches local state
+   * so the UI updates immediately without a full re-fetch.
    */
   async function submitRSVP(
     type: EventType,
     slug: string,
     data: RSVPRequest,
   ): Promise<RSVPResponse> {
-    return apiSubmitRSVP(type, slug, data)
+    const response = await apiSubmitRSVP(type, slug, data)
+
+    if (eventDetails.value?.invite) {
+      const guest = eventDetails.value.invite.guests.find(
+        (g) => g.id === data.guestId,
+      )
+      if (guest) {
+        guest.rsvpStatus = data.status
+        guest.rsvpMessage = data.message
+      }
+    }
+
+    return response
   }
 
   /**

@@ -255,7 +255,7 @@ async function loadEventData() {
           :type="type"
           :slug="slug"
           :invite-code="inviteCode"
-          @rsvp-updated="loadEventData"
+          @rsvp-updated="eventStore.fetchConfirmedGuests(type, slug)"
         />
       </div>
 
