@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useHostStore } from '@/stores/host'
-import { formatDate } from '@/utils/date'
+import { formatDate, formatTimeOnly } from '@/utils/date'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import type { HostGuest } from '@/types'
 
 const hostStore = useHostStore()
 const {
@@ -16,6 +17,19 @@ const {
   showAllGuests,
   filteredGuests,
 } = storeToRefs(hostStore)
+
+const messageModalGuest = ref<HostGuest | null>(null)
+
+/** Opens the message modal for a guest (only if they have a message). */
+function openMessage(guest: HostGuest) {
+  if (guest.rsvpMessage) {
+    messageModalGuest.value = guest
+  }
+}
+
+function closeMessage() {
+  messageModalGuest.value = null
+}
 
 onMounted(() => {
   hostStore.fetchEvents()
@@ -41,12 +55,12 @@ onMounted(() => {
       </div>
 
       <div v-else class="grid md:grid-cols-3 gap-8">
-        <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="bg-white rounded-lg shadow-sm p-6 md:sticky md:top-24 md:self-start">
           <h2 class="text-lg font-semibold text-primary mb-4">Your Events</h2>
           <div v-if="events.length === 0" class="text-gray-500 text-center py-8">
             No events found
           </div>
-          <ul v-else class="space-y-2">
+          <ul v-else class="space-y-2 max-h-[60vh] overflow-y-auto">
             <li v-for="event in events" :key="event.id">
               <div
                 role="button"
@@ -104,9 +118,8 @@ onMounted(() => {
                 <thead>
                   <tr class="border-b border-muted">
                     <th class="text-left py-3 px-4 font-medium text-gray-600">Name</th>
-                    <th class="text-left py-3 px-4 font-medium text-gray-600">Status</th>
-                    <th class="text-left py-3 px-4 font-medium text-gray-600">Message</th>
                     <th class="text-left py-3 px-4 font-medium text-gray-600">RSVP Date</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -116,30 +129,77 @@ onMounted(() => {
                     class="border-b border-surface"
                   >
                     <td class="py-3 px-4">{{ guest.displayName }}</td>
-                    <td class="py-3 px-4">
-                      <span
+                    <td class="py-3 px-4 text-gray-600 text-sm">
+                      <div>{{ formatDate(guest.rsvpAt) }}</div>
+                      <div class="text-gray-400">{{ formatTimeOnly(guest.rsvpAt ?? '') }}</div>
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                      <button
+                        @click="openMessage(guest)"
                         :class="[
-                          'inline-block px-2 py-1 rounded text-xs font-medium',
-                          guest.rsvpStatus === 'yes'
-                            ? 'bg-green-100 text-green-800'
-                            : guest.rsvpStatus === 'no'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-gray-100 text-gray-800',
+                          'shrink-0',
+                          guest.rsvpMessage ? 'cursor-pointer' : 'cursor-default',
                         ]"
+                        :title="guest.rsvpMessage ? 'View message' : undefined"
+                        type="button"
                       >
-                        {{ guest.rsvpStatus }}
-                      </span>
-                    </td>
-                    <td class="py-3 px-4 text-gray-600">
-                      {{ guest.rsvpMessage || '-' }}
-                    </td>
-                    <td class="py-3 px-4 text-gray-600">
-                      {{ formatDate(guest.rsvpAt, true) }}
+                        <svg
+                          v-if="guest.rsvpStatus === 'yes'"
+                          class="w-5 h-5 text-green-600"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.5"
+                          viewBox="0 0 24 24"
+                        >
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <svg
+                          v-else-if="guest.rsvpStatus === 'no'"
+                          class="w-5 h-5 text-red-600"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.5"
+                          viewBox="0 0 24 24"
+                        >
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <span
+                          v-else
+                          class="inline-block w-5 h-5 rounded-full border-2 border-gray-300"
+                        />
+                      </button>
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
+
+            <!-- Message Modal -->
+            <Teleport to="body">
+              <div
+                v-if="messageModalGuest"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+                @click.self="closeMessage"
+              >
+                <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+                  <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-primary">
+                      {{ messageModalGuest.displayName }}
+                    </h3>
+                    <button
+                      @click="closeMessage"
+                      class="text-gray-400 hover:text-gray-600 transition-colors"
+                      type="button"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <p class="text-gray-700 whitespace-pre-wrap">{{ messageModalGuest.rsvpMessage }}</p>
+                </div>
+              </div>
+            </Teleport>
           </template>
         </div>
       </div>
