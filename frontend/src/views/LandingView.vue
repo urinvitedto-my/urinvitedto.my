@@ -14,26 +14,27 @@
         <img
           src="/footer_logo.png"
           alt=""
-          class="w-full h-full object-contain scale-125"
+          class="w-full h-full object-contain scale-140"
         />
       </div>
       <div class="max-w-6xl w-full relative z-10">
-        <p class="text-base uppercase tracking-[0.3em] text-accent font-semibold mb-6">
+        <p
+          class="text-base uppercase tracking-[0.3em] text-accent font-semibold mb-6 ml-2"
+        >
           Digital Invitations
         </p>
         <h1
-          class="text-7xl md:text-8xl lg:text-9xl font-bold text-primary leading-[0.95] mb-8"
+          class="text-7xl md:text-8xl lg:text-9xl font-bold text-primary leading-[0.95] mb-4"
         >
           Invite<br />beautifully
         </h1>
-        <p class="text-base md:text-lg text-primary max-w-xs mb-2">
-          Have an event?
-          <span class="text-accent">urinvitedto.my@gmail.com</span><br>
-          <span class="text-sm text-primary underline">COMING SOON</span>
+        <p class="text-base md:text-lg text-primary max-w-xs mb-4 ml-2">
+          COMING SOON
+          <span class="text-accent">urinvitedto.my@gmail.com</span>
         </p>
         <RouterLink
           to="/host/login"
-          class="inline-block bg-accent text-white font-semibold px-10 py-4 rounded-full hover:bg-accent-dark transition-colors text-xl"
+          class="inline-block bg-accent text-white font-semibold px-10 py-4 rounded-full hover:bg-accent-dark transition-colors text-xl ml-2"
         >
           Get Started
         </RouterLink>
