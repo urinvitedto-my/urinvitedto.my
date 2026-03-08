@@ -20,6 +20,12 @@ const loading = ref(true)
 const error = ref('')
 const { eventSummary, eventDetails } = storeToRefs(eventStore)
 
+/** Splits title into lines around "&" for stacked display. */
+const titleParts = computed(() => {
+  if (!eventSummary.value?.title.includes('&')) return null
+  return eventSummary.value.title.split('&').map((part) => part.trim())
+})
+
 onMounted(async () => {
   await loadEvent()
 })
@@ -99,7 +105,12 @@ async function handleInviteSubmit() {
 
       <div class="relative z-10 flex flex-col items-center justify-center h-full px-4 text-center">
         <h1 class="landing-title text-white">
-          {{ eventSummary.title }}
+          <template v-if="titleParts">
+            <span v-for="(part, i) in titleParts" :key="i">
+              {{ part }}<br v-if="i < titleParts.length - 1" /><span v-if="i < titleParts.length - 1" class="block text-3xl md:text-4xl">&amp;</span>
+            </span>
+          </template>
+          <template v-else>{{ eventSummary.title }}</template>
         </h1>
 
         <!-- Public Event: Open Invitation button -->
@@ -161,7 +172,7 @@ async function handleInviteSubmit() {
 
 .landing-title {
   font-family: 'Lavishly Yours', cursive;
-  font-size: clamp(4rem, 14vw, 9rem);
+  font-size: clamp(6rem, 14vw, 12rem);
   font-weight: 400;
   letter-spacing: normal;
   text-transform: none;
