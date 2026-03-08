@@ -75,7 +75,10 @@ function buildInviteMessage(invite: AdminInvite): string {
   const lines = [
     `Hi ${label}!`,
     '',
-    `You're invited to ${hostLabel} ${eventType}!`,
+    `We're excited to let you know that you are invited to`,
+    `${hostLabel} ${eventType}!`,
+    '',
+    `We would love for you to be part of this special day.`,
     '',
     `View your invitation here:`,
     eventUrl.value,
@@ -113,7 +116,10 @@ onMounted(() => {
         <h1 class="text-2xl font-bold text-primary">Host Dashboard</h1>
       </div>
 
-      <div v-if="eventsLoading && !selectedEvent" class="flex items-center justify-center py-20">
+      <div
+        v-if="eventsLoading && !selectedEvent"
+        class="flex items-center justify-center py-20"
+      >
         <LoadingSpinner />
       </div>
 
@@ -125,7 +131,9 @@ onMounted(() => {
       </div>
 
       <div v-else class="grid md:grid-cols-3 gap-8">
-        <div class="bg-white rounded-lg shadow-sm p-6 md:sticky md:top-24 md:self-start">
+        <div
+          class="bg-white rounded-lg shadow-sm p-6 md:sticky md:top-24 md:self-start"
+        >
           <h2 class="text-lg font-semibold text-primary mb-4">Your Events</h2>
           <div v-if="events.length === 0" class="text-gray-500 text-center py-8">
             No events found
@@ -154,7 +162,9 @@ onMounted(() => {
                     View page
                   </RouterLink>
                 </div>
-                <div class="text-sm opacity-75">{{ formatDate(event.startsAt, true) }}</div>
+                <div class="text-sm opacity-75">
+                  {{ formatDate(event.startsAt, true) }}
+                </div>
               </div>
             </li>
           </ul>
@@ -175,8 +185,18 @@ onMounted(() => {
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-accent text-black hover:bg-accent/80 transition-colors"
                   type="button"
                 >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
                   </svg>
                   Invite Messages
                 </button>
@@ -191,7 +211,10 @@ onMounted(() => {
               <LoadingSpinner size="md" />
             </div>
 
-            <div v-else-if="filteredGuests.length === 0" class="text-gray-500 text-center py-12">
+            <div
+              v-else-if="filteredGuests.length === 0"
+              class="text-gray-500 text-center py-12"
+            >
               {{ showAllGuests ? 'No guests yet' : 'No confirmed guests yet' }}
             </div>
 
@@ -200,7 +223,9 @@ onMounted(() => {
                 <thead>
                   <tr class="border-b border-muted">
                     <th class="text-left py-3 px-4 font-medium text-gray-600">Name</th>
-                    <th class="text-left py-3 px-4 font-medium text-gray-600">RSVP Date</th>
+                    <th class="text-left py-3 px-4 font-medium text-gray-600">
+                      RSVP Date
+                    </th>
                     <th></th>
                   </tr>
                 </thead>
@@ -213,7 +238,9 @@ onMounted(() => {
                     <td class="py-3 px-4">{{ guest.displayName }}</td>
                     <td class="py-3 px-4 text-gray-600 text-sm">
                       <div>{{ formatDate(guest.rsvpAt) }}</div>
-                      <div class="text-gray-400">{{ formatTimeOnly(guest.rsvpAt ?? '') }}</div>
+                      <div class="text-gray-400">
+                        {{ formatTimeOnly(guest.rsvpAt ?? '') }}
+                      </div>
                     </td>
                     <td class="py-3 px-4 text-right">
                       <button
@@ -233,7 +260,11 @@ onMounted(() => {
                           stroke-width="2.5"
                           viewBox="0 0 24 24"
                         >
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
                         </svg>
                         <svg
                           v-else-if="guest.rsvpStatus === 'no'"
@@ -243,7 +274,11 @@ onMounted(() => {
                           stroke-width="2.5"
                           viewBox="0 0 24 24"
                         >
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                         <span
                           v-else
@@ -273,12 +308,24 @@ onMounted(() => {
                       class="text-gray-400 hover:text-gray-600 transition-colors"
                       type="button"
                     >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                   </div>
-                  <p class="text-gray-700 whitespace-pre-wrap">{{ messageModalGuest.rsvpMessage }}</p>
+                  <p class="text-gray-700 whitespace-pre-wrap">
+                    {{ messageModalGuest.rsvpMessage }}
+                  </p>
                 </div>
               </div>
             </Teleport>
@@ -290,26 +337,46 @@ onMounted(() => {
                 class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
                 @click.self="closeInvitesModal"
               >
-                <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[85vh] flex flex-col">
-                  <div class="flex items-center justify-between p-6 pb-4 border-b border-muted">
+                <div
+                  class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[85vh] flex flex-col"
+                >
+                  <div
+                    class="flex items-center justify-between p-6 pb-4 border-b border-muted"
+                  >
                     <h3 class="text-lg font-semibold text-primary">Invite Messages</h3>
                     <button
                       @click="closeInvitesModal"
                       class="text-gray-400 hover:text-gray-600 transition-colors"
                       type="button"
                     >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                   </div>
 
                   <div class="flex-1 overflow-y-auto p-6 pt-4">
-                    <div v-if="invitesLoading" class="flex items-center justify-center py-12">
+                    <div
+                      v-if="invitesLoading"
+                      class="flex items-center justify-center py-12"
+                    >
                       <LoadingSpinner size="md" />
                     </div>
 
-                    <div v-else-if="invites.length === 0" class="text-gray-500 text-center py-12">
+                    <div
+                      v-else-if="invites.length === 0"
+                      class="text-gray-500 text-center py-12"
+                    >
                       No invites found for this event
                     </div>
 
@@ -325,30 +392,61 @@ onMounted(() => {
                               {{ invite.label || `Invite ${invite.inviteCode}` }}
                             </div>
                             <div class="text-xs text-gray-500 mt-0.5">
-                              Code: <span class="font-mono font-medium">{{ invite.inviteCode }}</span>
+                              Code:
+                              <span class="font-mono font-medium">{{
+                                invite.inviteCode
+                              }}</span>
                               <span v-if="invite.guests.length" class="ml-2">
-                                &middot; {{ invite.guests.map(g => g.displayName).join(', ') }}
+                                &middot;
+                                {{ invite.guests.map((g) => g.displayName).join(', ') }}
                               </span>
                             </div>
                           </div>
                           <button
                             @click="copyMessage(invite)"
                             class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors"
-                            :class="copiedInviteId === invite.id
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-surface text-gray-700 hover:bg-muted'"
+                            :class="
+                              copiedInviteId === invite.id
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-surface text-gray-700 hover:bg-muted'
+                            "
                             type="button"
                           >
-                            <svg v-if="copiedInviteId === invite.id" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            <svg
+                              v-if="copiedInviteId === invite.id"
+                              class="w-3.5 h-3.5"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2.5"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M5 13l4 4L19 7"
+                              />
                             </svg>
-                            <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            <svg
+                              v-else
+                              class="w-3.5 h-3.5"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                              />
                             </svg>
                             {{ copiedInviteId === invite.id ? 'Copied!' : 'Copy' }}
                           </button>
                         </div>
-                        <pre class="text-sm text-gray-600 bg-surface rounded-md p-3 whitespace-pre-wrap font-sans leading-relaxed">{{ buildInviteMessage(invite) }}</pre>
+                        <pre
+                          class="text-sm text-gray-600 bg-surface rounded-md p-3 whitespace-pre-wrap font-sans leading-relaxed"
+                          >{{ buildInviteMessage(invite) }}</pre
+                        >
                       </div>
                     </div>
                   </div>
