@@ -18,7 +18,7 @@ defineProps<{
 
       <!-- Admin-authored HTML content (only editable by admins, no sanitization needed) -->
       <div
-        class="prose max-w-none mb-6"
+        class="prose max-w-none mb-6 text-primary"
         v-html="section.content"
       ></div>
 

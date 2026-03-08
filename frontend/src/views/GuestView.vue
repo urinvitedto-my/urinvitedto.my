@@ -272,15 +272,27 @@ async function loadEventData() {
 
 <style scoped>
 .guest-view {
+  position: relative;
+  isolation: isolate;
   font-family: var(--font-gelasio);
   color: var(--color-guest-text);
   background: linear-gradient(
     to bottom,
-    var(--color-primary-dark),
-    var(--color-guest-bg) 20%,
     var(--color-guest-bg) 80%,
     var(--color-primary-dark)
   );
+}
+
+.guest-view::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('https://olwskoxfukhqkalcmdeq.supabase.co/storage/v1/object/public/event-media/71537c23-2b2c-42ab-a6b8-9d9e1746cbfc/flower_background_v1.png');
+  background-repeat: repeat;
+  background-size: 100% auto;
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .guest-view :deep(h1),
