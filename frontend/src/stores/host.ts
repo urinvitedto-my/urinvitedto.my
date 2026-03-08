@@ -1,15 +1,18 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { getHostEvents, getHostGuests } from '@/services/api'
-import type { HostEvent, HostGuest } from '@/types'
+import { getHostEvents, getHostGuests, getHostInvites } from '@/services/api'
+import type { HostEvent, HostGuest, AdminInvite, Host } from '@/types'
 import { errorMsg } from '@/utils/error'
 
 export const useHostStore = defineStore('host', () => {
   const events = ref<HostEvent[]>([])
   const selectedEvent = ref<HostEvent | null>(null)
   const guests = ref<HostGuest[]>([])
+  const invites = ref<AdminInvite[]>([])
+  const eventHosts = ref<Host[]>([])
   const eventsLoading = ref(false)
   const guestsLoading = ref(false)
+  const invitesLoading = ref(false)
   const error = ref('')
   const showAllGuests = ref(false)
 
@@ -49,13 +52,32 @@ export const useHostStore = defineStore('host', () => {
     }
   }
 
+  /** Fetches invites for the selected event. */
+  async function fetchInvites(eventId: string) {
+    invitesLoading.value = true
+    try {
+      const data = await getHostInvites(eventId)
+      invites.value = data.invites || []
+      eventHosts.value = data.hosts || []
+    } catch (e: unknown) {
+      error.value = errorMsg(e, 'Failed to load invites')
+      invites.value = []
+      eventHosts.value = []
+    } finally {
+      invitesLoading.value = false
+    }
+  }
+
   /** Clears all host state. */
   function $reset() {
     events.value = []
     selectedEvent.value = null
     guests.value = []
+    invites.value = []
+    eventHosts.value = []
     eventsLoading.value = false
     guestsLoading.value = false
+    invitesLoading.value = false
     error.value = ''
     showAllGuests.value = false
   }
@@ -64,13 +86,17 @@ export const useHostStore = defineStore('host', () => {
     events,
     selectedEvent,
     guests,
+    invites,
+    eventHosts,
     eventsLoading,
     guestsLoading,
+    invitesLoading,
     error,
     showAllGuests,
     filteredGuests,
     fetchEvents,
     selectEvent,
+    fetchInvites,
     $reset,
   }
 })

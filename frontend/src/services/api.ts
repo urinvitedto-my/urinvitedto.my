@@ -16,6 +16,7 @@ import type {
   AdminGalleryItem,
   CustomContent,
   EnabledComponents,
+  Host,
   HostEvent,
   HostGuest,
 } from '@/types'
@@ -512,4 +513,12 @@ export async function getHostEvents(): Promise<{ events: HostEvent[] }> {
 export async function getHostGuests(eventId: string): Promise<{ guests: HostGuest[] }> {
   const res = await authFetch(`${API_BASE}/api/v1/host/events/${eventId}/guests`)
   return handleResponse(res, 'Failed to fetch guests')
+}
+
+/** Fetches invites with guests and hosts for an event (host must be linked). */
+export async function getHostInvites(
+  eventId: string,
+): Promise<{ invites: AdminInvite[]; hosts: Host[] }> {
+  const res = await authFetch(`${API_BASE}/api/v1/host/events/${eventId}/invites`)
+  return handleResponse(res, 'Failed to fetch invites')
 }
