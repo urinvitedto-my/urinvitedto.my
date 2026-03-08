@@ -120,3 +120,72 @@ func (h *Handlers) GetHostGuests(w http.ResponseWriter, r *http.Request) {
 
 	h.writeJSON(w, http.StatusOK, models.HostGuestsResponse{Guests: guests})
 }
+
+// GetHostInvites handles GET /host/events/:eventId/invites - returns invites with guests for an event if the user is a host.
+func (h *Handlers) GetHostInvites(w http.ResponseWriter, r *http.Request) {
+	email, ok := r.Context().Value(UserEmailKey).(string)
+	if !ok || email == "" {
+		h.writeError(w, http.StatusUnauthorized, "unauthorized", "Not authenticated")
+		return
+	}
+
+	eventID := chi.URLParam(r, "eventId")
+	if eventID == "" {
+		h.writeError(w, http.StatusBadRequest, "bad_request", "Event ID required")
+		return
+	}
+
+	ctx := r.Context()
+	emailLower := strings.ToLower(strings.TrimSpace(email))
+
+	var isHost bool
+	err := h.db.QueryRow(ctx, `
+		SELECT EXISTS(
+			SELECT 1 FROM hosts h
+			LEFT JOIN auth.users u ON u.id = h.auth_user_id
+			WHERE h.event_id = $1 AND (LOWER(u.email) = $2 OR LOWER(h.contact_email) = $2)
+		)
+	`, eventID, emailLower).Scan(&isHost)
+	if err != nil || !isHost {
+		h.writeError(w, http.StatusForbidden, "forbidden", "Not a host of this event")
+		return
+	}
+
+	rows, err := h.db.Query(ctx, `
+		SELECT id, invite_code, label, created_at
+		FROM invites WHERE event_id = $1
+		ORDER BY created_at DESC
+	`, eventID)
+	if err != nil {
+		slog.Error("DB error fetching host invites", "error", err)
+		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to fetch invites")
+		return
+	}
+	defer rows.Close()
+
+	invites := []models.AdminInvite{}
+	for rows.Next() {
+		var inv models.AdminInvite
+		if err := rows.Scan(&inv.ID, &inv.InviteCode, &inv.Label, &inv.CreatedAt); err != nil {
+			slog.Error("Error scanning invite", "error", err)
+			continue
+		}
+		invites = append(invites, inv)
+	}
+
+	for i := range invites {
+		guests, err := h.fetchInviteGuests(ctx, invites[i].ID)
+		if err != nil {
+			slog.Error("Error fetching guests", "inviteId", invites[i].ID, "error", err)
+		}
+		invites[i].Guests = guests
+	}
+
+	hosts, err := h.fetchHosts(ctx, eventID)
+	if err != nil {
+		slog.Error("Error fetching hosts for invites", "error", err)
+		hosts = []models.Host{}
+	}
+
+	h.writeJSON(w, http.StatusOK, models.HostInvitesResponse{Invites: invites, Hosts: hosts})
+}

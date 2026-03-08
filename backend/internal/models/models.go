@@ -382,3 +382,9 @@ type HostEventsResponse struct {
 type HostGuestsResponse struct {
 	Guests []AdminGuest `json:"guests"`
 }
+
+// HostInvitesResponse is the response for host invites endpoint.
+type HostInvitesResponse struct {
+	Invites []AdminInvite `json:"invites"`
+	Hosts   []Host        `json:"hosts"`
+}
