@@ -83,7 +83,7 @@ async function handleLogout() {
       navbarVisible ? 'translate-y-0' : '-translate-y-full',
     ]"
   >
-    <div class="max-w-full mx-16">
+    <div class="max-w-full mx-6 md:mx-16">
       <div class="flex items-center justify-between h-16">
         <!-- Logo -->
         <RouterLink to="/" class="block h-10 w-40 overflow-hidden rounded">

@@ -7,9 +7,15 @@
 <template>
   <div class="landing-view">
     <!-- Hero -->
-    <section class="min-h-screen flex items-center px-6 md:px-16 pt-16 relative overflow-hidden">
+    <section
+      class="min-h-screen flex items-center px-6 md:px-16 pt-16 relative overflow-hidden"
+    >
       <div class="hero-logo-bg" aria-hidden="true">
-        <img src="/footer_logo.png" alt="" class="w-full h-full object-contain scale-125" />
+        <img
+          src="/footer_logo.png"
+          alt=""
+          class="w-full h-full object-contain scale-125"
+        />
       </div>
       <div class="max-w-6xl w-full relative z-10">
         <p class="text-base uppercase tracking-[0.3em] text-accent font-semibold mb-6">
@@ -20,9 +26,6 @@
         >
           Invite<br />beautifully
         </h1>
-        <p class="text-xl md:text-2xl text-gray-400 max-w-md mb-10">
-          Weddings. Birthdays. Parties.
-        </p>
         <RouterLink
           to="/host/login"
           class="inline-block bg-accent text-white font-semibold px-10 py-4 rounded-full hover:bg-accent-dark transition-colors text-xl"
@@ -190,7 +193,7 @@
         <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
           Ready to send your first invite?
         </h2>
-        <p class="text-xl text-white/60 mb-6">
+        <p class="text-xl text-muted mb-6">
           Get in touch and we'll set everything up for you.
         </p>
         <a
@@ -199,7 +202,7 @@
         >
           Email Us
         </a>
-        <p class="mt-6 text-xl text-white/40">urinvitedto.my@gmail.com</p>
+        <p class="mt-6 text-xl text-accent">urinvitedto.my@gmail.com</p>
       </div>
     </section>
   </div>
