@@ -32,7 +32,7 @@ const descriptionParts = computed(() => {
 <template>
   <section class="attire-guide py-16 px-4">
     <div class="max-w-3xl mx-auto text-center">
-      <h2 class="text-4xl font-bold text-heading mb-4 font-kaushan">Attire Guide</h2>
+      <h2 class="text-4xl font-bold text-primary-dark mb-4 font-kaushan">Attire Guide</h2>
 
       <p class="text-gray-600 mb-4 text-xl">
         <template v-for="(part, i) in descriptionParts" :key="i">

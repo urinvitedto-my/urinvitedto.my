@@ -168,7 +168,7 @@ onUnmounted(() => {
 <template>
   <section class="event-gallery py-16 px-4">
     <div class="max-w-5xl mx-auto">
-      <h2 class="text-4xl font-bold text-heading text-center mb-8 font-kaushan">Our Prenup</h2>
+      <h2 class="text-4xl font-bold text-primary-dark text-center mb-8 font-kaushan">Our Prenup</h2>
 
       <!-- Carousel -->
       <div

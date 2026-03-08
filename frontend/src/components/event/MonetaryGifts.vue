@@ -24,7 +24,7 @@ async function downloadQr(url: string, label: string) {
 <template>
   <section class="monetary-gifts py-16 px-4">
     <div class="max-w-3xl mx-auto text-center">
-      <h2 class="text-4xl font-bold text-heading mb-4 font-kaushan">Monetary Gifts</h2>
+      <h2 class="text-4xl font-bold text-primary-dark mb-4 font-kaushan">Monetary Gifts</h2>
 
       <div v-if="config.accounts?.length" class="space-y-6">
         <p class="text-xs text-gray-400 mt-1">Click image to download</p>

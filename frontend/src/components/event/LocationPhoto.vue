@@ -7,7 +7,7 @@ defineProps<{
 
 <template>
   <section class="location-photo py-16 px-4">
-    <h2 class="text-4xl font-bold text-heading text-center mb-2 font-kaushan">Venue</h2>
+    <h2 class="text-4xl font-bold text-primary-dark text-center mb-2 font-kaushan">Venue</h2>
     <div v-if="location" class="flex items-center justify-center gap-2 text-gray-600 mb-6">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path

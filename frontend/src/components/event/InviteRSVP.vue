@@ -96,8 +96,8 @@ async function handleSubmit(guest: Guest) {
 <template>
   <section class="invite-rsvp py-16 px-4">
     <div class="max-w-md mx-auto">
-      <h2 class="text-4xl font-bold text-heading text-center mb-2 font-kaushan">Your Invitation</h2>
-      <p v-if="invite.label" class="text-gray-500 text-center mb-8">
+      <h2 class="text-4xl font-bold text-primary-dark text-center mb-2 font-kaushan text-outline">Your Invitation</h2>
+      <p v-if="invite.label" class="text-muted text-xl text-center mb-8">
         {{ invite.label }}
       </p>
 
@@ -109,24 +109,26 @@ async function handleSubmit(guest: Guest) {
         >
           <!-- Submitted state -->
           <div v-if="getState(guest.id).submitted" class="flex items-center justify-between">
-            <span class="font-medium text-heading">{{ guest.displayName }}</span>
+            <span class="font-medium text-guest-bg">{{ guest.displayName }}</span>
             <span
               :class="[
-                'text-sm font-medium',
-                getState(guest.id).status === 'yes' ? 'text-green-600' : 'text-red-500',
+                'text-xs font-semibold px-4 py-1.5 rounded-full',
+                getState(guest.id).status === 'yes'
+                  ? 'bg-guest-bg text-green-500'
+                  : 'bg-guest-bg text-red-500',
               ]"
             >
               {{ getState(guest.id).status === 'yes' ? 'Attending' : 'Not Attending' }}
             </span>
           </div>
-          <p v-if="getState(guest.id).submitted && getState(guest.id).message" class="text-gray-500 text-sm italic mt-1">
+          <p v-if="getState(guest.id).submitted && getState(guest.id).message" class="text-muted text-sm italic mt-1">
             "{{ getState(guest.id).message }}"
           </p>
 
           <!-- Pending state -->
           <template v-if="!getState(guest.id).submitted">
             <div class="flex items-center justify-between">
-              <span class="font-medium text-heading">{{ guest.displayName }}</span>
+              <span class="font-medium text-guest-bg">{{ guest.displayName }}</span>
               <div class="flex gap-2">
                 <button
                   @click="selectStatus(guest.id, 'yes')"
@@ -182,3 +184,13 @@ async function handleSubmit(guest: Guest) {
     </div>
   </section>
 </template>
+
+<style scoped>
+.text-outline {
+  text-shadow:
+    -1px -1px 0 rgba(255, 255, 255, 0.4),
+     1px -1px 0 rgba(255, 255, 255, 0.4),
+    -1px  1px 0 rgba(255, 255, 255, 0.4),
+     1px  1px 0 rgba(255, 255, 255, 0.4);
+}
+</style>

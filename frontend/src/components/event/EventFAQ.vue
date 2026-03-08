@@ -23,7 +23,7 @@ function toggle(id: string) {
 <template>
   <section class="event-faq py-16 px-4">
     <div class="max-w-2xl mx-auto">
-      <h2 class="text-4xl font-bold text-heading text-center mb-8 font-kaushan">FAQ</h2>
+      <h2 class="text-4xl font-bold text-primary-dark text-center mb-8 font-kaushan text-outline">FAQ</h2>
 
       <div class="divide-y divide-muted/50">
         <div v-for="faq in faqs" :key="faq.id">
@@ -63,3 +63,13 @@ function toggle(id: string) {
     </div>
   </section>
 </template>
+
+<style scoped>
+.text-outline {
+  text-shadow:
+    -1px -1px 0 rgba(255, 255, 255, 0.4),
+     1px -1px 0 rgba(255, 255, 255, 0.4),
+    -1px  1px 0 rgba(255, 255, 255, 0.4),
+     1px  1px 0 rgba(255, 255, 255, 0.4);
+}
+</style>

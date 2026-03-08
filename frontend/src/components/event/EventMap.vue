@@ -9,7 +9,7 @@ defineProps<{
 <template>
   <section class="event-map py-16 px-4">
     <div class="max-w-3xl mx-auto">
-      <h2 class="text-4xl font-bold text-heading text-center mb-6 font-kaushan">Map</h2>
+      <h2 class="text-4xl font-bold text-primary-dark text-center mb-6 font-kaushan">Map</h2>
 
       <!-- Map embed -->
       <div
