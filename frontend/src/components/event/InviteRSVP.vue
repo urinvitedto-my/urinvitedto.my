@@ -97,7 +97,7 @@ async function handleSubmit(guest: Guest) {
   <section class="invite-rsvp py-16 px-4">
     <div class="max-w-md mx-auto">
       <h2 class="text-4xl font-bold text-primary-dark text-center mb-2 font-kaushan text-outline">Your Invitation</h2>
-      <p v-if="invite.label" class="text-muted text-xl text-center mb-8">
+      <p v-if="invite.label" class="text-primary-dark text-xl text-center mb-8">
         {{ invite.label }}
       </p>
 
@@ -121,9 +121,6 @@ async function handleSubmit(guest: Guest) {
               {{ getState(guest.id).status === 'yes' ? 'Attending' : 'Not Attending' }}
             </span>
           </div>
-          <p v-if="getState(guest.id).submitted && getState(guest.id).message" class="text-muted text-sm italic mt-1">
-            "{{ getState(guest.id).message }}"
-          </p>
 
           <!-- Pending state -->
           <template v-if="!getState(guest.id).submitted">
