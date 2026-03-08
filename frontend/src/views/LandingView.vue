@@ -7,8 +7,11 @@
 <template>
   <div class="landing-view">
     <!-- Hero -->
-    <section class="min-h-screen flex items-center px-6 md:px-16 pt-16">
-      <div class="max-w-6xl w-full">
+    <section class="min-h-screen flex items-center px-6 md:px-16 pt-16 relative overflow-hidden">
+      <div class="hero-logo-bg" aria-hidden="true">
+        <img src="/footer_logo.png" alt="" class="w-full h-full object-contain scale-125" />
+      </div>
+      <div class="max-w-6xl w-full relative z-10">
         <p class="text-base uppercase tracking-[0.3em] text-accent font-semibold mb-6">
           Digital Invitations
         </p>
@@ -205,5 +208,18 @@
 <style scoped>
 .landing-view {
   font-family: var(--font-gelasio);
+}
+
+.hero-logo-bg {
+  position: absolute;
+  right: -5%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 55%;
+  height: 80%;
+  opacity: 0.4;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  pointer-events: none;
 }
 </style>
