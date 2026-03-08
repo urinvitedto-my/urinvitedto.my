@@ -46,7 +46,7 @@ export const useEventStore = defineStore('event', () => {
         { name: 'EventMap', enabled: true, order: 4 },
         { name: 'EventSchedule', enabled: true, order: 5 },
         { name: 'EventGallery', enabled: true, order: 6 },
-        { name: 'DressCode', enabled: true, order: 7 },
+        { name: 'AttireGuide', enabled: true, order: 7 },
         { name: 'EventFAQ', enabled: true, order: 8 },
         { name: 'MonetaryGifts', enabled: true, order: 9 },
         { name: 'GiftGuide', enabled: true, order: 10 },

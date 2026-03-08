@@ -115,11 +115,10 @@ export interface RSVPResponse {
 
 // JSONB types for custom_content and enabled_components
 
-export interface DressCode {
+export interface AttireGuide {
   title: string
   description: string
-  notes?: string
-  examples?: string[]
+  imageUrl?: string
 }
 
 export interface LocationDetails {
@@ -153,7 +152,7 @@ export interface CustomSection {
 }
 
 export interface CustomContent {
-  dressCode?: DressCode
+  attireGuide?: AttireGuide
   locationDetails?: LocationDetails
   monetaryGifts?: MonetaryGiftsConfig
   countdownTimer?: CountdownTimerConfig

@@ -12,7 +12,7 @@ import CountdownTimer from '@/components/event/CountdownTimer.vue'
 import EventMap from '@/components/event/EventMap.vue'
 import EventSchedule from '@/components/event/EventSchedule.vue'
 import EventGallery from '@/components/event/EventGallery.vue'
-import DressCode from '@/components/event/DressCode.vue'
+import AttireGuide from '@/components/event/AttireGuide.vue'
 import EventFAQ from '@/components/event/EventFAQ.vue'
 import MonetaryGifts from '@/components/event/MonetaryGifts.vue'
 import GiftGuide from '@/components/event/GiftGuide.vue'
@@ -209,11 +209,11 @@ async function loadEventData() {
           <EventGallery :items="eventData.gallery" />
         </div>
 
-        <DressCode
+        <AttireGuide
           v-else-if="
-            comp.name === 'DressCode' && eventData.event.customContent?.dressCode
+            comp.name === 'AttireGuide' && eventData.event.customContent?.attireGuide
           "
-          :dress-code="eventData.event.customContent.dressCode"
+          :attire-guide="eventData.event.customContent.attireGuide"
         />
 
         <EventFAQ

@@ -20,9 +20,8 @@ const error = computed(() => adminStore.getSubError('customContent', props.event
 
 const saving = ref(false)
 
-const dressCodeEnabled = ref(false)
-const dressCode = ref({ title: '', description: '', notes: '', examples: [] as string[] })
-const newExample = ref('')
+const attireGuideEnabled = ref(false)
+const attireGuide = ref({ title: '', description: '', imageUrl: '' })
 
 const locationEnabled = ref(false)
 const location = ref({ parkingInfo: '', accessibilityNotes: '', mapEmbedUrl: '' })
@@ -49,13 +48,12 @@ onMounted(async () => {
 
 /** Populates form refs from fetched data. */
 function populateFromData(data: CustomContent) {
-  if (data.dressCode) {
-    dressCodeEnabled.value = true
-    dressCode.value = {
-      title: data.dressCode.title || '',
-      description: data.dressCode.description || '',
-      notes: data.dressCode.notes || '',
-      examples: data.dressCode.examples || [],
+  if (data.attireGuide) {
+    attireGuideEnabled.value = true
+    attireGuide.value = {
+      title: data.attireGuide.title || '',
+      description: data.attireGuide.description || '',
+      imageUrl: data.attireGuide.imageUrl || '',
     }
   }
 
@@ -92,12 +90,11 @@ function populateFromData(data: CustomContent) {
 function buildPayload(): CustomContent {
   const payload: CustomContent = {}
 
-  if (dressCodeEnabled.value) {
-    payload.dressCode = {
-      title: dressCode.value.title.trim(),
-      description: dressCode.value.description.trim(),
-      notes: dressCode.value.notes.trim() || undefined,
-      examples: dressCode.value.examples.length > 0 ? dressCode.value.examples : undefined,
+  if (attireGuideEnabled.value) {
+    payload.attireGuide = {
+      title: attireGuide.value.title.trim(),
+      description: attireGuide.value.description.trim(),
+      imageUrl: attireGuide.value.imageUrl.trim() || undefined,
     }
   }
 
@@ -146,19 +143,6 @@ async function handleSave() {
   } finally {
     saving.value = false
   }
-}
-
-/** Adds an example to the dress code list. */
-function addExample() {
-  const val = newExample.value.trim()
-  if (!val) return
-  dressCode.value.examples.push(val)
-  newExample.value = ''
-}
-
-/** Removes an example from the dress code list. */
-function removeExample(index: number) {
-  dressCode.value.examples.splice(index, 1)
 }
 
 /** Adds a monetary account. */
@@ -251,58 +235,35 @@ function removeSection(id: string) {
       <p v-else-if="error" class="text-red-600 text-sm mb-3">{{ error }}</p>
 
       <div v-else class="space-y-4">
-        <!-- Dress Code -->
+        <!-- Attire Guide -->
         <div class="bg-gray-50 rounded-lg p-4">
           <div class="flex items-center justify-between mb-3">
-            <h4 class="text-sm font-medium text-primary">Dress Code</h4>
+            <h4 class="text-sm font-medium text-primary">Attire Guide</h4>
             <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="dressCodeEnabled" type="checkbox" class="rounded" />
-              <span class="text-xs text-gray-500">{{ dressCodeEnabled ? 'Enabled' : 'Disabled' }}</span>
+              <input v-model="attireGuideEnabled" type="checkbox" class="rounded" />
+              <span class="text-xs text-gray-500">{{ attireGuideEnabled ? 'Enabled' : 'Disabled' }}</span>
             </label>
           </div>
-          <template v-if="dressCodeEnabled">
+          <template v-if="attireGuideEnabled">
             <div class="space-y-2">
               <input
-                v-model="dressCode.title"
+                v-model="attireGuide.title"
                 type="text"
                 placeholder="e.g., Semi-Formal"
                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
               />
               <textarea
-                v-model="dressCode.description"
+                v-model="attireGuide.description"
                 rows="2"
                 placeholder="Description"
                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
               ></textarea>
               <input
-                v-model="dressCode.notes"
-                type="text"
-                placeholder="Notes (optional)"
+                v-model="attireGuide.imageUrl"
+                type="url"
+                placeholder="Attire motif image URL (optional)"
                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
               />
-              <div>
-                <p class="text-xs text-gray-500 mb-1">Examples</p>
-                <div class="flex flex-wrap gap-1 mb-2">
-                  <span
-                    v-for="(ex, i) in dressCode.examples"
-                    :key="i"
-                    class="inline-flex items-center gap-1 px-2 py-0.5 bg-white rounded text-xs text-gray-700 border"
-                  >
-                    {{ ex }}
-                    <button @click="removeExample(i)" class="text-red-400 hover:text-red-600">&times;</button>
-                  </span>
-                </div>
-                <div class="flex gap-2">
-                  <input
-                    v-model="newExample"
-                    type="text"
-                    placeholder="Add example"
-                    class="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
-                    @keyup.enter="addExample"
-                  />
-                  <button @click="addExample" class="text-xs text-primary hover:underline">Add</button>
-                </div>
-              </div>
             </div>
           </template>
         </div>
