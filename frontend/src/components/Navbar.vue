@@ -87,11 +87,7 @@ async function handleLogout() {
       <div class="flex items-center justify-between h-16">
         <!-- Logo -->
         <RouterLink to="/" class="block h-10 w-40 overflow-hidden rounded">
-          <img
-            src="/nav_logo.png"
-            alt="urinvitedto.my"
-            class="h-full w-full object-cover object-center"
-          />
+          <img src="/nav_logo.png" class="h-full w-full object-cover object-center" />
         </RouterLink>
 
         <!-- Desktop: LOGIN link when not logged in -->
