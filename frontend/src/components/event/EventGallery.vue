@@ -334,7 +334,7 @@ onUnmounted(() => {
     <!-- Lightbox -->
     <div
       v-if="lightboxOpen"
-      class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center"
+      class="fixed inset-0 bg-black/90 z-60 flex items-center justify-center"
       @click.self="closeLightbox"
     >
       <button
