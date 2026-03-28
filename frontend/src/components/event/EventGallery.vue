@@ -21,6 +21,7 @@ let autoTimer: ReturnType<typeof setInterval> | null = null
 let resetTimer: ReturnType<typeof setTimeout> | null = null
 
 const isHovered = ref(false)
+const showAll = ref(false)
 
 const MOBILE_BREAKPOINT = 768
 const visibleCount = ref(
@@ -188,8 +189,55 @@ onUnmounted(() => {
         Our Prenup
       </h2>
 
+      <div class="flex justify-end mb-4">
+        <button
+          @click="showAll = !showAll"
+          class="text-sm font-medium text-primary hover:text-primary-dark/80 transition-colors flex items-center gap-1"
+        >
+          {{ showAll ? 'Show Less' : 'View All' }}
+          <svg
+            class="w-4 h-4 transition-transform"
+            :class="{ 'rotate-180': showAll }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Full gallery grid -->
+      <div v-if="showAll" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div
+          v-for="(item, idx) in items"
+          :key="idx"
+          class="group cursor-pointer"
+          @click="lightboxIndex = idx; lightboxOpen = true"
+        >
+          <div class="aspect-4/5 overflow-hidden rounded-xl shadow-sm border border-muted/50 bg-white/80 backdrop-blur">
+            <img
+              v-if="item.mediaType === 'photo'"
+              :src="item.mediaUrl"
+              :alt="item.caption || 'Gallery image'"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              loading="lazy"
+            />
+            <div
+              v-else
+              class="w-full h-full bg-primary flex items-center justify-center group-hover:bg-primary-dark transition-colors"
+            >
+              <svg class="w-12 h-12 text-accent" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Carousel -->
       <div
+        v-if="!showAll"
         class="relative"
         @mouseenter="isHovered = true"
         @mouseleave="isHovered = false"
@@ -348,9 +396,6 @@ onUnmounted(() => {
           controls
           class="max-w-full max-h-[80vh]"
         ></video>
-        <p v-if="currentItem().caption" class="text-white text-center mt-4">
-          {{ currentItem().caption }}
-        </p>
       </div>
     </div>
   </section>
