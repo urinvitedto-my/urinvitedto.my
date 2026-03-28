@@ -126,14 +126,14 @@ async function handleInviteSubmit() {
       <div class="absolute inset-0 bg-black/40"></div>
 
       <div
-        class="relative z-10 flex flex-col items-center justify-start pt-[1vh] md:justify-center md:pt-0 h-full px-4 text-center"
+        class="relative z-10 flex flex-col items-center justify-between pt-[6vh] pb-[6vh] md:justify-center md:pt-0 md:pb-0 h-full px-4 text-center"
       >
         <h1 class="landing-title text-white">
           <template v-if="titleParts">
             <span v-for="(part, i) in titleParts" :key="i">
               {{ part }}<br v-if="i < titleParts.length - 1" /><span
                 v-if="i < titleParts.length - 1"
-                class="block text-xl md:text-4xl"
+                class="block text-2xl md:text-4xl"
                 >&amp;</span
               >
             </span>
@@ -228,7 +228,7 @@ async function handleInviteSubmit() {
 
 .landing-title {
   font-family: 'Lavishly Yours', cursive;
-  font-size: clamp(3.5rem, 12vw, 5rem);
+  font-size: clamp(4rem, 14vw, 6rem);
   font-weight: 400;
   letter-spacing: normal;
   text-transform: none;
