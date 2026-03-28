@@ -73,7 +73,7 @@ function buildInviteMessage(invite: AdminInvite): string {
   const label = invite.label || 'there'
 
   const lines = [
-    `Hi ${label}!`,
+    `Hello ${label}!`,
     '',
     `We're excited to let you know that you are invited to`,
     `${hostLabel} ${eventType}!`,
@@ -85,7 +85,15 @@ function buildInviteMessage(invite: AdminInvite): string {
   ]
 
   if (isPrivate) {
-    lines.push('', `Your invite code: ${invite.inviteCode}`)
+    const guestNames = invite.guests.map((g) => `- ${g.displayName}`)
+    lines.push(
+      '',
+      `Invite code: ${invite.inviteCode}`,
+      '',
+      `Invitation code for:`,
+      ...guestNames,
+      '',
+    )
   }
 
   return lines.join('\n')
