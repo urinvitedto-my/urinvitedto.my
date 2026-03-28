@@ -123,9 +123,16 @@ onMounted(() => {
         <LoadingSpinner />
       </div>
 
-      <div v-else-if="error" class="text-center py-20">
-        <p class="text-red-600 mb-4">{{ error }}</p>
-        <button @click="hostStore.fetchEvents()" class="text-accent hover:underline">
+      <div
+        v-else-if="error"
+        class="flex flex-col items-center justify-center text-center min-h-[60vh]"
+      >
+        <h2 class="text-2xl font-bold text-primary mb-2">Something went wrong</h2>
+        <p class="text-base text-gray-500 mb-6 max-w-sm">{{ error }}</p>
+        <button
+          @click="hostStore.fetchEvents()"
+          class="bg-accent text-black font-semibold px-8 py-3 rounded-lg text-base hover:bg-accent-dark transition-colors"
+        >
           Try again
         </button>
       </div>

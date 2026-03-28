@@ -97,8 +97,12 @@ async function handleInviteSubmit() {
       class="landing-fullscreen bg-primary flex items-center justify-center"
     >
       <div class="text-center px-4">
-        <p class="text-red-400 mb-4">{{ error }}</p>
-        <button @click="loadEvent" class="text-accent hover:underline">
+        <h2 class="text-2xl font-bold text-white mb-2">Something went wrong</h2>
+        <p class="text-base text-white/60 mb-6 max-w-sm mx-auto">{{ error }}</p>
+        <button
+          @click="loadEvent"
+          class="bg-accent text-black font-semibold px-8 py-3 rounded-lg text-base hover:bg-accent-dark transition-colors"
+        >
           Try again
         </button>
       </div>

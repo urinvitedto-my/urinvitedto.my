@@ -117,9 +117,16 @@ watch(isAdmin, async (newVal) => {
         </div>
 
         <!-- Error -->
-        <div v-else-if="eventsError" class="text-center py-12">
-          <p class="text-red-600 mb-4">{{ eventsError }}</p>
-          <button @click="adminStore.fetchEvents()" class="text-accent hover:underline">
+        <div
+          v-else-if="eventsError"
+          class="flex flex-col items-center justify-center text-center min-h-[60vh]"
+        >
+          <h2 class="text-2xl font-bold text-primary mb-2">Something went wrong</h2>
+          <p class="text-base text-gray-500 mb-6 max-w-sm">{{ eventsError }}</p>
+          <button
+            @click="adminStore.fetchEvents()"
+            class="bg-accent text-black font-semibold px-8 py-3 rounded-lg text-base hover:bg-accent-dark transition-colors"
+          >
             Try again
           </button>
         </div>

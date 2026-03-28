@@ -156,9 +156,18 @@ async function loadEventData() {
     </div>
 
     <!-- Error -->
-    <div v-else-if="error" class="max-w-md mx-auto py-20 px-4 text-center">
-      <p class="text-red-600 mb-4">{{ error }}</p>
-      <RouterLink :to="`/${type}/${slug}`" class="text-accent hover:underline">
+    <div
+      v-else-if="error"
+      class="flex flex-col items-center justify-center text-center min-h-[60vh] px-4"
+    >
+      <h2 class="text-2xl font-bold text-primary mb-2 font-sans!">
+        Something went wrong
+      </h2>
+      <p class="text-base text-gray-500 mb-6 max-w-sm font-sans!">{{ error }}</p>
+      <RouterLink
+        :to="`/${type}/${slug}`"
+        class="bg-accent text-black font-semibold px-8 py-3 rounded-lg text-base hover:bg-accent-dark transition-colors font-sans!"
+      >
         Go back
       </RouterLink>
     </div>

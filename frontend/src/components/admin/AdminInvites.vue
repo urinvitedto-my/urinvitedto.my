@@ -335,7 +335,7 @@ function rsvpClass(status: string): string {
                 <button
                   type="button"
                   @click="
-                    addingGuestInviteId = null
+                    addingGuestInviteId = null;
                     guestName = ''
                   "
                   class="text-sm text-gray-500 hover:text-gray-700"
