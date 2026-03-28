@@ -165,7 +165,7 @@ type CreateEventRequest struct {
 	Location *string `json:"location,omitempty"`
 }
 
-// AdminEvent is an event with hosts for admin list view.
+// AdminEvent is an event with hosts and stats for admin list view.
 type AdminEvent struct {
 	BaseEvent
 	Description      *string     `json:"description,omitempty"`
@@ -173,6 +173,10 @@ type AdminEvent struct {
 	LocationPhotoURL *string     `json:"locationPhotoUrl,omitempty"`
 	MusicURL         *string     `json:"musicUrl,omitempty"`
 	Hosts            []AdminHost `json:"hosts"`
+	InviteCount      int         `json:"inviteCount"`
+	GuestCount       int         `json:"guestCount"`
+	RsvpYes          int         `json:"rsvpYes"`
+	RsvpNo           int         `json:"rsvpNo"`
 }
 
 // UpdateEventRequest is the request body for updating an event.

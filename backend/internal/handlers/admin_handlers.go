@@ -21,9 +21,13 @@ func (h *Handlers) ListEvents(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	rows, err := h.db.Query(ctx, `
-		SELECT id, type, slug, title, description, is_public,
-			cover_image_url, location_photo_url, music_url, starts_at, location, created_at
-		FROM events ORDER BY created_at DESC
+		SELECT e.id, e.type, e.slug, e.title, e.description, e.is_public,
+			e.cover_image_url, e.location_photo_url, e.music_url, e.starts_at, e.location, e.created_at,
+			COALESCE((SELECT COUNT(*) FROM invites WHERE event_id = e.id), 0),
+			COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = e.id), 0),
+			COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = e.id AND g.rsvp_status = 'yes'), 0),
+			COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = e.id AND g.rsvp_status = 'no'), 0)
+		FROM events e ORDER BY e.created_at DESC
 	`)
 	if err != nil {
 		slog.Error("DB error listing events", "error", err)
@@ -53,6 +57,10 @@ func (h *Handlers) ListEvents(w http.ResponseWriter, r *http.Request) {
 			&e.StartsAt,
 			&e.Location,
 			&e.CreatedAt,
+			&e.InviteCount,
+			&e.GuestCount,
+			&e.RsvpYes,
+			&e.RsvpNo,
 		); err != nil {
 			slog.Error("Error scanning event", "error", err)
 			continue
@@ -384,6 +392,10 @@ func (h *Handlers) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 	}
 	event.Hosts = hosts
 
+	if err := h.fetchEventCounts(ctx, &event); err != nil {
+		slog.Error("Error fetching event counts", "eventId", event.ID, "error", err)
+	}
+
 	h.writeJSON(w, http.StatusOK, event)
 }
 
@@ -410,6 +422,17 @@ func (h *Handlers) DeleteEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// fetchEventCounts populates invite/guest/RSVP counts on an AdminEvent.
+func (h *Handlers) fetchEventCounts(ctx context.Context, event *models.AdminEvent) error {
+	return h.db.QueryRow(ctx, `
+		SELECT
+			COALESCE((SELECT COUNT(*) FROM invites WHERE event_id = $1), 0),
+			COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = $1), 0),
+			COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = $1 AND g.rsvp_status = 'yes'), 0),
+			COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = $1 AND g.rsvp_status = 'no'), 0)
+	`, event.ID).Scan(&event.InviteCount, &event.GuestCount, &event.RsvpYes, &event.RsvpNo)
 }
 
 // fetchAdminHosts retrieves hosts with email for admin views.
