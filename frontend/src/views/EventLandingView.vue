@@ -97,8 +97,12 @@ async function handleInviteSubmit() {
       class="landing-fullscreen bg-primary flex items-start pt-[12vh] md:items-center md:pt-0 justify-center"
     >
       <div class="text-center px-4">
-        <h2 class="text-xl md:text-2xl font-bold text-white mb-2">Something went wrong</h2>
-        <p class="text-sm md:text-base text-white/60 mb-4 md:mb-6 max-w-sm mx-auto">{{ error }}</p>
+        <h2 class="text-xl md:text-2xl font-bold text-white mb-2">
+          Something went wrong
+        </h2>
+        <p class="text-sm md:text-base text-white/60 mb-4 md:mb-6 max-w-sm mx-auto">
+          {{ error }}
+        </p>
         <button
           @click="loadEvent"
           class="bg-accent text-black font-semibold px-6 py-2.5 md:px-8 md:py-3 rounded-lg text-sm md:text-base hover:bg-accent-dark transition-colors"
@@ -122,14 +126,14 @@ async function handleInviteSubmit() {
       <div class="absolute inset-0 bg-black/40"></div>
 
       <div
-        class="relative z-10 flex flex-col items-center justify-start pt-[3vh] md:justify-center md:pt-0 h-full px-4 text-center"
+        class="relative z-10 flex flex-col items-center justify-start pt-[2vh] md:justify-center md:pt-0 h-full px-4 text-center"
       >
         <h1 class="landing-title text-white">
           <template v-if="titleParts">
             <span v-for="(part, i) in titleParts" :key="i">
               {{ part }}<br v-if="i < titleParts.length - 1" /><span
                 v-if="i < titleParts.length - 1"
-                class="block text-2xl md:text-4xl"
+                class="block text-xl md:text-4xl"
                 >&amp;</span
               >
             </span>
@@ -161,7 +165,10 @@ async function handleInviteSubmit() {
         </div>
 
         <!-- Private Event: Invite Code Entry -->
-        <div v-if="!eventSummary.isPublic" class="mt-4 md:mt-6 w-full max-w-xs md:max-w-sm">
+        <div
+          v-if="!eventSummary.isPublic"
+          class="mt-4 md:mt-6 w-full max-w-xs md:max-w-sm"
+        >
           <form
             @submit.prevent="handleInviteSubmit"
             class="flex flex-col items-center gap-3 md:gap-4"
@@ -175,7 +182,7 @@ async function handleInviteSubmit() {
               type="text"
               maxlength="6"
               placeholder="ABC123"
-              class="w-full px-3 py-2.5 md:px-4 md:py-3 text-center text-lg md:text-xl tracking-widest font-mono rounded-lg bg-white/15 backdrop-blur border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 uppercase"
+              class="w-full px-2.5 py-1.5 md:px-4 md:py-3 text-center text-base md:text-xl tracking-widest font-mono rounded-lg bg-white/15 backdrop-blur border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 uppercase"
               :disabled="submitting"
             />
 
@@ -235,10 +242,10 @@ async function handleInviteSubmit() {
   justify-content: center;
   gap: 0.375rem;
   width: 100%;
-  padding: 0.625rem 1.5rem;
+  padding: 0.5rem 1.25rem;
   background-color: color-mix(in srgb, var(--color-primary-dark) 90%, transparent);
   color: white;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   border-radius: 0.5rem;
