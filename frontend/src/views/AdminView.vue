@@ -57,7 +57,7 @@ watch(isAdmin, async (newVal) => {
 </script>
 
 <template>
-  <div class="admin-view min-h-screen pt-24 pb-8 px-4">
+  <div class="admin-view min-h-screen pt-24 pb-8 px-4 md:mx-16">
     <div class="max-w-7xl mx-auto">
 
       <!--

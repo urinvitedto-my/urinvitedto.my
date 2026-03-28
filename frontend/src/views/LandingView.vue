@@ -29,7 +29,7 @@
           Invite<br />beautifully
         </h1>
         <p class="text-base md:text-lg text-primary max-w-xs mb-4 ml-2">
-          COMING SOON
+          COMING SOON<br />
           <span class="text-accent">urinvitedto.my@gmail.com</span>
         </p>
         <RouterLink
