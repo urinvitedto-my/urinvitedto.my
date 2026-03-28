@@ -266,4 +266,8 @@ export interface AdminEvent {
   location?: string
   createdAt: string
   hosts: AdminHost[]
+  inviteCount: number
+  guestCount: number
+  rsvpYes: number
+  rsvpNo: number
 }
