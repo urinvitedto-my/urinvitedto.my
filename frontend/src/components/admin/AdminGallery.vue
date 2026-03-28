@@ -30,19 +30,52 @@ const editLoading = ref(false)
 
 const BUCKET = 'event-media'
 
+/** Matches common image extensions when the browser leaves MIME empty. */
+const IMAGE_NAME_RE = /\.(gif|jpe?g|png|webp|bmp|svg|avif|heic|heif|tiff?|ico|jfif|pjpeg|pjp)$/i
+
+/** Parses `/_gallery/NNN-` from stored media URLs so new files continue after the highest ordinal (handles gaps after deletes). */
+const GALLERY_ORDINAL_RE = /\/_gallery\/(\d+)-/
+
 onMounted(() => adminStore.fetchGallery(props.eventId))
 
-/** Detects media type from file MIME type. */
-function detectMediaType(file: File): 'photo' | 'video' {
-  return file.type.startsWith('video/') ? 'video' : 'photo'
+/** Highest numeric prefix in `_gallery/NNN-` paths, or 0 if none match (e.g. legacy URLs). */
+function maxGalleryOrdinalFromUrls(galleryItems: AdminGalleryItem[]): number {
+  let max = 0
+  for (const item of galleryItems) {
+    const m = item.mediaUrl.match(GALLERY_ORDINAL_RE)
+    if (m?.[1]) {
+      const n = Number.parseInt(m[1], 10)
+      if (!Number.isNaN(n)) max = Math.max(max, n)
+    }
+  }
+  return max
 }
 
-/** Generates a unique storage path for the file. */
-function buildStoragePath(file: File): string {
-  const ext = file.name.split('.').pop() || 'bin'
-  const timestamp = Date.now()
+/** True when the name has a non-empty segment after the last dot (e.g. photo.jpg, not "photo"). */
+function hasFilenameExtension(file: File): boolean {
+  const name = file.name.trim()
+  if (!name.includes('.')) return false
+  const ext = name.split('.').pop()?.trim()
+  return !!ext && ext.length > 0
+}
+
+/** Returns true for images we accept: has a filename extension and image MIME or known image ext. */
+function isAllowedImageFile(file: File): boolean {
+  if (!hasFilenameExtension(file)) return false
+  if (file.type.startsWith('image/')) return true
+  if (!file.type && IMAGE_NAME_RE.test(file.name)) return true
+  return false
+}
+
+/**
+ * Builds a unique storage path. `ordinal` is the next `_gallery/NNN-` index (after max existing, so deletes leave no duplicate numbers);
+ * a short random suffix keeps keys unique. Only call for files that passed isAllowedImageFile.
+ */
+function buildStoragePath(file: File, ordinal: number): string {
+  const ext = file.name.split('.').pop()!.trim().toLowerCase()
+  const label = String(ordinal).padStart(3, '0')
   const random = Math.random().toString(36).slice(2, 8)
-  return `${props.eventId}/${timestamp}-${random}.${ext}`
+  return `${props.eventId}/_gallery/${label}-${random}.${ext}`
 }
 
 /** Extracts storage path from a Supabase public URL for deletion. */
@@ -63,13 +96,26 @@ async function handleFileUpload(event: Event) {
   uploadError.value = ''
 
   try {
-    for (const file of Array.from(files)) {
-      const path = buildStoragePath(file)
-      const mediaType = detectMediaType(file)
+    const picked = Array.from(files)
+    const allowed = picked.filter(isAllowedImageFile)
+    const skipped = picked.length - allowed.length
+    if (skipped > 0) {
+      toast.error(
+        skipped === picked.length
+          ? 'Only image files with a file extension are allowed (e.g. .jpg, .png, .gif).'
+          : `Skipped ${skipped} file(s) — use images only, each with a file extension.`,
+      )
+    }
+    if (allowed.length === 0) return
+
+    let nextOrdinal = maxGalleryOrdinalFromUrls(adminStore.getGallery(props.eventId))
+    for (const file of allowed) {
+      nextOrdinal += 1
+      const path = buildStoragePath(file, nextOrdinal)
 
       const { error: uploadErr } = await supabase.storage
         .from(BUCKET)
-        .upload(path, file, { contentType: file.type })
+        .upload(path, file, { contentType: file.type || 'application/octet-stream' })
 
       if (uploadErr) throw new Error(uploadErr.message)
 
@@ -78,7 +124,7 @@ async function handleFileUpload(event: Event) {
         .getPublicUrl(path)
 
       await adminStore.createGalleryItem(props.eventId, {
-        mediaType,
+        mediaType: 'photo',
         mediaUrl: urlData.publicUrl,
       })
     }
@@ -178,7 +224,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
           <input
             ref="fileInput"
             type="file"
-            accept="image/*,video/*"
+            accept="image/*"
             multiple
             class="hidden"
             :disabled="uploading"
