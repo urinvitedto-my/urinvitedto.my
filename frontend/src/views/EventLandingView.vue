@@ -126,7 +126,7 @@ async function handleInviteSubmit() {
       <div class="absolute inset-0 bg-black/40"></div>
 
       <div
-        class="relative z-10 flex flex-col items-center justify-start pt-[12vh] md:justify-center md:pt-0 h-full px-4 text-center"
+        class="relative z-10 flex flex-col items-center justify-start pt-[2vh] md:justify-center md:pt-0 h-full px-4 text-center"
       >
         <h1 class="landing-title text-white">
           <template v-if="titleParts">
@@ -212,11 +212,17 @@ async function handleInviteSubmit() {
 </template>
 
 <style scoped>
+.event-landing-view {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 .landing-fullscreen {
   position: relative;
   width: 100%;
-  height: 100vh;
-  height: 100dvh;
+  height: 100%;
   overflow: hidden;
 }
 
