@@ -8,11 +8,22 @@ const props = defineProps<{
   gallery: GalleryItem[]
 }>()
 
+/** Caption value on gallery rows used to pick hero slideshow images (max 3). */
+const EVENT_DETAILS_BG_CAPTION = 'event_details_background'
+
 const currentIndex = ref(0)
 
-const photos = computed(() =>
-  props.gallery.filter((item) => item.mediaType === 'photo'),
-)
+/** Use photos tagged for this section’s background, ordered like the gallery. */
+const slideshowPhotos = computed(() => {
+  const tagged = props.gallery
+    .filter(
+      (item) =>
+        item.mediaType === 'photo' &&
+        item.caption === EVENT_DETAILS_BG_CAPTION,
+    )
+    .sort((a, b) => a.orderIndex - b.orderIndex)
+  return tagged
+})
 
 /** Splits title into lines around "&" for stacked display. */
 const titleParts = computed(() => {
@@ -23,9 +34,10 @@ const titleParts = computed(() => {
 let slideshowTimer: ReturnType<typeof setInterval> | null = null
 
 onMounted(() => {
-  if (photos.value.length > 1) {
+  if (slideshowPhotos.value.length > 1) {
     slideshowTimer = setInterval(() => {
-      currentIndex.value = (currentIndex.value + 1) % photos.value.length
+      currentIndex.value =
+        (currentIndex.value + 1) % slideshowPhotos.value.length
     }, 5000)
   }
 })
@@ -38,12 +50,11 @@ onUnmounted(() => {
 <template>
   <section class="event-details relative overflow-hidden py-10 md:py-24 lg:py-30 px-4">
     <!-- Slideshow background -->
-    <template v-if="photos.length">
+    <template v-if="slideshowPhotos.length">
       <img
-        v-for="(photo, idx) in photos"
+        v-for="(photo, idx) in slideshowPhotos"
         :key="photo.id"
         :src="photo.mediaUrl"
-        :alt="photo.caption || ''"
         class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
         :class="idx === currentIndex ? 'opacity-100' : 'opacity-0'"
         aria-hidden="true"
