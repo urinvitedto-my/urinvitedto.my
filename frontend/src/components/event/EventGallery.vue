@@ -87,7 +87,16 @@ function onPointerDown(e: PointerEvent) {
   startX = e.clientX
   startY = e.clientY
   dragDelta.value = 0
-  ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+  window.addEventListener('pointermove', onPointerMove)
+  window.addEventListener('pointerup', onPointerUp)
+  window.addEventListener('pointercancel', onPointerUp)
+}
+
+/** Removes drag listeners from window. */
+function cleanupDragListeners() {
+  window.removeEventListener('pointermove', onPointerMove)
+  window.removeEventListener('pointerup', onPointerUp)
+  window.removeEventListener('pointercancel', onPointerUp)
 }
 
 function onPointerMove(e: PointerEvent) {
@@ -115,6 +124,7 @@ function onPointerMove(e: PointerEvent) {
 
 function onPointerUp(e: PointerEvent) {
   if (!isDragging.value) return
+  cleanupDragListeners()
   const dx = e.clientX - startX
   isDragging.value = false
   animated.value = true
@@ -123,7 +133,6 @@ function onPointerUp(e: PointerEvent) {
   if (isHorizontalDrag && Math.abs(dx) > 40) {
     step(dx < 0 ? 1 : -1)
   }
-  // If not enough drag, dragDelta animates back to 0 (snap back)
 }
 
 /**
@@ -168,6 +177,7 @@ onUnmounted(() => {
   window.removeEventListener('resize', updateVisibleCount)
   if (autoTimer) clearInterval(autoTimer)
   if (resetTimer) clearTimeout(resetTimer)
+  cleanupDragListeners()
 })
 </script>
 
@@ -206,9 +216,6 @@ onUnmounted(() => {
           class="overflow-hidden cursor-grab active:cursor-grabbing select-none"
           style="touch-action: pan-y"
           @pointerdown="onPointerDown"
-          @pointermove="onPointerMove"
-          @pointerup="onPointerUp"
-          @pointercancel="onPointerUp"
         >
           <div
             class="flex"
