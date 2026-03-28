@@ -213,9 +213,10 @@ async function handleInviteSubmit() {
 
 <style scoped>
 .event-landing-view {
-  height: 100vh;
-  height: 100dvh;
+  position: fixed;
+  inset: 0;
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
 .landing-fullscreen {
