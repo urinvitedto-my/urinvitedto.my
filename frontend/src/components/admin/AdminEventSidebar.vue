@@ -74,14 +74,14 @@ function pendingCount(event: AdminEvent): number {
         v-model="search"
         type="text"
         placeholder="Search by title or slug..."
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:outline-none"
+        class="w-full px-3 py-2 border bg-white border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:outline-none"
       />
 
       <!-- Filters + Sort -->
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2 justify-between">
         <select
           v-model="typeFilter"
-          class="px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:outline-none"
+          class="px-2 py-1.5 border bg-white border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:outline-none"
         >
           <option value="all">All types</option>
           <option value="wedding">Wedding</option>
@@ -91,7 +91,7 @@ function pendingCount(event: AdminEvent): number {
 
         <select
           v-model="visibilityFilter"
-          class="px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:outline-none"
+          class="px-2 py-1.5 border bg-white border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:outline-none"
         >
           <option value="all">All</option>
           <option value="public">Public</option>
@@ -100,7 +100,7 @@ function pendingCount(event: AdminEvent): number {
 
         <select
           v-model="sortBy"
-          class="px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:outline-none"
+          class="px-2 py-1.5 border bg-white border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-accent focus:outline-none"
         >
           <option value="created">Created</option>
           <option value="date">Event date</option>
@@ -109,7 +109,7 @@ function pendingCount(event: AdminEvent): number {
 
         <button
           @click="toggleSortDir"
-          class="px-2 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
+          class="px-2 py-1.5 border bg-white border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
           :title="sortDir === 'asc' ? 'Ascending' : 'Descending'"
         >
           {{ sortDir === 'asc' ? '↑' : '↓' }}

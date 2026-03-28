@@ -159,7 +159,7 @@ async function handleSubmit(guest: Guest) {
                 v-model="getState(guest.id).message"
                 placeholder="Leave a message (optional)"
                 rows="2"
-                class="w-full mt-3 px-3 py-2 text-sm border border-muted rounded-lg focus:outline-none focus:ring-2 focus:ring-accent resize-none"
+                class="w-full mt-3 px-3 py-2 text-sm bg-white border border-muted rounded-lg focus:outline-none focus:ring-2 focus:ring-accent resize-none"
                 :disabled="getState(guest.id).submitting"
               ></textarea>
 
