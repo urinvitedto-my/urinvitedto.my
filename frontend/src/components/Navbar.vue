@@ -132,7 +132,7 @@ async function handleLogout() {
           <!-- Desktop dropdown -->
           <div
             v-if="menuOpen"
-            class="hidden md:block absolute right-0 top-full mt-2 min-w-[240px] bg-white rounded-xl py-2 shadow-xl ring-1 ring-black/5"
+            class="hidden md:block absolute right-0 top-full mt-2 min-w-60 bg-white rounded-xl py-2 shadow-xl ring-1 ring-black/5"
           >
             <template v-if="authStore.initialized && isLoggedIn">
               <div class="px-4 py-2.5 border-b border-gray-300">

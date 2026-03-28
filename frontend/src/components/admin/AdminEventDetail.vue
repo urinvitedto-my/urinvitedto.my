@@ -44,7 +44,12 @@ function getEventUrl(event: AdminEvent): string {
 
 /** Deletes an event after confirmation. */
 async function handleDelete() {
-  if (!(await toast.confirm('Delete this event? This will remove all related data (hosts, invites, guests, etc.) and cannot be undone.'))) return
+  if (
+    !(await toast.confirm(
+      'Delete this event? This will remove all related data (hosts, invites, guests, etc.) and cannot be undone.',
+    ))
+  )
+    return
   try {
     await adminStore.deleteEvent(props.event.id)
     emit('deleted')
@@ -60,16 +65,24 @@ function noop() {}
   <div>
     <!-- Header -->
     <template v-if="!isEditing">
-      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
+      <div
+        class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6"
+      >
         <div class="min-w-0">
           <div class="flex items-center gap-2 mb-1 flex-wrap">
-            <span class="inline-block px-2 py-0.5 bg-accent text-black text-xs font-medium rounded capitalize">
+            <span
+              class="inline-block px-2 py-0.5 bg-accent text-black text-xs font-medium rounded capitalize"
+            >
               {{ event.type }}
             </span>
-            <span class="text-xs text-gray-500">{{ event.isPublic ? 'Public' : 'Private' }}</span>
+            <span class="text-xs text-gray-500">{{
+              event.isPublic ? 'Public' : 'Private'
+            }}</span>
           </div>
           <h2 class="text-xl font-bold text-primary">{{ event.title }}</h2>
-          <p v-if="event.description" class="text-sm text-gray-600 mt-1">{{ event.description }}</p>
+          <p v-if="event.description" class="text-sm text-gray-600 mt-1">
+            {{ event.description }}
+          </p>
           <p class="text-sm text-gray-500 mt-1">
             {{ formatDate(event.startsAt) }} · {{ event.location || 'No location' }}
           </p>
@@ -89,10 +102,7 @@ function noop() {}
           >
             Edit
           </button>
-          <button
-            @click="handleDelete"
-            class="text-sm text-red-500 hover:text-red-700"
-          >
+          <button @click="handleDelete" class="text-sm text-red-500 hover:text-red-700">
             Delete
           </button>
         </div>
@@ -115,9 +125,11 @@ function noop() {}
           :key="tab.key"
           @click="activeTab = tab.key"
           class="px-3 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors"
-          :class="activeTab === tab.key
-            ? 'border-accent text-primary'
-            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          :class="
+            activeTab === tab.key
+              ? 'border-accent text-primary'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          "
         >
           {{ tab.label }}
         </button>
@@ -126,10 +138,7 @@ function noop() {}
 
     <!-- Tab Content -->
     <div>
-      <AdminGuestOverview
-        v-if="activeTab === 'guests'"
-        :event-id="event.id"
-      />
+      <AdminGuestOverview v-if="activeTab === 'guests'" :event-id="event.id" />
 
       <AdminHosts
         v-else-if="activeTab === 'hosts'"

@@ -7,8 +7,13 @@ defineProps<{
 
 <template>
   <section class="location-photo py-16 px-4">
-    <h2 class="text-4xl font-bold text-primary-dark text-center mb-2 font-kaushan">Venue</h2>
-    <div v-if="location" class="flex items-center justify-center gap-2 text-gray-600 mb-6">
+    <h2 class="text-4xl font-bold text-primary-dark text-center mb-2 font-kaushan">
+      Venue
+    </h2>
+    <div
+      v-if="location"
+      class="flex items-center justify-center gap-2 text-gray-600 mb-6"
+    >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
           stroke-linecap="round"
@@ -26,8 +31,12 @@ defineProps<{
       <span class="font-medium">{{ location }}</span>
     </div>
     <div class="max-w-2xl mx-auto relative">
-      <div class="absolute inset-y-0 left-0 w-16 bg-linear-to-r from-background to-transparent z-10" />
-      <div class="absolute inset-y-0 right-0 w-16 bg-linear-to-l from-background to-transparent z-10" />
+      <div
+        class="absolute inset-y-0 left-0 w-16 bg-linear-to-r from-background to-transparent z-10"
+      />
+      <div
+        class="absolute inset-y-0 right-0 w-16 bg-linear-to-l from-background to-transparent z-10"
+      />
       <img
         :src="url"
         alt="Venue photo"

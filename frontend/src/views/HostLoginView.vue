@@ -32,14 +32,19 @@ async function handleLogin() {
 </script>
 
 <template>
-  <div class="host-login-view min-h-screen flex items-center justify-center pt-24 pb-12 px-4">
+  <div
+    class="host-login-view min-h-screen flex items-center justify-center pt-24 pb-12 px-4"
+  >
     <div class="max-w-md w-full">
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-primary">Host Login</h1>
         <p class="text-gray-600 mt-2">Sign in to view your event dashboard</p>
       </div>
 
-      <form @submit.prevent="handleLogin" class="bg-white rounded-lg shadow-sm p-8 space-y-6">
+      <form
+        @submit.prevent="handleLogin"
+        class="bg-white rounded-lg shadow-sm p-8 space-y-6"
+      >
         <div>
           <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
             Email

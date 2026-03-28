@@ -63,7 +63,11 @@ async function handleInviteSubmit() {
   error.value = ''
 
   try {
-    await eventStore.fetchDetails(props.type, props.slug, inviteCode.value.toUpperCase())
+    await eventStore.fetchDetails(
+      props.type,
+      props.slug,
+      inviteCode.value.toUpperCase(),
+    )
     router.push({
       name: 'guest',
       params: { type: props.type, slug: props.slug },
@@ -80,15 +84,23 @@ async function handleInviteSubmit() {
 <template>
   <div class="event-landing-view">
     <!-- Loading -->
-    <div v-if="loading" class="landing-fullscreen bg-primary flex items-center justify-center">
+    <div
+      v-if="loading"
+      class="landing-fullscreen bg-primary flex items-center justify-center"
+    >
       <LoadingSpinner />
     </div>
 
     <!-- Error (no event loaded) -->
-    <div v-else-if="error && !eventSummary" class="landing-fullscreen bg-primary flex items-center justify-center">
+    <div
+      v-else-if="error && !eventSummary"
+      class="landing-fullscreen bg-primary flex items-center justify-center"
+    >
       <div class="text-center px-4">
         <p class="text-red-400 mb-4">{{ error }}</p>
-        <button @click="loadEvent" class="text-accent hover:underline">Try again</button>
+        <button @click="loadEvent" class="text-accent hover:underline">
+          Try again
+        </button>
       </div>
     </div>
 
@@ -97,17 +109,25 @@ async function handleInviteSubmit() {
       v-else-if="eventSummary"
       class="landing-fullscreen bg-cover bg-center"
       :class="{ 'bg-primary': !eventSummary.coverImageUrl }"
-      :style="eventSummary.coverImageUrl
-        ? { backgroundImage: `url(${eventSummary.coverImageUrl})` }
-        : undefined"
+      :style="
+        eventSummary.coverImageUrl
+          ? { backgroundImage: `url(${eventSummary.coverImageUrl})` }
+          : undefined
+      "
     >
       <div class="absolute inset-0 bg-black/40"></div>
 
-      <div class="relative z-10 flex flex-col items-center justify-center h-full px-4 text-center">
+      <div
+        class="relative z-10 flex flex-col items-center justify-center h-full px-4 text-center"
+      >
         <h1 class="landing-title text-white">
           <template v-if="titleParts">
             <span v-for="(part, i) in titleParts" :key="i">
-              {{ part }}<br v-if="i < titleParts.length - 1" /><span v-if="i < titleParts.length - 1" class="block text-3xl md:text-4xl">&amp;</span>
+              {{ part }}<br v-if="i < titleParts.length - 1" /><span
+                v-if="i < titleParts.length - 1"
+                class="block text-3xl md:text-4xl"
+                >&amp;</span
+              >
             </span>
           </template>
           <template v-else>{{ eventSummary.title }}</template>
@@ -119,8 +139,18 @@ async function handleInviteSubmit() {
             :to="{ name: 'guest', params: { type, slug } }"
             class="landing-btn"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
             </svg>
             Open Invitation
           </RouterLink>
@@ -128,7 +158,10 @@ async function handleInviteSubmit() {
 
         <!-- Private Event: Invite Code Entry -->
         <div v-if="!eventSummary.isPublic" class="mt-6 w-full max-w-sm">
-          <form @submit.prevent="handleInviteSubmit" class="flex flex-col items-center gap-4">
+          <form
+            @submit.prevent="handleInviteSubmit"
+            class="flex flex-col items-center gap-4"
+          >
             <p class="text-white/80 text-sm font-medium tracking-wide">
               Enter Your Invite Code
             </p>
@@ -142,13 +175,19 @@ async function handleInviteSubmit() {
               :disabled="submitting"
             />
 
-            <button
-              type="submit"
-              :disabled="submitting"
-              class="landing-btn"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            <button type="submit" :disabled="submitting" class="landing-btn">
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
               </svg>
               {{ submitting ? 'Checking Guest List...' : 'Open Invitation' }}
             </button>

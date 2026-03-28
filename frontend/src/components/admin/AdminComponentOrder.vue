@@ -15,7 +15,9 @@ const emit = defineEmits<{ toggle: [] }>()
 const adminStore = useAdminStore()
 const toast = useToast()
 
-const loading = computed(() => adminStore.isSubLoading('enabledComponents', props.eventId))
+const loading = computed(() =>
+  adminStore.isSubLoading('enabledComponents', props.eventId),
+)
 const error = computed(() => adminStore.getSubError('enabledComponents', props.eventId))
 
 const saving = ref(false)
@@ -98,7 +100,9 @@ function syncCustomSectionEntries(comps: ComponentConfig[]): ComponentConfig[] {
   })
 
   filtered.sort((a, b) => a.order - b.order)
-  filtered.forEach((c, i) => { c.order = i + 1 })
+  filtered.forEach((c, i) => {
+    c.order = i + 1
+  })
 
   return filtered
 }
@@ -161,7 +165,8 @@ function displayName(name: string): string {
         <span
           class="inline-block transition-transform duration-200"
           :class="collapsed ? '' : 'rotate-90'"
-        >▶</span>
+          >▶</span
+        >
         Component Order
       </button>
     </div>
@@ -175,7 +180,8 @@ function displayName(name: string): string {
 
       <div v-else class="space-y-2">
         <p class="text-xs text-gray-500 mb-2">
-          Toggle visibility and reorder event page sections. Disabled sections won't appear on the event page.
+          Toggle visibility and reorder event page sections. Disabled sections won't
+          appear on the event page.
         </p>
 
         <div
@@ -191,19 +197,25 @@ function displayName(name: string): string {
                 :disabled="index === 0"
                 class="text-gray-400 hover:text-gray-600 disabled:opacity-30 text-xs leading-none"
                 title="Move up"
-              >▲</button>
+              >
+                ▲
+              </button>
               <button
                 @click="moveComponent(index, 'down')"
                 :disabled="index === components.length - 1"
                 class="text-gray-400 hover:text-gray-600 disabled:opacity-30 text-xs leading-none"
                 title="Move down"
-              >▼</button>
+              >
+                ▼
+              </button>
             </div>
             <span class="text-sm text-primary">{{ displayName(comp.name) }}</span>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input v-model="comp.enabled" type="checkbox" class="sr-only peer" />
-            <div class="w-9 h-5 bg-gray-300 rounded-full peer peer-checked:bg-accent transition-colors after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
+            <div
+              class="w-9 h-5 bg-gray-300 rounded-full peer peer-checked:bg-accent transition-colors after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"
+            ></div>
           </label>
         </div>
 

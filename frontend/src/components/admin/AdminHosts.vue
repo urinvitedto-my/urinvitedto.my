@@ -61,9 +61,12 @@ async function handleDelete(hostId: string) {
         <span
           class="inline-block transition-transform duration-200"
           :class="collapsed ? '' : 'rotate-90'"
-        >▶</span>
+          >▶</span
+        >
         Hosts
-        <span v-if="hosts.length > 0" class="text-gray-400 font-normal">({{ hosts.length }})</span>
+        <span v-if="hosts.length > 0" class="text-gray-400 font-normal"
+          >({{ hosts.length }})</span
+        >
       </button>
       <button
         v-if="!collapsed"
@@ -89,12 +92,14 @@ async function handleDelete(hostId: string) {
               v-if="host.authUserId"
               class="text-xs text-green-600 ml-2"
               title="Account linked"
-            >✓ Linked</span>
+              >✓ Linked</span
+            >
             <span
               v-else
               class="text-xs text-orange-500 ml-2"
               title="No auth account yet"
-            >⚠ Not linked</span>
+              >⚠ Not linked</span
+            >
           </div>
           <button
             @click="handleDelete(host.id)"

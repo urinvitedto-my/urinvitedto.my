@@ -17,9 +17,7 @@ const currentIndex = ref(0)
 const slideshowPhotos = computed(() => {
   const tagged = props.gallery
     .filter(
-      (item) =>
-        item.mediaType === 'photo' &&
-        item.caption === EVENT_DETAILS_BG_CAPTION,
+      (item) => item.mediaType === 'photo' && item.caption === EVENT_DETAILS_BG_CAPTION,
     )
     .sort((a, b) => a.orderIndex - b.orderIndex)
   return tagged
@@ -36,8 +34,7 @@ let slideshowTimer: ReturnType<typeof setInterval> | null = null
 onMounted(() => {
   if (slideshowPhotos.value.length > 1) {
     slideshowTimer = setInterval(() => {
-      currentIndex.value =
-        (currentIndex.value + 1) % slideshowPhotos.value.length
+      currentIndex.value = (currentIndex.value + 1) % slideshowPhotos.value.length
     }, 5000)
   }
 })
@@ -64,22 +61,48 @@ onUnmounted(() => {
 
     <div class="relative max-w-3xl mx-auto text-center">
       <!-- Title -->
-      <h1 class="text-8xl md:text-8xl lg:text-9xl font-normal text-white mb-6" style="font-family: 'Lavishly Yours', cursive; text-transform: none; letter-spacing: normal;">
+      <h1
+        class="text-8xl md:text-8xl lg:text-9xl font-normal text-white mb-6"
+        style="
+          font-family: 'Lavishly Yours', cursive;
+          text-transform: none;
+          letter-spacing: normal;
+        "
+      >
         <template v-if="titleParts">
           <span v-for="(part, i) in titleParts" :key="i">
-            {{ part }}<br v-if="i < titleParts.length - 1" /><span v-if="i < titleParts.length - 1" class="block text-3xl md:text-4xl">&amp;</span>
+            {{ part }}<br v-if="i < titleParts.length - 1" /><span
+              v-if="i < titleParts.length - 1"
+              class="block text-3xl md:text-4xl"
+              >&amp;</span
+            >
           </span>
         </template>
         <template v-else>{{ event.title }}</template>
       </h1>
 
       <!-- Dot divider -->
-      <svg class="mx-auto mt-12 mb-12 w-[200px] md:w-[400px]" viewBox="0 0 400 6" fill="none">
-        <circle v-for="i in 25" :key="i" :cx="4 + (i - 1) * 16.33" cy="3" r="2.5" fill="rgba(255,255,255,0.5)" />
+      <svg
+        class="mx-auto mt-12 mb-12 w-[200px] md:w-[400px]"
+        viewBox="0 0 400 6"
+        fill="none"
+      >
+        <circle
+          v-for="i in 25"
+          :key="i"
+          :cx="4 + (i - 1) * 16.33"
+          cy="3"
+          r="2.5"
+          fill="rgba(255,255,255,0.5)"
+        />
       </svg>
 
       <!-- Description -->
-      <p v-if="event.description" class="mb-2 text-gray-300 whitespace-pre-wrap max-w-2xl mx-auto text-xl md:text-3xl font-bold" style="font-family: 'Cormorant Garamond', 'Playfair Display', 'Georgia', serif;">
+      <p
+        v-if="event.description"
+        class="mb-2 text-gray-300 whitespace-pre-wrap max-w-2xl mx-auto text-xl md:text-3xl font-bold"
+        style="font-family: 'Cormorant Garamond', 'Playfair Display', 'Georgia', serif"
+      >
         {{ event.description }}
       </p>
 

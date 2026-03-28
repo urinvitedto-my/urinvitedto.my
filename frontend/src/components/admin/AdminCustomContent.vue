@@ -27,7 +27,14 @@ const locationEnabled = ref(false)
 const location = ref({ parkingInfo: '', accessibilityNotes: '', mapEmbedUrl: '' })
 
 const monetaryEnabled = ref(false)
-const monetary = ref({ accounts: [] as { method: string; number?: string; name: string; qrCodeUrl: string }[] })
+const monetary = ref({
+  accounts: [] as {
+    method: string
+    number?: string
+    name: string
+    qrCodeUrl: string
+  }[],
+})
 const newAccount = ref({ method: '', number: '', name: '', qrCodeUrl: '' })
 
 const countdownEnabled = ref(false)
@@ -36,7 +43,12 @@ const countdown = ref({ customMessage: '' })
 const customSections = ref<CustomSection[]>([])
 const showAddSection = ref(false)
 const DEFAULT_SECTION_BG = 'transparent'
-const newSection = ref({ title: '', content: '', image: '', bgColor: DEFAULT_SECTION_BG })
+const newSection = ref({
+  title: '',
+  content: '',
+  image: '',
+  bgColor: DEFAULT_SECTION_BG,
+})
 const editingSectionId = ref<string | null>(null)
 const editSection = ref({ title: '', content: '', image: '', bgColor: '', order: 0 })
 
@@ -108,14 +120,15 @@ function buildPayload(): CustomContent {
 
   payload.monetaryGifts = {
     enabled: monetaryEnabled.value,
-    accounts: monetary.value.accounts.length > 0
-      ? monetary.value.accounts.map((a) => ({
-          method: a.method,
-          number: a.number,
-          name: a.name,
-          qrCodeUrl: a.qrCodeUrl.trim() || undefined,
-        }))
-      : undefined,
+    accounts:
+      monetary.value.accounts.length > 0
+        ? monetary.value.accounts.map((a) => ({
+            method: a.method,
+            number: a.number,
+            name: a.name,
+            qrCodeUrl: a.qrCodeUrl.trim() || undefined,
+          }))
+        : undefined,
   }
 
   payload.countdownTimer = {
@@ -222,7 +235,8 @@ function removeSection(id: string) {
         <span
           class="inline-block transition-transform duration-200"
           :class="collapsed ? '' : 'rotate-90'"
-        >▶</span>
+          >▶</span
+        >
         Custom Content
       </button>
     </div>
@@ -241,7 +255,9 @@ function removeSection(id: string) {
             <h4 class="text-sm font-medium text-primary">Attire Guide</h4>
             <label class="flex items-center gap-2 cursor-pointer">
               <input v-model="attireGuideEnabled" type="checkbox" class="rounded" />
-              <span class="text-xs text-gray-500">{{ attireGuideEnabled ? 'Enabled' : 'Disabled' }}</span>
+              <span class="text-xs text-gray-500">{{
+                attireGuideEnabled ? 'Enabled' : 'Disabled'
+              }}</span>
             </label>
           </div>
           <template v-if="attireGuideEnabled">
@@ -274,7 +290,9 @@ function removeSection(id: string) {
             <h4 class="text-sm font-medium text-primary">Location Details</h4>
             <label class="flex items-center gap-2 cursor-pointer">
               <input v-model="locationEnabled" type="checkbox" class="rounded" />
-              <span class="text-xs text-gray-500">{{ locationEnabled ? 'Enabled' : 'Disabled' }}</span>
+              <span class="text-xs text-gray-500">{{
+                locationEnabled ? 'Enabled' : 'Disabled'
+              }}</span>
             </label>
           </div>
           <template v-if="locationEnabled">
@@ -307,7 +325,9 @@ function removeSection(id: string) {
             <h4 class="text-sm font-medium text-primary">Monetary Gifts</h4>
             <label class="flex items-center gap-2 cursor-pointer">
               <input v-model="monetaryEnabled" type="checkbox" class="rounded" />
-              <span class="text-xs text-gray-500">{{ monetaryEnabled ? 'Enabled' : 'Disabled' }}</span>
+              <span class="text-xs text-gray-500">{{
+                monetaryEnabled ? 'Enabled' : 'Disabled'
+              }}</span>
             </label>
           </div>
           <template v-if="monetaryEnabled">
@@ -321,10 +341,20 @@ function removeSection(id: string) {
                     class="flex items-center justify-between bg-white px-3 py-1.5 rounded text-sm border"
                   >
                     <div class="min-w-0">
-                      <span>{{ acc.method }} &middot; {{ acc.number }} &middot; {{ acc.name }}</span>
-                      <span v-if="acc.qrCodeUrl" class="text-xs text-gray-400 ml-1">(QR)</span>
+                      <span
+                        >{{ acc.method }} &middot; {{ acc.number }} &middot;
+                        {{ acc.name }}</span
+                      >
+                      <span v-if="acc.qrCodeUrl" class="text-xs text-gray-400 ml-1"
+                        >(QR)</span
+                      >
                     </div>
-                    <button @click="removeAccount(i)" class="text-red-400 hover:text-red-600 text-xs shrink-0 ml-2">Remove</button>
+                    <button
+                      @click="removeAccount(i)"
+                      class="text-red-400 hover:text-red-600 text-xs shrink-0 ml-2"
+                    >
+                      Remove
+                    </button>
                   </div>
                 </div>
                 <div class="space-y-2">
@@ -355,7 +385,12 @@ function removeSection(id: string) {
                       placeholder="QR code image URL (optional)"
                       class="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
                     />
-                    <button @click="addAccount" class="text-xs text-primary hover:underline shrink-0">Add</button>
+                    <button
+                      @click="addAccount"
+                      class="text-xs text-primary hover:underline shrink-0"
+                    >
+                      Add
+                    </button>
                   </div>
                 </div>
               </div>
@@ -369,7 +404,9 @@ function removeSection(id: string) {
             <h4 class="text-sm font-medium text-primary">Countdown Timer</h4>
             <label class="flex items-center gap-2 cursor-pointer">
               <input v-model="countdownEnabled" type="checkbox" class="rounded" />
-              <span class="text-xs text-gray-500">{{ countdownEnabled ? 'Enabled' : 'Disabled' }}</span>
+              <span class="text-xs text-gray-500">{{
+                countdownEnabled ? 'Enabled' : 'Disabled'
+              }}</span>
             </label>
           </div>
           <template v-if="countdownEnabled">
@@ -387,7 +424,9 @@ function removeSection(id: string) {
           <div class="flex items-center justify-between mb-3">
             <h4 class="text-sm font-medium text-primary">
               Custom Sections
-              <span v-if="customSections.length > 0" class="text-gray-400 font-normal">({{ customSections.length }})</span>
+              <span v-if="customSections.length > 0" class="text-gray-400 font-normal"
+                >({{ customSections.length }})</span
+              >
             </h4>
             <button
               @click="showAddSection = !showAddSection"
@@ -398,7 +437,10 @@ function removeSection(id: string) {
           </div>
 
           <!-- Add section form -->
-          <div v-if="showAddSection" class="bg-white p-3 rounded-lg mb-3 border space-y-2">
+          <div
+            v-if="showAddSection"
+            class="bg-white p-3 rounded-lg mb-3 border space-y-2"
+          >
             <input
               v-model="newSection.title"
               type="text"
@@ -420,7 +462,11 @@ function removeSection(id: string) {
               />
               <div class="flex items-center gap-2">
                 <label class="text-xs text-gray-500 shrink-0">Background</label>
-                <input v-model="newSection.bgColor" type="color" class="w-8 h-8 rounded cursor-pointer" />
+                <input
+                  v-model="newSection.bgColor"
+                  type="color"
+                  class="w-8 h-8 rounded cursor-pointer"
+                />
                 <span class="text-xs text-gray-400">{{ newSection.bgColor }}</span>
               </div>
             </div>
@@ -442,12 +488,29 @@ function removeSection(id: string) {
               <template v-if="editingSectionId !== section.id">
                 <div class="flex items-center justify-between">
                   <div class="min-w-0">
-                    <span class="text-sm font-medium text-primary">{{ section.title }}</span>
-                    <p v-if="section.content" class="text-xs text-gray-500 truncate mt-0.5">{{ section.content.slice(0, 80) }}</p>
+                    <span class="text-sm font-medium text-primary">{{
+                      section.title
+                    }}</span>
+                    <p
+                      v-if="section.content"
+                      class="text-xs text-gray-500 truncate mt-0.5"
+                    >
+                      {{ section.content.slice(0, 80) }}
+                    </p>
                   </div>
                   <div class="flex items-center gap-2 shrink-0 ml-3">
-                    <button @click="startEditSection(section)" class="text-xs text-primary hover:underline">Edit</button>
-                    <button @click="removeSection(section.id)" class="text-xs text-red-500 hover:text-red-700">Delete</button>
+                    <button
+                      @click="startEditSection(section)"
+                      class="text-xs text-primary hover:underline"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      @click="removeSection(section.id)"
+                      class="text-xs text-red-500 hover:text-red-700"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               </template>
@@ -472,7 +535,11 @@ function removeSection(id: string) {
                     />
                     <div class="flex items-center gap-2">
                       <label class="text-xs text-gray-500 shrink-0">BG</label>
-                      <input v-model="editSection.bgColor" type="color" class="w-8 h-8 rounded cursor-pointer" />
+                      <input
+                        v-model="editSection.bgColor"
+                        type="color"
+                        class="w-8 h-8 rounded cursor-pointer"
+                      />
                     </div>
                     <div class="flex items-center gap-1">
                       <label class="text-xs text-gray-500 shrink-0">Order</label>

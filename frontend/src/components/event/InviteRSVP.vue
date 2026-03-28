@@ -43,7 +43,11 @@ function initGuest(guest: Guest) {
 function getState(guestId: string): GuestState {
   if (!guestStates.value[guestId]) {
     guestStates.value[guestId] = {
-      status: null, message: '', submitting: false, submitted: false, error: '',
+      status: null,
+      message: '',
+      submitting: false,
+      submitted: false,
+      error: '',
     }
   }
   return guestStates.value[guestId]
@@ -51,7 +55,10 @@ function getState(guestId: string): GuestState {
 
 props.invite.guests.forEach(initGuest)
 
-watch(() => props.invite.guests, (guests) => guests.forEach(initGuest))
+watch(
+  () => props.invite.guests,
+  (guests) => guests.forEach(initGuest),
+)
 
 /**
  * Selects RSVP status for a guest.
@@ -96,19 +103,22 @@ async function handleSubmit(guest: Guest) {
 <template>
   <section class="invite-rsvp py-16 px-4">
     <div class="max-w-md mx-auto">
-      <h2 class="text-4xl font-bold text-primary-dark text-center mb-2 font-kaushan text-outline">Your Invitation</h2>
+      <h2
+        class="text-4xl font-bold text-primary-dark text-center mb-2 font-kaushan text-outline"
+      >
+        Your Invitation
+      </h2>
       <p v-if="invite.label" class="text-primary-dark text-xl text-center mb-8">
         {{ invite.label }}
       </p>
 
       <div class="divide-y divide-muted/50">
-        <div
-          v-for="guest in invite.guests"
-          :key="guest.id"
-          class="py-4 first:pt-0"
-        >
+        <div v-for="guest in invite.guests" :key="guest.id" class="py-4 first:pt-0">
           <!-- Submitted state -->
-          <div v-if="getState(guest.id).submitted" class="flex items-center justify-between">
+          <div
+            v-if="getState(guest.id).submitted"
+            class="flex items-center justify-between"
+          >
             <span class="font-medium text-guest-bg">{{ guest.displayName }}</span>
             <span
               :class="[
@@ -186,8 +196,8 @@ async function handleSubmit(guest: Guest) {
 .text-outline {
   text-shadow:
     -1px -1px 0 rgba(255, 255, 255, 0.4),
-     1px -1px 0 rgba(255, 255, 255, 0.4),
-    -1px  1px 0 rgba(255, 255, 255, 0.4),
-     1px  1px 0 rgba(255, 255, 255, 0.4);
+    1px -1px 0 rgba(255, 255, 255, 0.4),
+    -1px 1px 0 rgba(255, 255, 255, 0.4),
+    1px 1px 0 rgba(255, 255, 255, 0.4);
 }
 </style>

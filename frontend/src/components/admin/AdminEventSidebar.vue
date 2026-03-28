@@ -118,9 +118,14 @@ function pendingCount(event: AdminEvent): number {
     </div>
 
     <!-- Scrollable Event Cards -->
-    <div class="flex-1 min-h-0 overflow-y-auto max-h-[calc(100vh-20rem)] lg:max-h-[calc(100vh-20rem)]">
+    <div
+      class="flex-1 min-h-0 overflow-y-auto max-h-[calc(100vh-20rem)] lg:max-h-[calc(100vh-20rem)]"
+    >
       <div class="flex flex-col gap-3">
-        <p v-if="filteredEvents.length === 0" class="text-sm text-gray-400 text-center py-4">
+        <p
+          v-if="filteredEvents.length === 0"
+          class="text-sm text-gray-400 text-center py-4"
+        >
           No events match your filters
         </p>
 
@@ -129,15 +134,21 @@ function pendingCount(event: AdminEvent): number {
           :key="event.id"
           @click="emit('select', event.id)"
           class="rounded-lg border-2 p-3 cursor-pointer transition-all hover:shadow-md"
-          :class="selectedEventId === event.id
-            ? 'border-accent bg-amber-50 shadow-sm'
-            : 'border-gray-200 bg-white hover:border-gray-300'"
+          :class="
+            selectedEventId === event.id
+              ? 'border-accent bg-amber-50 shadow-sm'
+              : 'border-gray-200 bg-white hover:border-gray-300'
+          "
         >
           <div class="flex items-center gap-2 mb-1">
-            <span class="inline-block px-1.5 py-0.5 bg-accent text-black text-xs font-medium rounded capitalize">
+            <span
+              class="inline-block px-1.5 py-0.5 bg-accent text-black text-xs font-medium rounded capitalize"
+            >
               {{ event.type }}
             </span>
-            <span class="text-xs text-gray-400">{{ event.isPublic ? 'Public' : 'Private' }}</span>
+            <span class="text-xs text-gray-400">{{
+              event.isPublic ? 'Public' : 'Private'
+            }}</span>
           </div>
 
           <h4 class="text-sm font-semibold text-primary truncate">{{ event.title }}</h4>
@@ -147,7 +158,9 @@ function pendingCount(event: AdminEvent): number {
           </p>
 
           <div class="flex items-center gap-2 mt-1.5 text-xs text-gray-500">
-            <span>{{ event.guestCount }} guest{{ event.guestCount !== 1 ? 's' : '' }}</span>
+            <span
+              >{{ event.guestCount }} guest{{ event.guestCount !== 1 ? 's' : '' }}</span
+            >
             <span class="text-gray-300">|</span>
             <span class="text-green-600">{{ event.rsvpYes }} yes</span>
             <span class="text-red-500">{{ event.rsvpNo }} no</span>

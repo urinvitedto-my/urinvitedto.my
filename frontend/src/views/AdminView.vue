@@ -12,12 +12,17 @@ const authStore = useAuthStore()
 const adminStore = useAdminStore()
 
 const { isAdmin } = storeToRefs(authStore)
-const { events, loading: eventsLoading, error: eventsError, selectedEventId } = storeToRefs(adminStore)
+const {
+  events,
+  loading: eventsLoading,
+  error: eventsError,
+  selectedEventId,
+} = storeToRefs(adminStore)
 
 const showCreateForm = ref(false)
 
-const selectedEvent = computed(() =>
-  events.value.find((e) => e.id === selectedEventId.value) ?? null,
+const selectedEvent = computed(
+  () => events.value.find((e) => e.id === selectedEventId.value) ?? null,
 )
 
 /** Whether the mobile detail view is showing (an event is selected on small screens). */
@@ -58,8 +63,7 @@ watch(isAdmin, async (newVal) => {
 
 <template>
   <div class="admin-view min-h-screen pt-24 pb-8 px-4 md:mx-16">
-    <div class="max-w-7xl mx-auto">
-
+    <div class="max-w-8xl mx-auto">
       <!--
         MOBILE (<lg): toggle between list and detail views.
         When no event selected -> show header + list.
@@ -115,18 +119,25 @@ watch(isAdmin, async (newVal) => {
         <!-- Error -->
         <div v-else-if="eventsError" class="text-center py-12">
           <p class="text-red-600 mb-4">{{ eventsError }}</p>
-          <button @click="adminStore.fetchEvents()" class="text-accent hover:underline">Try again</button>
+          <button @click="adminStore.fetchEvents()" class="text-accent hover:underline">
+            Try again
+          </button>
         </div>
 
         <!-- Empty -->
-        <div v-else-if="events.length === 0" class="bg-white rounded-lg shadow-sm p-8 text-center">
+        <div
+          v-else-if="events.length === 0"
+          class="bg-white rounded-lg shadow-sm p-8 text-center"
+        >
           <p class="text-gray-500">No events yet. Create your first event!</p>
         </div>
 
         <!-- Split View (desktop keeps both panels visible) -->
         <div v-else class="flex flex-col lg:flex-row gap-6 lg:items-start">
           <!-- Sidebar / Event List -->
-          <div class="w-full lg:w-[340px] lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] shrink-0">
+          <div
+            class="w-full lg:w-[340px] lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] shrink-0"
+          >
             <AdminEventSidebar
               :events="events"
               :selected-event-id="selectedEventId"

@@ -246,7 +246,8 @@ async function loadEventData() {
             customSectionsMap[comp.name.slice(14)]
           "
           :section="customSectionsMap[comp.name.slice(14)]!"
-        />      </template>
+        />
+      </template>
 
       <!-- Fixed Sections (always at bottom) -->
       <div v-if="eventData.invite" id="section-rsvp">

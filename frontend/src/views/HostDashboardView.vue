@@ -111,7 +111,7 @@ onMounted(() => {
 
 <template>
   <div class="host-dashboard-view min-h-screen pt-24 pb-8 px-4 md:mx-16">
-    <div class="max-w-6xl mx-auto">
+    <div class="max-w-8xl mx-auto">
       <div class="mb-8">
         <h1 class="text-2xl font-bold text-primary">Host Dashboard</h1>
       </div>

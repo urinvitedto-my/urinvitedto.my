@@ -31,7 +31,8 @@ const editLoading = ref(false)
 const BUCKET = 'event-media'
 
 /** Matches common image extensions when the browser leaves MIME empty. */
-const IMAGE_NAME_RE = /\.(gif|jpe?g|png|webp|bmp|svg|avif|heic|heif|tiff?|ico|jfif|pjpeg|pjp)$/i
+const IMAGE_NAME_RE =
+  /\.(gif|jpe?g|png|webp|bmp|svg|avif|heic|heif|tiff?|ico|jfif|pjpeg|pjp)$/i
 
 /** Parses `/_gallery/NNN-` from stored media URLs so new files continue after the highest ordinal (handles gaps after deletes). */
 const GALLERY_ORDINAL_RE = /\/_gallery\/(\d+)-/
@@ -119,9 +120,7 @@ async function handleFileUpload(event: Event) {
 
       if (uploadErr) throw new Error(uploadErr.message)
 
-      const { data: urlData } = supabase.storage
-        .from(BUCKET)
-        .getPublicUrl(path)
+      const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(path)
 
       await adminStore.createGalleryItem(props.eventId, {
         mediaType: 'photo',
@@ -193,7 +192,8 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
       adminStore.getGallery(props.eventId),
       itemId,
       direction,
-      async (id, orderIndex) => adminStore.updateGalleryItem(props.eventId, id, { orderIndex }),
+      async (id, orderIndex) =>
+        adminStore.updateGalleryItem(props.eventId, id, { orderIndex }),
     )
   } catch (e: unknown) {
     toast.error(e instanceof Error ? e.message : 'Failed to reorder')
@@ -211,9 +211,12 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
         <span
           class="inline-block transition-transform duration-200"
           :class="collapsed ? '' : 'rotate-90'"
-        >▶</span>
+          >▶</span
+        >
         Gallery
-        <span v-if="items.length > 0" class="text-gray-400 font-normal">({{ items.length }})</span>
+        <span v-if="items.length > 0" class="text-gray-400 font-normal"
+          >({{ items.length }})</span
+        >
       </button>
       <div v-if="!collapsed" class="flex items-center gap-2">
         <label
@@ -243,7 +246,9 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
 
       <p v-else-if="error" class="text-red-600 text-sm mb-3">{{ error }}</p>
 
-      <p v-else-if="items.length === 0" class="text-sm text-gray-400 mb-3">No gallery items yet</p>
+      <p v-else-if="items.length === 0" class="text-sm text-gray-400 mb-3">
+        No gallery items yet
+      </p>
 
       <div v-else class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         <div
@@ -255,7 +260,9 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
           <template v-if="editingItemId === item.id">
             <form @submit.prevent="handleUpdate" class="p-3 space-y-2">
               <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">Caption</label>
+                <label class="block text-xs font-medium text-gray-700 mb-1"
+                  >Caption</label
+                >
                 <input
                   v-model="editForm.caption"
                   type="text"
@@ -264,7 +271,9 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
                 />
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">Order</label>
+                <label class="block text-xs font-medium text-gray-700 mb-1"
+                  >Order</label
+                >
                 <input
                   v-model.number="editForm.orderIndex"
                   type="number"
@@ -317,7 +326,9 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
             </div>
 
             <div class="px-2 py-2">
-              <p v-if="item.caption" class="text-xs text-gray-600 truncate mb-1">{{ item.caption }}</p>
+              <p v-if="item.caption" class="text-xs text-gray-600 truncate mb-1">
+                {{ item.caption }}
+              </p>
               <div class="flex items-center justify-between">
                 <div class="flex gap-0.5">
                   <button
@@ -325,17 +336,31 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
                     :disabled="index === 0"
                     class="text-gray-400 hover:text-gray-600 disabled:opacity-30 text-xs"
                     title="Move up"
-                  >▲</button>
+                  >
+                    ▲
+                  </button>
                   <button
                     @click="moveItem(item.id, 'down')"
                     :disabled="index === items.length - 1"
                     class="text-gray-400 hover:text-gray-600 disabled:opacity-30 text-xs"
                     title="Move down"
-                  >▼</button>
+                  >
+                    ▼
+                  </button>
                 </div>
                 <div class="flex items-center gap-1.5">
-                  <button @click="startEdit(item)" class="text-xs text-primary hover:underline">Edit</button>
-                  <button @click="handleDelete(item)" class="text-xs text-red-500 hover:text-red-700">Delete</button>
+                  <button
+                    @click="startEdit(item)"
+                    class="text-xs text-primary hover:underline"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    @click="handleDelete(item)"
+                    class="text-xs text-red-500 hover:text-red-700"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             </div>

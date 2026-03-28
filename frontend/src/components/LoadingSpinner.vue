@@ -14,6 +14,9 @@ const sizeClasses: Record<string, string> = {
   <div
     role="status"
     aria-label="Loading"
-    :class="['animate-spin rounded-full border-accent border-t-transparent', sizeClasses[size ?? 'lg']]"
+    :class="[
+      'animate-spin rounded-full border-accent border-t-transparent',
+      sizeClasses[size ?? 'lg'],
+    ]"
   ></div>
 </template>

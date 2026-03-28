@@ -24,20 +24,23 @@ const form = ref({
 const loading = ref(false)
 const error = ref('')
 
-watch(() => props.event, (ev) => {
-  form.value = {
-    type: ev.type,
-    slug: ev.slug,
-    title: ev.title,
-    description: ev.description || '',
-    isPublic: ev.isPublic,
-    startsAt: toDatetimeLocal(ev.startsAt),
-    location: ev.location || '',
-    coverImageUrl: ev.coverImageUrl || '',
-    locationPhotoUrl: ev.locationPhotoUrl || '',
-    musicUrl: ev.musicUrl || '',
-  }
-})
+watch(
+  () => props.event,
+  (ev) => {
+    form.value = {
+      type: ev.type,
+      slug: ev.slug,
+      title: ev.title,
+      description: ev.description || '',
+      isPublic: ev.isPublic,
+      startsAt: toDatetimeLocal(ev.startsAt),
+      location: ev.location || '',
+      coverImageUrl: ev.coverImageUrl || '',
+      locationPhotoUrl: ev.locationPhotoUrl || '',
+      musicUrl: ev.musicUrl || '',
+    }
+  },
+)
 
 /** Saves edits to the event. */
 async function handleSubmit() {
@@ -91,7 +94,9 @@ async function handleSubmit() {
         </select>
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Slug (URL path)</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >Slug (URL path)</label
+        >
         <input
           v-model="form.slug"
           type="text"
@@ -137,7 +142,9 @@ async function handleSubmit() {
     </div>
     <div class="grid md:grid-cols-2 gap-4">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Cover Image URL</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >Cover Image URL</label
+        >
         <input
           v-model="form.coverImageUrl"
           type="url"
@@ -146,7 +153,9 @@ async function handleSubmit() {
         />
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Venue Photo URL</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >Venue Photo URL</label
+        >
         <input
           v-model="form.locationPhotoUrl"
           type="url"
@@ -155,7 +164,9 @@ async function handleSubmit() {
         />
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Background Music URL</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >Background Music URL</label
+        >
         <input
           v-model="form.musicUrl"
           type="url"
@@ -171,7 +182,9 @@ async function handleSubmit() {
         id="editIsPublic"
         class="rounded"
       />
-      <label for="editIsPublic" class="text-sm text-gray-700">Public event (no invite code required)</label>
+      <label for="editIsPublic" class="text-sm text-gray-700"
+        >Public event (no invite code required)</label
+      >
     </div>
     <p v-if="error" class="text-red-600 text-sm">{{ error }}</p>
     <div class="flex gap-3">

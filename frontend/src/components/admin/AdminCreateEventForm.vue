@@ -66,7 +66,9 @@ async function handleSubmit() {
           </select>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Slug (URL path)</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >Slug (URL path)</label
+          >
           <input
             v-model="form.slug"
             type="text"
@@ -88,7 +90,9 @@ async function handleSubmit() {
       </div>
       <div class="grid md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Date & Time</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >Date & Time</label
+          >
           <input
             v-model="form.startsAt"
             type="datetime-local"
@@ -106,13 +110,10 @@ async function handleSubmit() {
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <input
-          v-model="form.isPublic"
-          type="checkbox"
-          id="isPublic"
-          class="rounded"
-        />
-        <label for="isPublic" class="text-sm text-gray-700">Public event (no invite code required)</label>
+        <input v-model="form.isPublic" type="checkbox" id="isPublic" class="rounded" />
+        <label for="isPublic" class="text-sm text-gray-700"
+          >Public event (no invite code required)</label
+        >
       </div>
       <p v-if="error" class="text-red-600 text-sm">{{ error }}</p>
       <div class="flex gap-3">

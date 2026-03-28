@@ -50,15 +50,24 @@ const filteredGuests = computed(() => {
   return flatGuests.value.filter((g) => g.rsvpStatus === statusFilter.value)
 })
 
-const yesCount = computed(() => flatGuests.value.filter((g) => g.rsvpStatus === 'yes').length)
-const noCount = computed(() => flatGuests.value.filter((g) => g.rsvpStatus === 'no').length)
-const pendingCount = computed(() => flatGuests.value.filter((g) => g.rsvpStatus === 'pending').length)
+const yesCount = computed(
+  () => flatGuests.value.filter((g) => g.rsvpStatus === 'yes').length,
+)
+const noCount = computed(
+  () => flatGuests.value.filter((g) => g.rsvpStatus === 'no').length,
+)
+const pendingCount = computed(
+  () => flatGuests.value.filter((g) => g.rsvpStatus === 'pending').length,
+)
 
 function rsvpBadgeClass(status: string): string {
   switch (status) {
-    case 'yes': return 'bg-green-100 text-green-700'
-    case 'no': return 'bg-red-100 text-red-700'
-    default: return 'bg-gray-100 text-gray-600'
+    case 'yes':
+      return 'bg-green-100 text-green-700'
+    case 'no':
+      return 'bg-red-100 text-red-700'
+    default:
+      return 'bg-gray-100 text-gray-600'
   }
 }
 
@@ -90,7 +99,8 @@ onMounted(() => {
       <!-- Summary -->
       <div class="mb-4">
         <p class="text-sm text-gray-600">
-          <span class="font-semibold text-primary">{{ flatGuests.length }}</span> total guests
+          <span class="font-semibold text-primary">{{ flatGuests.length }}</span> total
+          guests
           <span class="mx-1">—</span>
           <span class="text-green-600 font-medium">{{ yesCount }} confirmed</span>,
           <span class="text-red-500 font-medium">{{ noCount }} declined</span>,
@@ -105,9 +115,11 @@ onMounted(() => {
           :key="btn.key"
           @click="statusFilter = btn.key"
           class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
-          :class="statusFilter === btn.key
-            ? 'bg-primary text-white'
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+          :class="
+            statusFilter === btn.key
+              ? 'bg-primary text-white'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          "
         >
           {{ btn.label }} ({{ btn.countFn() }})
         </button>
@@ -131,7 +143,9 @@ onMounted(() => {
         >
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-sm font-semibold text-primary">{{ guest.displayName }}</span>
+              <span class="text-sm font-semibold text-primary">{{
+                guest.displayName
+              }}</span>
               <span
                 class="text-xs px-1.5 py-0.5 rounded capitalize"
                 :class="rsvpBadgeClass(guest.rsvpStatus)"
@@ -139,14 +153,19 @@ onMounted(() => {
                 {{ guest.rsvpStatus }}
               </span>
             </div>
-            <p v-if="guest.rsvpMessage" class="text-xs text-gray-500 italic mt-0.5 wrap-break-word">
+            <p
+              v-if="guest.rsvpMessage"
+              class="text-xs text-gray-500 italic mt-0.5 wrap-break-word"
+            >
               "{{ guest.rsvpMessage }}"
             </p>
           </div>
 
           <div class="flex items-center gap-3 text-xs text-gray-400 shrink-0">
             <span v-if="guest.inviteLabel">{{ guest.inviteLabel }}</span>
-            <code class="bg-white px-1.5 py-0.5 rounded border border-gray-200 font-mono text-[10px]">
+            <code
+              class="bg-white px-1.5 py-0.5 rounded border border-gray-200 font-mono text-[10px]"
+            >
               {{ guest.inviteCode }}
             </code>
             <span v-if="guest.rsvpAt">{{ formatDate(guest.rsvpAt, true) }}</span>

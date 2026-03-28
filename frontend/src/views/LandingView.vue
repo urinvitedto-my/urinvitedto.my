@@ -8,7 +8,7 @@
   <div class="landing-view">
     <!-- Hero -->
     <section
-      class="min-h-screen flex items-center px-6 md:px-16 pt-16 relative overflow-hidden"
+      class="min-h-screen flex items-center px-6 md:px-16 relative overflow-hidden"
     >
       <div class="hero-logo-bg" aria-hidden="true">
         <img

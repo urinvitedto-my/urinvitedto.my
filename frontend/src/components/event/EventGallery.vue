@@ -23,7 +23,9 @@ let resetTimer: ReturnType<typeof setTimeout> | null = null
 const isHovered = ref(false)
 
 const MOBILE_BREAKPOINT = 768
-const visibleCount = ref(typeof window !== 'undefined' && window.innerWidth >= MOBILE_BREAKPOINT ? 3 : 2)
+const visibleCount = ref(
+  typeof window !== 'undefined' && window.innerWidth >= MOBILE_BREAKPOINT ? 3 : 2,
+)
 
 /** Updates visible item count based on screen width. */
 function updateVisibleCount() {
@@ -67,9 +69,11 @@ function scheduleReset() {
     }
     if (!jumped) return
     await nextTick()
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      animated.value = true
-    }))
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        animated.value = true
+      }),
+    )
   }, 750)
 }
 
@@ -155,7 +159,9 @@ onMounted(() => {
   trackIndex.value = props.items.length
   updateVisibleCount()
   window.addEventListener('resize', updateVisibleCount)
-  autoTimer = setInterval(() => { if (!isHovered.value) step(1) }, 4000)
+  autoTimer = setInterval(() => {
+    if (!isHovered.value) step(1)
+  }, 4000)
 })
 
 onUnmounted(() => {
@@ -168,7 +174,9 @@ onUnmounted(() => {
 <template>
   <section class="event-gallery py-16 px-4">
     <div class="max-w-5xl mx-auto">
-      <h2 class="text-4xl font-bold text-primary-dark text-center mb-8 font-kaushan">Our Prenup</h2>
+      <h2 class="text-4xl font-bold text-primary-dark text-center mb-8 font-kaushan">
+        Our Prenup
+      </h2>
 
       <!-- Carousel -->
       <div
@@ -184,14 +192,19 @@ onUnmounted(() => {
           class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur shadow border border-muted/50 text-heading hover:text-accent transition-colors"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
         </button>
 
         <!-- Track -->
         <div
           class="overflow-hidden cursor-grab active:cursor-grabbing select-none"
-          style="touch-action: pan-y;"
+          style="touch-action: pan-y"
           @pointerdown="onPointerDown"
           @pointermove="onPointerMove"
           @pointerup="onPointerUp"
@@ -200,9 +213,13 @@ onUnmounted(() => {
           <div
             class="flex"
             :style="{
-              width: `${cloned.length / visibleCount * 100}%`,
-              transform: `translateX(calc(-${trackIndex / cloned.length * 100}% + ${dragDelta}px))`,
-              transition: isDragging ? 'none' : (animated ? 'transform 0.7s ease-in-out' : 'none'),
+              width: `${(cloned.length / visibleCount) * 100}%`,
+              transform: `translateX(calc(-${(trackIndex / cloned.length) * 100}% + ${dragDelta}px))`,
+              transition: isDragging
+                ? 'none'
+                : animated
+                  ? 'transform 0.7s ease-in-out'
+                  : 'none',
             }"
           >
             <div
@@ -212,7 +229,9 @@ onUnmounted(() => {
               :style="{ width: `${100 / cloned.length}%` }"
               @click="handleItemClick(idx)"
             >
-              <div class="aspect-4/5 overflow-hidden rounded-xl shadow-sm border border-muted/50 bg-white/80 backdrop-blur">
+              <div
+                class="aspect-4/5 overflow-hidden rounded-xl shadow-sm border border-muted/50 bg-white/80 backdrop-blur"
+              >
                 <img
                   v-if="item.mediaType === 'photo'"
                   :src="item.mediaUrl"
@@ -225,7 +244,11 @@ onUnmounted(() => {
                   v-else
                   class="w-full h-full bg-primary flex items-center justify-center group-hover:bg-primary-dark transition-colors"
                 >
-                  <svg class="w-12 h-12 text-accent pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    class="w-12 h-12 text-accent pointer-events-none"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 </div>
@@ -242,7 +265,12 @@ onUnmounted(() => {
           class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur shadow border border-muted/50 text-heading hover:text-accent transition-colors"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </button>
       </div>
@@ -260,7 +288,12 @@ onUnmounted(() => {
         class="absolute top-4 right-4 text-white hover:text-accent transition-colors"
       >
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
 
@@ -271,7 +304,12 @@ onUnmounted(() => {
         class="absolute left-4 text-white hover:text-accent transition-colors"
       >
         <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          />
         </svg>
       </button>
       <button
@@ -281,7 +319,12 @@ onUnmounted(() => {
         class="absolute right-4 text-white hover:text-accent transition-colors"
       >
         <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          />
         </svg>
       </button>
 
