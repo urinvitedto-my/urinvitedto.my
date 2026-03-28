@@ -86,7 +86,7 @@ async function handleInviteSubmit() {
     <!-- Loading -->
     <div
       v-if="loading"
-      class="landing-fullscreen bg-primary flex items-center justify-center"
+      class="landing-fullscreen bg-primary flex items-start pt-[12vh] md:items-center md:pt-0 justify-center"
     >
       <LoadingSpinner />
     </div>
@@ -94,14 +94,14 @@ async function handleInviteSubmit() {
     <!-- Error (no event loaded) -->
     <div
       v-else-if="error && !eventSummary"
-      class="landing-fullscreen bg-primary flex items-center justify-center"
+      class="landing-fullscreen bg-primary flex items-start pt-[12vh] md:items-center md:pt-0 justify-center"
     >
       <div class="text-center px-4">
-        <h2 class="text-2xl font-bold text-white mb-2">Something went wrong</h2>
-        <p class="text-base text-white/60 mb-6 max-w-sm mx-auto">{{ error }}</p>
+        <h2 class="text-xl md:text-2xl font-bold text-white mb-2">Something went wrong</h2>
+        <p class="text-sm md:text-base text-white/60 mb-4 md:mb-6 max-w-sm mx-auto">{{ error }}</p>
         <button
           @click="loadEvent"
-          class="bg-accent text-black font-semibold px-8 py-3 rounded-lg text-base hover:bg-accent-dark transition-colors"
+          class="bg-accent text-black font-semibold px-6 py-2.5 md:px-8 md:py-3 rounded-lg text-sm md:text-base hover:bg-accent-dark transition-colors"
         >
           Try again
         </button>
@@ -122,14 +122,14 @@ async function handleInviteSubmit() {
       <div class="absolute inset-0 bg-black/40"></div>
 
       <div
-        class="relative z-10 flex flex-col items-center justify-center h-full px-4 text-center"
+        class="relative z-10 flex flex-col items-center justify-start pt-[3vh] md:justify-center md:pt-0 h-full px-4 text-center"
       >
         <h1 class="landing-title text-white">
           <template v-if="titleParts">
             <span v-for="(part, i) in titleParts" :key="i">
               {{ part }}<br v-if="i < titleParts.length - 1" /><span
                 v-if="i < titleParts.length - 1"
-                class="block text-3xl md:text-4xl"
+                class="block text-2xl md:text-4xl"
                 >&amp;</span
               >
             </span>
@@ -138,13 +138,13 @@ async function handleInviteSubmit() {
         </h1>
 
         <!-- Public Event: Open Invitation button -->
-        <div v-if="eventSummary.isPublic && eventDetails" class="mt-6">
+        <div v-if="eventSummary.isPublic && eventDetails" class="mt-4 md:mt-6">
           <RouterLink
             :to="{ name: 'guest', params: { type, slug } }"
             class="landing-btn"
           >
             <svg
-              class="w-5 h-5"
+              class="w-4 h-4 md:w-5 md:h-5"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
@@ -161,12 +161,12 @@ async function handleInviteSubmit() {
         </div>
 
         <!-- Private Event: Invite Code Entry -->
-        <div v-if="!eventSummary.isPublic" class="mt-6 w-full max-w-sm">
+        <div v-if="!eventSummary.isPublic" class="mt-4 md:mt-6 w-full max-w-xs md:max-w-sm">
           <form
             @submit.prevent="handleInviteSubmit"
-            class="flex flex-col items-center gap-4"
+            class="flex flex-col items-center gap-3 md:gap-4"
           >
-            <p class="text-white/80 text-sm font-medium tracking-wide">
+            <p class="text-white/80 text-xs md:text-sm font-medium tracking-wide">
               Enter Your Invite Code
             </p>
 
@@ -175,13 +175,13 @@ async function handleInviteSubmit() {
               type="text"
               maxlength="6"
               placeholder="ABC123"
-              class="w-full px-4 py-3 text-center text-xl tracking-widest font-mono rounded-lg bg-white/15 backdrop-blur border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 uppercase"
+              class="w-full px-3 py-2.5 md:px-4 md:py-3 text-center text-lg md:text-xl tracking-widest font-mono rounded-lg bg-white/15 backdrop-blur border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 uppercase"
               :disabled="submitting"
             />
 
             <button type="submit" :disabled="submitting" class="landing-btn">
               <svg
-                class="w-5 h-5"
+                class="w-4 h-4 md:w-5 md:h-5"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
@@ -215,23 +215,30 @@ async function handleInviteSubmit() {
 
 .landing-title {
   font-family: 'Lavishly Yours', cursive;
-  font-size: clamp(6rem, 14vw, 12rem);
+  font-size: clamp(3.5rem, 12vw, 5rem);
   font-weight: 400;
   letter-spacing: normal;
   text-transform: none;
-  line-height: 1.3;
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  .landing-title {
+    font-size: clamp(6rem, 14vw, 12rem);
+    line-height: 1.3;
+  }
 }
 
 .landing-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.375rem;
   width: 100%;
-  padding: 0.875rem 2rem;
-  background-color: color-mix(in srgb, var(--color-accent) 90%, transparent);
-  color: black;
-  font-size: 1.05rem;
+  padding: 0.625rem 1.5rem;
+  background-color: color-mix(in srgb, var(--color-primary-dark) 90%, transparent);
+  color: white;
+  font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   border-radius: 0.5rem;
@@ -239,8 +246,16 @@ async function handleInviteSubmit() {
   text-decoration: none;
 }
 
+@media (min-width: 768px) {
+  .landing-btn {
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
+    font-size: 1.05rem;
+  }
+}
+
 .landing-btn:hover {
-  background-color: var(--color-accent);
+  background-color: var(--color-primary);
 }
 
 .landing-btn:disabled {
