@@ -26,9 +26,9 @@ const router = createRouter({
       meta: { hideFooter: true, hideNavbar: true },
     },
     {
-      path: '/host/login',
-      name: 'host-login',
-      component: () => import('@/views/HostLoginView.vue'),
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/LoginView.vue'),
       meta: { guestOnly: true },
     },
     {
@@ -60,7 +60,7 @@ router.beforeEach(async (to) => {
     try {
       await authStore.init()
     } catch {
-      return { name: 'host-login' }
+      return { name: 'login' }
     }
   }
 
@@ -71,7 +71,7 @@ router.beforeEach(async (to) => {
 
   // Protected routes: must be logged in
   if (to.meta.requiresAuth && !authStore.isLoggedIn) {
-    return { name: 'host-login' }
+    return { name: 'login' }
   }
 
   // Admin routes: must be admin

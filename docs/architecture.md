@@ -489,7 +489,7 @@ frontend/src/
 │   ├── LandingView.vue         # / (homepage)
 │   ├── EventLandingView.vue    # /:type/:slug (public details or invite entry)
 │   ├── GuestView.vue           # /:type/:slug/guest (private event page)
-│   ├── HostLoginView.vue       # /host/login
+│   ├── LoginView.vue           # /login
 │   ├── HostDashboardView.vue   # /host/dashboard
 │   └── AdminView.vue           # /admin
 ├── components/
@@ -530,7 +530,7 @@ frontend/src/
 | `/`                                      | LandingView       | Homepage with hero, features, CTA            |
 | `/:type(wedding\|birthday\|party)/:slug` | EventLandingView  | Public event page or invite code entry       |
 | `/:type/:slug/guest`                     | GuestView         | Private event page (requires `?invite=CODE`) |
-| `/host/login`                            | HostLoginView     | Host authentication                          |
+| `/login`                                 | LoginView         | Authentication (hosts and admins)            |
 | `/host/dashboard`                        | HostDashboardView | Host's read-only dashboard                   |
 | `/admin`                                 | AdminView         | Admin CRUD interface                         |
 

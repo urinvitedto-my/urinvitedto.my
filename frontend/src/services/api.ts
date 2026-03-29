@@ -60,7 +60,7 @@ async function authFetch(url: string, options: RequestInit = {}): Promise<Respon
 
   if (res.status === 401) {
     await supabase.auth.signOut({ scope: 'local' })
-    router.push('/host/login')
+    router.push('/login')
     throw new Error('Session expired')
   }
 

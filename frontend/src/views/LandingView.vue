@@ -33,7 +33,7 @@
           <span class="text-accent">urinvitedto.my@gmail.com</span>
         </p>
         <RouterLink
-          to="/host/login"
+          to="/login"
           class="inline-block bg-accent text-white font-semibold px-10 py-4 rounded-full hover:bg-accent-dark transition-colors text-xl ml-2"
         >
           Get Started

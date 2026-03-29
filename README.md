@@ -85,7 +85,7 @@ npm run dev
 | `/`                              | Landing page                                   |
 | `/:type/:slug`                   | Event landing (public details or invite entry) |
 | `/:type/:slug/guest?invite=CODE` | Private event page                             |
-| `/host/login`                    | Host authentication                            |
+| `/login`                         | Authentication (hosts and admins)              |
 | `/host/dashboard`                | Host's read-only dashboard                     |
 | `/admin`                         | Admin CRUD interface                           |
 

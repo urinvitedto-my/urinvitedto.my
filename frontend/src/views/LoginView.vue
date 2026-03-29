@@ -33,12 +33,12 @@ async function handleLogin() {
 
 <template>
   <div
-    class="host-login-view min-h-screen flex items-center justify-center pt-24 pb-12 px-4"
+    class="login-view min-h-screen flex items-center justify-center pt-24 pb-12 px-4"
   >
     <div class="max-w-md w-full">
       <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-primary">Host Login</h1>
-        <p class="text-gray-600 mt-2">Sign in to view your event dashboard</p>
+        <h1 class="text-3xl font-bold text-primary">LOG IN</h1>
+        <p class="text-gray-600 mt-2">Sign in to continue to your dashboard</p>
       </div>
 
       <form

@@ -93,7 +93,7 @@ async function handleLogout() {
         <!-- Desktop: LOGIN link when not logged in -->
         <RouterLink
           v-if="authStore.initialized && !isLoggedIn"
-          to="/host/login"
+          to="/login"
           :class="[
             'hidden md:block font-bold uppercase tracking-wide transition-colors',
             useLightNav
@@ -226,7 +226,7 @@ async function handleLogout() {
             </template>
             <RouterLink
               v-else-if="authStore.initialized"
-              to="/host/login"
+              to="/login"
               class="block px-4 py-2.5 text-primary font-bold uppercase transition-colors hover:bg-gray-50"
               @click="menuOpen = false"
             >
@@ -334,7 +334,7 @@ async function handleLogout() {
         </template>
         <RouterLink
           v-else-if="authStore.initialized"
-          to="/host/login"
+          to="/login"
           class="block px-5 py-3 text-base text-center text-primary font-bold uppercase transition-colors hover:bg-gray-50"
           @click="menuOpen = false"
         >
