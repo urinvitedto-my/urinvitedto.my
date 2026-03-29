@@ -18,7 +18,7 @@ const visibleGuests = computed(() =>
 </script>
 
 <template>
-  <section class="confirmed-guests pb-8 px-4">
+  <section class="confirmed-guests pb-16 px-4">
     <div class="max-w-3xl mx-auto">
       <h2 class="text-4xl font-bold text-guest-bg text-center mb-2 font-kaushan">
         Who's Coming

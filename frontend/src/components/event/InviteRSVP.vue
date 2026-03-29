@@ -112,14 +112,18 @@ async function handleSubmit(guest: Guest) {
         {{ invite.label }}
       </p>
 
-      <div class="divide-y divide-muted/50">
-        <div v-for="guest in invite.guests" :key="guest.id" class="py-4 first:pt-0">
+      <div class="flex flex-col gap-3">
+        <div
+          v-for="guest in invite.guests"
+          :key="guest.id"
+          class="rounded-xl bg-white/30 px-4 py-4 shadow-[2px_3px_6px_rgba(0,0,0,0.15)]"
+        >
           <!-- Submitted state -->
           <div
             v-if="getState(guest.id).submitted"
             class="flex items-center justify-between"
           >
-            <span class="font-medium text-guest-bg">{{ guest.displayName }}</span>
+            <span class="font-medium text-primary-dark">{{ guest.displayName }}</span>
             <span
               :class="[
                 'text-xs font-semibold px-4 py-1.5 rounded-full',
@@ -135,7 +139,7 @@ async function handleSubmit(guest: Guest) {
           <!-- Pending state -->
           <template v-if="!getState(guest.id).submitted">
             <div class="flex items-center justify-between">
-              <span class="font-medium text-guest-bg">{{ guest.displayName }}</span>
+              <span class="font-medium text-primary-dark">{{ guest.displayName }}</span>
               <div class="flex gap-2">
                 <button
                   @click="selectStatus(guest.id, 'yes')"
