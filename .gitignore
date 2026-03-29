@@ -3,3 +3,7 @@
 
 # env file
 .env
+
+# Python Scripts
+.venv
+__pycache__
