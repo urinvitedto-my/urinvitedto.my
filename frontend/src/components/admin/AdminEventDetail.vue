@@ -24,6 +24,17 @@ const toast = useToast()
 
 const activeTab = ref('guests')
 const isEditing = ref(false)
+const refreshKey = ref(0)
+const refreshing = ref(false)
+
+/** Invalidates cached sub-data for this event and remounts the active tab. */
+async function handleRefresh() {
+  refreshing.value = true
+  adminStore.invalidateEventSubData(props.event.id)
+  refreshKey.value += 1
+  await new Promise((r) => setTimeout(r, 300))
+  refreshing.value = false
+}
 
 const tabs = [
   { key: 'guests', label: 'Guests' },
@@ -89,6 +100,27 @@ function noop() {}
         </div>
 
         <div class="flex items-center gap-3 shrink-0">
+          <button
+            @click="handleRefresh"
+            :disabled="refreshing"
+            class="text-sm text-gray-400 hover:text-primary transition-colors disabled:opacity-50"
+            title="Refresh data"
+          >
+            <svg
+              class="w-4 h-4"
+              :class="{ 'animate-spin': refreshing }"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M4 4v5h5M20 20v-5h-5M4.93 9a9 9 0 0115.04-2.34L20 9M19.07 15a9 9 0 01-15.04 2.34L4 15"
+              />
+            </svg>
+          </button>
           <a
             :href="getEventUrl(event)"
             target="_blank"
@@ -137,7 +169,7 @@ function noop() {}
     </div>
 
     <!-- Tab Content -->
-    <div>
+    <div :key="refreshKey">
       <AdminGuestOverview v-if="activeTab === 'guests'" :event-id="event.id" />
 
       <AdminHosts
