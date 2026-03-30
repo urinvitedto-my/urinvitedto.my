@@ -594,6 +594,28 @@ export const useAdminStore = defineStore('admin', () => {
     items.sort((a, b) => a.orderIndex - b.orderIndex)
   }
 
+  /**
+   * Drops cached sub-entity data for one event so the next open refetches.
+   * Used when switching away or re-selecting the same event for a refresh.
+   */
+  function invalidateEventSubData(eventId: string) {
+    delete invites.value[eventId]
+    delete schedule.value[eventId]
+    delete faqs.value[eventId]
+    delete gifts.value[eventId]
+    delete gallery.value[eventId]
+    delete customContent.value[eventId]
+    delete enabledComponents.value[eventId]
+
+    const suffix = `:${eventId}`
+    for (const k of Object.keys(subLoading.value)) {
+      if (k.endsWith(suffix)) delete subLoading.value[k]
+    }
+    for (const k of Object.keys(subError.value)) {
+      if (k.endsWith(suffix)) delete subError.value[k]
+    }
+  }
+
   /** Clears all admin state. Called on logout. */
   function $reset() {
     events.value = []
@@ -669,6 +691,7 @@ export const useAdminStore = defineStore('admin', () => {
     isSubLoading,
     getSubError,
     swapOrder,
+    invalidateEventSubData,
     $reset,
   }
 })

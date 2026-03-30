@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { useAdminStore } from '@/stores/admin'
@@ -21,6 +21,16 @@ const {
 
 const showCreateForm = ref(false)
 
+/** Bumps when re-selecting the same event so detail remounts and refetches tab data. */
+const detailRemountKey = ref(0)
+
+/** Matches Tailwind `lg` — only one of mobile vs desktop detail panels should mount. */
+const MOBILE_MAX_WIDTH = '(max-width: 1023px)'
+
+const isMobileLayout = ref(
+  typeof window !== 'undefined' ? window.matchMedia(MOBILE_MAX_WIDTH).matches : false,
+)
+
 const selectedEvent = computed(
   () => events.value.find((e) => e.id === selectedEventId.value) ?? null,
 )
@@ -29,12 +39,22 @@ const selectedEvent = computed(
 const mobileShowDetail = computed(() => !!selectedEventId.value)
 
 function selectEvent(eventId: string) {
+  const previousId = selectedEventId.value
+  if (previousId && previousId !== eventId) {
+    adminStore.invalidateEventSubData(previousId)
+  } else if (previousId === eventId) {
+    adminStore.invalidateEventSubData(eventId)
+    detailRemountKey.value += 1
+  }
   selectedEventId.value = eventId
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 /** Goes back to event list on mobile. */
 function handleBack() {
+  if (selectedEventId.value) {
+    adminStore.invalidateEventSubData(selectedEventId.value)
+  }
   selectedEventId.value = null
 }
 
@@ -43,6 +63,14 @@ function handleDeleted() {
 }
 
 onMounted(async () => {
+  const mql = window.matchMedia(MOBILE_MAX_WIDTH)
+  const syncLayout = () => {
+    isMobileLayout.value = mql.matches
+  }
+  syncLayout()
+  mql.addEventListener('change', syncLayout)
+  onUnmounted(() => mql.removeEventListener('change', syncLayout))
+
   try {
     await adminStore.fetchEvents()
   } catch {
@@ -70,9 +98,9 @@ watch(isAdmin, async (newVal) => {
         When event selected -> show back button + detail.
       -->
 
-      <!-- Mobile: Detail View -->
-      <template v-if="mobileShowDetail && selectedEvent">
-        <div class="lg:hidden">
+      <!-- Mobile: Detail View (must not mount alongside desktop detail — same breakpoint as `lg:`) -->
+      <template v-if="mobileShowDetail && selectedEvent && isMobileLayout">
+        <div>
           <button
             @click="handleBack"
             class="flex items-center gap-1 text-sm text-primary hover:underline mb-4"
@@ -82,7 +110,7 @@ watch(isAdmin, async (newVal) => {
 
           <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6">
             <AdminEventDetail
-              :key="selectedEvent.id"
+              :key="`${selectedEvent.id}-${detailRemountKey}`"
               :event="selectedEvent"
               @deleted="handleDeleted"
             />
@@ -152,11 +180,11 @@ watch(isAdmin, async (newVal) => {
             />
           </div>
 
-          <!-- Desktop Detail Panel (hidden on mobile, shown via lg:block) -->
+          <!-- Desktop Detail Panel -->
           <div class="hidden lg:block flex-1 min-w-0">
-            <div v-if="selectedEvent" class="bg-white rounded-lg shadow-sm p-6">
+            <div v-if="selectedEvent && !isMobileLayout" class="bg-white rounded-lg shadow-sm p-6">
               <AdminEventDetail
-                :key="selectedEvent.id"
+                :key="`${selectedEvent.id}-${detailRemountKey}`"
                 :event="selectedEvent"
                 @deleted="handleDeleted"
               />
