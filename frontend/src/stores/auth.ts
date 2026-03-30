@@ -68,10 +68,17 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       if (newSession) {
+        const previousAccessToken = session.value?.access_token
         session.value = newSession
         user.value = newSession.user ?? null
 
-        if (event === 'SIGNED_IN' && newSession.user?.email) {
+        // Supabase emits SIGNED_IN again on tab focus (session recovery), not only on login.
+        // Only hit /auth/me when the access token actually changed.
+        if (
+          event === 'SIGNED_IN' &&
+          newSession.user?.email &&
+          newSession.access_token !== previousAccessToken
+        ) {
           await checkAdmin()
         }
       }
