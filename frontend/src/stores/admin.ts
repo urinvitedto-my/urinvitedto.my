@@ -78,6 +78,14 @@ export const useAdminStore = defineStore('admin', () => {
     return `${type}:${eventId}`
   }
 
+  /** Optional `force` refetches even when we already have data for this event (e.g. future refresh UI). */
+  type SubFetchOpts = { force?: boolean }
+
+  /** Whether we already stored a response for this event (empty list / null still counts). */
+  function hasSubData<T>(record: Record<string, T>, eventId: string): boolean {
+    return Object.prototype.hasOwnProperty.call(record, eventId)
+  }
+
   function isSubLoading(type: string, eventId: string) {
     return subLoading.value[subKey(type, eventId)] ?? false
   }
@@ -185,7 +193,9 @@ export const useAdminStore = defineStore('admin', () => {
     return invites.value[eventId] ?? []
   }
 
-  async function fetchInvites(eventId: string) {
+  async function fetchInvites(eventId: string, opts?: SubFetchOpts) {
+    if (!opts?.force && hasSubData(invites.value, eventId)) return
+
     const key = subKey('invites', eventId)
     subLoading.value[key] = true
     subError.value[key] = ''
@@ -255,7 +265,9 @@ export const useAdminStore = defineStore('admin', () => {
     return schedule.value[eventId] ?? []
   }
 
-  async function fetchSchedule(eventId: string) {
+  async function fetchSchedule(eventId: string, opts?: SubFetchOpts) {
+    if (!opts?.force && hasSubData(schedule.value, eventId)) return
+
     const key = subKey('schedule', eventId)
     subLoading.value[key] = true
     subError.value[key] = ''
@@ -310,7 +322,9 @@ export const useAdminStore = defineStore('admin', () => {
     return faqs.value[eventId] ?? []
   }
 
-  async function fetchFAQs(eventId: string) {
+  async function fetchFAQs(eventId: string, opts?: SubFetchOpts) {
+    if (!opts?.force && hasSubData(faqs.value, eventId)) return
+
     const key = subKey('faqs', eventId)
     subLoading.value[key] = true
     subError.value[key] = ''
@@ -365,7 +379,9 @@ export const useAdminStore = defineStore('admin', () => {
     return gifts.value[eventId] ?? []
   }
 
-  async function fetchGifts(eventId: string) {
+  async function fetchGifts(eventId: string, opts?: SubFetchOpts) {
+    if (!opts?.force && hasSubData(gifts.value, eventId)) return
+
     const key = subKey('gifts', eventId)
     subLoading.value[key] = true
     subError.value[key] = ''
@@ -431,7 +447,9 @@ export const useAdminStore = defineStore('admin', () => {
     return gallery.value[eventId] ?? []
   }
 
-  async function fetchGallery(eventId: string) {
+  async function fetchGallery(eventId: string, opts?: SubFetchOpts) {
+    if (!opts?.force && hasSubData(gallery.value, eventId)) return
+
     const key = subKey('gallery', eventId)
     subLoading.value[key] = true
     subError.value[key] = ''
@@ -491,7 +509,9 @@ export const useAdminStore = defineStore('admin', () => {
     return customContent.value[eventId] ?? null
   }
 
-  async function fetchCustomContent(eventId: string) {
+  async function fetchCustomContent(eventId: string, opts?: SubFetchOpts) {
+    if (!opts?.force && hasSubData(customContent.value, eventId)) return
+
     const key = subKey('customContent', eventId)
     subLoading.value[key] = true
     subError.value[key] = ''
@@ -518,7 +538,9 @@ export const useAdminStore = defineStore('admin', () => {
     return enabledComponents.value[eventId] ?? []
   }
 
-  async function fetchEnabledComponents(eventId: string) {
+  async function fetchEnabledComponents(eventId: string, opts?: SubFetchOpts) {
+    if (!opts?.force && hasSubData(enabledComponents.value, eventId)) return
+
     const key = subKey('enabledComponents', eventId)
     subLoading.value[key] = true
     subError.value[key] = ''

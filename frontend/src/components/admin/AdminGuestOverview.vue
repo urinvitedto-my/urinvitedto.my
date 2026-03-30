@@ -78,11 +78,7 @@ const filterButtons: { key: StatusFilter; label: string; countFn: () => number }
   { key: 'pending', label: 'Pending', countFn: () => pendingCount.value },
 ]
 
-onMounted(() => {
-  if (invites.value.length === 0) {
-    adminStore.fetchInvites(props.eventId)
-  }
-})
+onMounted(() => adminStore.fetchInvites(props.eventId))
 </script>
 
 <template>
