@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useAdminStore } from '@/stores/admin'
 import { useToast } from '@/composables/useToast'
+import { useInviteMessage } from '@/composables/useInviteMessage'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
-import type { AdminGuest } from '@/types'
+import type { AdminGuest, AdminInvite } from '@/types'
 
 const props = defineProps<{
   eventId: string
@@ -14,6 +16,34 @@ const emit = defineEmits<{ toggle: [] }>()
 
 const adminStore = useAdminStore()
 const toast = useToast()
+
+const { events } = storeToRefs(adminStore)
+
+const event = computed(() => events.value.find((e) => e.id === props.eventId) ?? null)
+const eventHosts = computed(() => event.value?.hosts ?? [])
+
+const { buildInviteMessage } = useInviteMessage(event, eventHosts)
+
+const expandedMessageId = ref<string | null>(null)
+const copiedInviteId = ref<string | null>(null)
+
+/** Toggles the invite message preview for a card. */
+function toggleMessage(inviteId: string) {
+  expandedMessageId.value = expandedMessageId.value === inviteId ? null : inviteId
+}
+
+/** Copies the invite message to clipboard. */
+async function copyMessage(invite: AdminInvite) {
+  try {
+    await navigator.clipboard.writeText(buildInviteMessage(invite))
+    copiedInviteId.value = invite.id
+    setTimeout(() => {
+      if (copiedInviteId.value === invite.id) copiedInviteId.value = null
+    }, 2000)
+  } catch {
+    // silent fail
+  }
+}
 
 const invites = computed(() => adminStore.getInvites(props.eventId))
 const loading = computed(() => adminStore.isSubLoading('invites', props.eventId))
@@ -351,6 +381,68 @@ function rsvpClass(status: string): string {
             >
               + Add Guest
             </button>
+          </div>
+
+          <!-- Invite Message -->
+          <div class="mt-3 border-t border-gray-200 pt-3">
+            <div class="flex items-center gap-2">
+              <button
+                @click="toggleMessage(invite.id)"
+                class="text-xs text-gray-500 hover:text-primary transition-colors"
+              >
+                <span
+                  class="inline-block transition-transform duration-200 mr-1"
+                  :class="expandedMessageId === invite.id ? 'rotate-90' : ''"
+                  >▶</span
+                >
+                Invite Message
+              </button>
+              <button
+                @click="copyMessage(invite)"
+                class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md transition-colors"
+                :class="
+                  copiedInviteId === invite.id
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-surface text-gray-600 hover:bg-muted'
+                "
+                type="button"
+              >
+                <svg
+                  v-if="copiedInviteId === invite.id"
+                  class="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <svg
+                  v-else
+                  class="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  />
+                </svg>
+                {{ copiedInviteId === invite.id ? 'Copied!' : 'Copy' }}
+              </button>
+            </div>
+            <pre
+              v-if="expandedMessageId === invite.id"
+              class="mt-2 text-sm text-gray-600 bg-white rounded-md p-3 whitespace-pre-wrap font-sans leading-relaxed border border-gray-100"
+              >{{ buildInviteMessage(invite) }}</pre
+            >
           </div>
         </div>
       </div>
