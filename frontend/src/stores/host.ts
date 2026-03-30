@@ -14,13 +14,20 @@ export const useHostStore = defineStore('host', () => {
   const guestsLoading = ref(false)
   const invitesLoading = ref(false)
   const error = ref('')
-  const showAllGuests = ref(false)
+  const guestFilter = ref<'all' | 'yes' | 'no' | 'pending'>('all')
 
-  /** Only confirmed guests (or all, based on toggle). */
+  /** Guests filtered by the active status filter. */
   const filteredGuests = computed(() => {
-    if (showAllGuests.value) return guests.value
-    return guests.value.filter((g) => g.rsvpStatus === 'yes')
+    if (guestFilter.value === 'all') return guests.value
+    return guests.value.filter((g) => g.rsvpStatus === guestFilter.value)
   })
+
+  const totalCount = computed(() => guests.value.length)
+  const yesCount = computed(() => guests.value.filter((g) => g.rsvpStatus === 'yes').length)
+  const noCount = computed(() => guests.value.filter((g) => g.rsvpStatus === 'no').length)
+  const pendingCount = computed(
+    () => guests.value.filter((g) => g.rsvpStatus === 'pending').length,
+  )
 
   /** Fetches events for the authenticated host. */
   async function fetchEvents() {
@@ -79,7 +86,7 @@ export const useHostStore = defineStore('host', () => {
     guestsLoading.value = false
     invitesLoading.value = false
     error.value = ''
-    showAllGuests.value = false
+    guestFilter.value = 'all'
   }
 
   return {
@@ -92,8 +99,12 @@ export const useHostStore = defineStore('host', () => {
     guestsLoading,
     invitesLoading,
     error,
-    showAllGuests,
+    guestFilter,
     filteredGuests,
+    totalCount,
+    yesCount,
+    noCount,
+    pendingCount,
     fetchEvents,
     selectEvent,
     fetchInvites,

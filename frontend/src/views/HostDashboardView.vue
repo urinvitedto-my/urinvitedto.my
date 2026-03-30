@@ -3,9 +3,9 @@ import { ref, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useHostStore } from '@/stores/host'
-import { formatDate, formatTimeOnly } from '@/utils/date'
+import { formatDate } from '@/utils/date'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
-import type { HostGuest, AdminInvite } from '@/types'
+import type { AdminInvite } from '@/types'
 
 const hostStore = useHostStore()
 const {
@@ -17,24 +17,51 @@ const {
   invites,
   eventHosts,
   error,
-  showAllGuests,
+  guestFilter,
   filteredGuests,
+  totalCount,
+  yesCount,
+  noCount,
+  pendingCount,
 } = storeToRefs(hostStore)
 
-const messageModalGuest = ref<HostGuest | null>(null)
-const showInvitesModal = ref(false)
-const copiedInviteId = ref<string | null>(null)
+type StatusFilter = 'all' | 'yes' | 'no' | 'pending'
 
-/** Opens the message modal for a guest (only if they have a message). */
-function openMessage(guest: HostGuest) {
-  if (guest.rsvpMessage) {
-    messageModalGuest.value = guest
+const filterButtons: { key: StatusFilter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'yes', label: 'Confirmed' },
+  { key: 'no', label: 'Declined' },
+  { key: 'pending', label: 'Pending' },
+]
+
+/** Returns the count for each filter button. */
+function filterCount(key: StatusFilter): number {
+  switch (key) {
+    case 'all':
+      return totalCount.value
+    case 'yes':
+      return yesCount.value
+    case 'no':
+      return noCount.value
+    case 'pending':
+      return pendingCount.value
   }
 }
 
-function closeMessage() {
-  messageModalGuest.value = null
+/** Returns the RSVP badge CSS classes for a status. */
+function rsvpBadgeClass(status: string): string {
+  switch (status) {
+    case 'yes':
+      return 'bg-green-100 text-green-700'
+    case 'no':
+      return 'bg-red-100 text-red-700'
+    default:
+      return 'bg-gray-100 text-gray-600'
+  }
 }
+
+const showInvitesModal = ref(false)
+const copiedInviteId = ref<string | null>(null)
 
 /** Opens the invite messages modal, fetching invites if needed. */
 async function openInvitesModal() {
@@ -237,160 +264,114 @@ onMounted(() => {
             Select an event to view guests
           </div>
           <template v-else>
-            <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
               <h2 class="text-lg font-semibold text-primary">
                 {{ selectedEvent.title }} - Guests
               </h2>
-              <div class="flex items-center gap-4">
-                <button
-                  @click="openInvitesModal"
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-accent text-black hover:bg-accent/80 transition-colors"
-                  type="button"
+              <button
+                @click="openInvitesModal"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-accent text-black hover:bg-accent/80 transition-colors"
+                type="button"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
                 >
-                  <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
-                  Invite Messages
-                </button>
-                <label class="flex items-center gap-2 text-sm">
-                  <input v-model="showAllGuests" type="checkbox" class="rounded" />
-                  Show all guests
-                </label>
-              </div>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+                Invite Messages
+              </button>
             </div>
 
             <div v-if="guestsLoading" class="flex items-center justify-center py-12">
               <LoadingSpinner size="md" />
             </div>
 
-            <div
-              v-else-if="filteredGuests.length === 0"
-              class="text-gray-500 text-center py-12"
-            >
-              {{ showAllGuests ? 'No guests yet' : 'No confirmed guests yet' }}
-            </div>
+            <template v-else>
+              <!-- Summary stats -->
+              <div class="mb-4">
+                <p class="text-sm text-gray-600">
+                  <span class="font-semibold text-primary">{{ totalCount }}</span> total
+                  guests
+                  <span class="mx-1">&mdash;</span>
+                  <span class="text-green-600 font-medium">{{ yesCount }} confirmed</span>,
+                  <span class="text-red-500 font-medium">{{ noCount }} declined</span>,
+                  <span class="text-gray-500 font-medium">{{ pendingCount }} pending</span>
+                </p>
+              </div>
 
-            <div v-else class="overflow-x-auto">
-              <table class="w-full">
-                <thead>
-                  <tr class="border-b border-muted">
-                    <th class="text-left py-3 px-4 font-medium text-gray-600">Name</th>
-                    <th class="text-left py-3 px-4 font-medium text-gray-600">
-                      RSVP Date
-                    </th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="guest in filteredGuests"
-                    :key="guest.id"
-                    class="border-b border-surface"
-                  >
-                    <td class="py-3 px-4">{{ guest.displayName }}</td>
-                    <td class="py-3 px-4 text-gray-600 text-sm">
-                      <div>{{ formatDate(guest.rsvpAt) }}</div>
-                      <div class="text-gray-400">
-                        {{ formatTimeOnly(guest.rsvpAt ?? '') }}
-                      </div>
-                    </td>
-                    <td class="py-3 px-4 text-right">
-                      <button
-                        @click="openMessage(guest)"
-                        :class="[
-                          'shrink-0',
-                          guest.rsvpMessage ? 'cursor-pointer' : 'cursor-default',
-                        ]"
-                        :title="guest.rsvpMessage ? 'View message' : undefined"
-                        type="button"
-                      >
-                        <svg
-                          v-if="guest.rsvpStatus === 'yes'"
-                          class="w-5 h-5 text-green-600"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2.5"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                        <svg
-                          v-else-if="guest.rsvpStatus === 'no'"
-                          class="w-5 h-5 text-red-600"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2.5"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                        <span
-                          v-else
-                          class="inline-block w-5 h-5 rounded-full border-2 border-gray-300"
-                        />
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+              <!-- Filter pills -->
+              <div class="flex flex-wrap gap-2 mb-4">
+                <button
+                  v-for="btn in filterButtons"
+                  :key="btn.key"
+                  @click="guestFilter = btn.key"
+                  class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+                  :class="
+                    guestFilter === btn.key
+                      ? 'bg-primary text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  "
+                >
+                  {{ btn.label }} ({{ filterCount(btn.key) }})
+                </button>
+              </div>
 
-            <!-- Guest Message Modal -->
-            <Teleport to="body">
-              <div
-                v-if="messageModalGuest"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-                @click.self="closeMessage"
+              <!-- Empty states -->
+              <p
+                v-if="totalCount === 0"
+                class="text-sm text-gray-400 py-4"
               >
-                <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-                  <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-primary">
-                      {{ messageModalGuest.displayName }}
-                    </h3>
-                    <button
-                      @click="closeMessage"
-                      class="text-gray-400 hover:text-gray-600 transition-colors"
-                      type="button"
-                    >
-                      <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        viewBox="0 0 24 24"
+                No guests yet.
+              </p>
+
+              <p
+                v-else-if="filteredGuests.length === 0"
+                class="text-sm text-gray-400 py-4"
+              >
+                No guests match this filter.
+              </p>
+
+              <!-- Guest cards -->
+              <div v-else class="space-y-2">
+                <div
+                  v-for="guest in filteredGuests"
+                  :key="guest.id"
+                  class="bg-gray-50 rounded-lg px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1"
+                >
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="text-sm font-semibold text-primary">{{
+                        guest.displayName
+                      }}</span>
+                      <span
+                        class="text-xs px-1.5 py-0.5 rounded capitalize"
+                        :class="rsvpBadgeClass(guest.rsvpStatus)"
                       >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
+                        {{ guest.rsvpStatus }}
+                      </span>
+                    </div>
+                    <p
+                      v-if="guest.rsvpMessage"
+                      class="text-xs text-gray-500 italic mt-0.5 wrap-break-word"
+                    >
+                      "{{ guest.rsvpMessage }}"
+                    </p>
                   </div>
-                  <p class="text-gray-700 whitespace-pre-wrap">
-                    {{ messageModalGuest.rsvpMessage }}
-                  </p>
+
+                  <div class="flex items-center gap-3 text-xs text-gray-400 shrink-0">
+                    <span v-if="guest.rsvpAt">{{ formatDate(guest.rsvpAt, true) }}</span>
+                  </div>
                 </div>
               </div>
-            </Teleport>
+            </template>
 
             <!-- Invite Messages Modal -->
             <Teleport to="body">
