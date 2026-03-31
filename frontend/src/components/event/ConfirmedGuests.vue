@@ -19,28 +19,25 @@ const visibleGuests = computed(() =>
 
 <template>
   <section class="confirmed-guests pb-16 px-4">
-    <div class="max-w-3xl mx-auto">
-      <h2 class="text-4xl font-bold text-guest-bg text-center mb-2 font-kaushan">
+    <div class="max-w-3xl mx-auto bg-primary-dark/60 p-4 rounded-lg shadow-lg shadow-primary-dark">
+      <h2 class="text-4xl font-bold text-guest-bg text-center mb-2 font-kaushan text-shadow-md text-shadow-black/35">
         Who's Coming
       </h2>
-      <p class="text-guest-bg text-center mb-8">
+      <p class="text-white text-center text-lg mb-8 text-shadow-md text-shadow-black/35">
         {{ count }} guest{{ count !== 1 ? 's' : '' }} attending
       </p>
 
-      <div v-if="guests.length === 0" class="text-center text-guest-bg py-8">
+      <div v-if="guests.length === 0" class="text-center text-white py-8 text-shadow-md text-shadow-black/35">
         No confirmed guests yet
       </div>
 
       <template v-else>
         <!-- Desktop: show preview names, Mobile: hidden until expanded -->
-        <div
-          v-if="!expanded"
-          class="hidden sm:flex flex-wrap justify-center gap-3"
-        >
+        <div v-if="!expanded" class="hidden sm:flex flex-wrap justify-center gap-3">
           <div
             v-for="(guest, index) in visibleGuests"
             :key="index"
-            class="px-4 py-2 text-guest-bg"
+            class="px-4 py-2 text-white text-shadow-md text-shadow-black/35"
           >
             {{ guest.displayName }}
           </div>
@@ -51,7 +48,7 @@ const visibleGuests = computed(() =>
           <div
             v-for="(guest, index) in guests"
             :key="index"
-            class="px-4 py-2 text-guest-bg"
+            class="px-4 py-2 text-white text-shadow-md text-shadow-black/35"
           >
             {{ guest.displayName }}
           </div>
@@ -60,7 +57,7 @@ const visibleGuests = computed(() =>
         <div class="text-center mt-4">
           <button
             @click="expanded = !expanded"
-            class="text-guest-bg/80 hover:text-guest-bg text-sm underline underline-offset-4 transition-colors cursor-pointer"
+            class="text-white/80 hover:text-white text-sm underline underline-offset-4 transition-colors cursor-pointer text-shadow-md text-shadow-black/35"
           >
             {{ expanded ? 'Show less' : `View all ${guests.length} guests` }}
           </button>
