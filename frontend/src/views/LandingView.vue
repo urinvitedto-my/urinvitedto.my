@@ -19,18 +19,20 @@
       </div>
       <div class="max-w-6xl w-full relative z-10">
         <p
-          class="text-base uppercase tracking-[0.3em] text-accent font-semibold mb-6 ml-2"
+          class="text-xs md:text-base uppercase tracking-[0.2em] text-accent font-semibold mb-6 ml-2"
         >
           Digital Invitations
         </p>
         <h1
-          class="text-7xl md:text-8xl lg:text-9xl font-bold text-primary leading-[0.95] mb-4"
+          class="text-6xl md:text-8xl lg:text-9xl font-bold text-primary leading-[0.95] mb-4"
         >
           Invite<br />beautifully
         </h1>
-        <p class="text-base md:text-lg text-primary max-w-xs mb-4 ml-2">
+        <p class="text-xl text-primary max-w-xs mb-4 ml-2">
           COMING SOON<br />
-          <span class="text-accent">urinvitedto.my@gmail.com</span>
+          <span class="text-primary-dark underline text-base md:text-lg"
+            >urinvitedto.my@gmail.com</span
+          >
         </p>
         <RouterLink
           to="/login"

@@ -11,7 +11,7 @@
         to="/"
         class="inline-block bg-accent text-black font-semibold px-6 py-3 rounded-lg hover:bg-accent-dark transition-colors"
       >
-        Go Home
+        Go To Homepage
       </RouterLink>
     </div>
   </div>
