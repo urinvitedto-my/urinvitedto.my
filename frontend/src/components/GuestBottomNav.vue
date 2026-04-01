@@ -3,7 +3,7 @@ const navItems = [
   { id: 'section-top', label: 'Top' },
   { id: 'section-countdown', label: 'Countdown' },
   { id: 'section-gallery', label: 'Gallery' },
-  { id: 'section-venue', label: 'Venue' },
+  { id: 'section-location', label: 'Venue' },
   { id: 'section-rsvp', label: 'RSVP' },
 ]
 
@@ -75,14 +75,14 @@ function scrollToSection(sectionId: string) {
           />
         </svg>
 
-        <!-- Navigation / send arrow -->
+        <!-- Map pin -->
         <svg
-          v-else-if="item.id === 'section-venue'"
+          v-else-if="item.id === 'section-location'"
           class="w-11 h-11 text-primary"
           viewBox="0 0 24 24"
           fill="currentColor"
         >
-          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" />
         </svg>
 
         <!-- Contact / ID card -->

@@ -182,11 +182,15 @@ async function loadEventData() {
           :gallery="eventData.gallery"
         />
 
-        <LocationPhoto
+        <div
           v-else-if="comp.name === 'LocationPhoto' && eventData.event.locationPhotoUrl"
-          :url="eventData.event.locationPhotoUrl"
-          :location="eventData.event.location"
-        />
+          id="section-location"
+        >
+          <LocationPhoto
+            :url="eventData.event.locationPhotoUrl"
+            :location="eventData.event.location"
+          />
+        </div>
 
         <div
           v-else-if="comp.name === 'CountdownTimer' && eventData.event.startsAt"
