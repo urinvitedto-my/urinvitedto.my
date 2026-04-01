@@ -22,9 +22,12 @@ func (h *Handlers) GetHostEvents(w http.ResponseWriter, r *http.Request) {
 	emailLower := strings.ToLower(strings.TrimSpace(email))
 	slog.Info("Fetching host events", "email", emailLower)
 
-	// fetch events where user is a host (by auth_user_id OR contact_email)
+	// fetch events where user is a host (by auth_user_id OR contact_email), with guest RSVP stats
 	rows, err := h.db.Query(ctx, `
-		SELECT DISTINCT e.id, e.type, e.slug, e.title, e.is_public, e.starts_at, e.location, e.created_at
+		SELECT DISTINCT e.id, e.type, e.slug, e.title, e.is_public, e.starts_at, e.location, e.created_at,
+			COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = e.id), 0),
+			COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = e.id AND g.rsvp_status = 'yes'), 0),
+			COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = e.id AND g.rsvp_status = 'no'), 0)
 		FROM events e
 		INNER JOIN hosts h ON h.event_id = e.id
 		LEFT JOIN auth.users u ON u.id = h.auth_user_id
@@ -55,6 +58,9 @@ func (h *Handlers) GetHostEvents(w http.ResponseWriter, r *http.Request) {
 			&e.StartsAt,
 			&e.Location,
 			&e.CreatedAt,
+			&e.GuestCount,
+			&e.RsvpYes,
+			&e.RsvpNo,
 		); err != nil {
 			slog.Error("Error scanning event", "error", err)
 			continue

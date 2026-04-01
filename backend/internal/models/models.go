@@ -374,8 +374,13 @@ type UpdateGalleryItemRequest struct {
 	OrderIndex *int    `json:"orderIndex"`
 }
 
-// HostEvent is an alias for BaseEvent for host dashboard view.
-type HostEvent = BaseEvent
+// HostEvent is a list item for the host dashboard (RSVP stats for sidebar cards).
+type HostEvent struct {
+	BaseEvent
+	GuestCount int `json:"guestCount"`
+	RsvpYes    int `json:"rsvpYes"`
+	RsvpNo     int `json:"rsvpNo"`
+}
 
 // HostEventsResponse is the response for host events endpoint.
 type HostEventsResponse struct {
