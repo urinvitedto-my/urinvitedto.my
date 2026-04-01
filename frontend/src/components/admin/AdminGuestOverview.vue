@@ -100,9 +100,7 @@ onMounted(() => adminStore.fetchInvites(props.eventId))
 
     <template v-else>
       <!-- Status filters + sort -->
-      <div
-        class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 mb-4"
-      >
+      <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 mb-4">
         <div class="flex flex-wrap gap-2">
           <button
             v-for="btn in filterButtons"
@@ -126,10 +124,10 @@ onMounted(() => adminStore.fetchInvites(props.eventId))
             v-model="sortMode"
             class="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-800 focus:ring-2 focus:ring-accent focus:outline-none min-w-0 max-w-full"
           >
-            <option value="name-asc">Name (A–Z)</option>
-            <option value="name-desc">Name (Z–A)</option>
-            <option value="responded-newest">Response (newest first)</option>
-            <option value="responded-oldest">Response (oldest first)</option>
+            <option value="name-asc">Name: A to Z</option>
+            <option value="name-desc">Name: Z to A</option>
+            <option value="responded-newest">RSPV: Newest</option>
+            <option value="responded-oldest">RSPV: Oldest</option>
           </select>
         </label>
       </div>

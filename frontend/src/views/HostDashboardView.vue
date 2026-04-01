@@ -46,7 +46,11 @@ const sortedFilteredGuests = computed(() => {
 })
 
 /** Pending RSVPs for an event row (guests minus yes/no). */
-function hostPendingCount(event: { guestCount: number; rsvpYes: number; rsvpNo: number }) {
+function hostPendingCount(event: {
+  guestCount: number
+  rsvpYes: number
+  rsvpNo: number
+}) {
   return event.guestCount - event.rsvpYes - event.rsvpNo
 }
 
@@ -177,19 +181,26 @@ onMounted(() => {
                 </div>
                 <div
                   class="flex items-center gap-2 mt-1.5 text-xs opacity-90"
-                  :class="selectedEvent?.id === event.id ? 'text-black/80' : 'text-gray-600'"
+                  :class="
+                    selectedEvent?.id === event.id ? 'text-black/80' : 'text-gray-600'
+                  "
                 >
                   <span
                     >{{ event.guestCount }} guest{{
                       event.guestCount !== 1 ? 's' : ''
                     }}</span
                   >
-                  <span :class="selectedEvent?.id === event.id ? 'text-black/40' : 'text-gray-300'"
+                  <span
+                    :class="
+                      selectedEvent?.id === event.id ? 'text-black/40' : 'text-gray-300'
+                    "
                     >|</span
                   >
                   <span class="text-green-600">{{ event.rsvpYes }} yes</span>
                   <span class="text-red-500">{{ event.rsvpNo }} no</span>
-                  <span class="text-gray-500">{{ hostPendingCount(event) }} pending</span>
+                  <span class="text-gray-500"
+                    >{{ hostPendingCount(event) }} pending</span
+                  >
                 </div>
               </div>
             </li>
@@ -259,19 +270,16 @@ onMounted(() => {
                     v-model="guestSortMode"
                     class="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-800 focus:ring-2 focus:ring-accent focus:outline-none min-w-0 max-w-full"
                   >
-                    <option value="name-asc">Name (A–Z)</option>
-                    <option value="name-desc">Name (Z–A)</option>
-                    <option value="responded-newest">Response (newest first)</option>
-                    <option value="responded-oldest">Response (oldest first)</option>
+                    <option value="name-asc">Name: A to Z</option>
+                    <option value="name-desc">Name: Z to A</option>
+                    <option value="responded-newest">RSPV: Newest</option>
+                    <option value="responded-oldest">RSPV: Oldest</option>
                   </select>
                 </label>
               </div>
 
               <!-- Empty states -->
-              <p
-                v-if="totalCount === 0"
-                class="text-sm text-gray-400 py-4"
-              >
+              <p v-if="totalCount === 0" class="text-sm text-gray-400 py-4">
                 No guests yet.
               </p>
 
@@ -310,7 +318,9 @@ onMounted(() => {
                   </div>
 
                   <div class="flex items-center gap-3 text-xs text-gray-400 shrink-0">
-                    <span v-if="guest.rsvpAt">{{ formatDate(guest.rsvpAt, true) }}</span>
+                    <span v-if="guest.rsvpAt">{{
+                      formatDate(guest.rsvpAt, true)
+                    }}</span>
                   </div>
                 </div>
               </div>
