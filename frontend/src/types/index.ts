@@ -180,6 +180,9 @@ export interface HostEvent {
   startsAt?: string
   location?: string
   createdAt: string
+  guestCount: number
+  rsvpYes: number
+  rsvpNo: number
 }
 
 export interface HostGuest {

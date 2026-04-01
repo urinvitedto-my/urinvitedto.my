@@ -35,6 +35,11 @@ const filterButtons: { key: StatusFilter; label: string }[] = [
   { key: 'pending', label: 'Pending' },
 ]
 
+/** Pending RSVPs for an event row (guests minus yes/no). */
+function hostPendingCount(event: { guestCount: number; rsvpYes: number; rsvpNo: number }) {
+  return event.guestCount - event.rsvpYes - event.rsvpNo
+}
+
 /** Returns the count for each filter button. */
 function filterCount(key: StatusFilter): number {
   switch (key) {
@@ -160,6 +165,22 @@ onMounted(() => {
                 <div class="text-sm opacity-75">
                   {{ formatDate(event.startsAt, true) }}
                 </div>
+                <div
+                  class="flex items-center gap-2 mt-1.5 text-xs opacity-90"
+                  :class="selectedEvent?.id === event.id ? 'text-black/80' : 'text-gray-600'"
+                >
+                  <span
+                    >{{ event.guestCount }} guest{{
+                      event.guestCount !== 1 ? 's' : ''
+                    }}</span
+                  >
+                  <span :class="selectedEvent?.id === event.id ? 'text-black/40' : 'text-gray-300'"
+                    >|</span
+                  >
+                  <span class="text-green-600">{{ event.rsvpYes }} yes</span>
+                  <span class="text-red-500">{{ event.rsvpNo }} no</span>
+                  <span class="text-gray-500">{{ hostPendingCount(event) }} pending</span>
+                </div>
               </div>
             </li>
           </ul>
@@ -201,18 +222,6 @@ onMounted(() => {
             </div>
 
             <template v-else>
-              <!-- Summary stats -->
-              <div class="mb-4">
-                <p class="text-sm text-gray-600">
-                  <span class="font-semibold text-primary">{{ totalCount }}</span> total
-                  guests
-                  <span class="mx-1">&mdash;</span>
-                  <span class="text-green-600 font-medium">{{ yesCount }} confirmed</span>,
-                  <span class="text-red-500 font-medium">{{ noCount }} declined</span>,
-                  <span class="text-gray-500 font-medium">{{ pendingCount }} pending</span>
-                </p>
-              </div>
-
               <!-- Filter pills -->
               <div class="flex flex-wrap gap-2 mb-4">
                 <button

@@ -92,18 +92,6 @@ onMounted(() => adminStore.fetchInvites(props.eventId))
     <p v-else-if="error" class="text-red-600 text-sm py-4">{{ error }}</p>
 
     <template v-else>
-      <!-- Summary -->
-      <div class="mb-4">
-        <p class="text-sm text-gray-600">
-          <span class="font-semibold text-primary">{{ flatGuests.length }}</span> total
-          guests
-          <span class="mx-1">—</span>
-          <span class="text-green-600 font-medium">{{ yesCount }} confirmed</span>,
-          <span class="text-red-500 font-medium">{{ noCount }} declined</span>,
-          <span class="text-gray-500 font-medium">{{ pendingCount }} pending</span>
-        </p>
-      </div>
-
       <!-- Filter pills -->
       <div class="flex flex-wrap gap-2 mb-4">
         <button
