@@ -3,6 +3,7 @@ import { computed, onMounted } from 'vue'
 import { ref } from 'vue'
 import { useAdminStore } from '@/stores/admin'
 import { formatDate } from '@/utils/date'
+import { compareGuests, type GuestSortMode } from '@/utils/guestSort'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 
 const props = defineProps<{ eventId: string }>()
@@ -15,6 +16,7 @@ const error = computed(() => adminStore.getSubError('invites', props.eventId))
 
 type StatusFilter = 'all' | 'yes' | 'no' | 'pending'
 const statusFilter = ref<StatusFilter>('all')
+const sortMode = ref<GuestSortMode>('name-asc')
 
 interface FlatGuest {
   id: string
@@ -26,7 +28,7 @@ interface FlatGuest {
   inviteCode: string
 }
 
-/** Flattens all guests across all invites into a single sorted list. */
+/** Flattens all guests across all invites (order fixed when sorting). */
 const flatGuests = computed<FlatGuest[]>(() => {
   const guests: FlatGuest[] = []
   for (const invite of invites.value) {
@@ -42,12 +44,17 @@ const flatGuests = computed<FlatGuest[]>(() => {
       })
     }
   }
-  return guests.sort((a, b) => a.displayName.localeCompare(b.displayName))
+  return guests
 })
 
 const filteredGuests = computed(() => {
-  if (statusFilter.value === 'all') return flatGuests.value
-  return flatGuests.value.filter((g) => g.rsvpStatus === statusFilter.value)
+  const base =
+    statusFilter.value === 'all'
+      ? flatGuests.value
+      : flatGuests.value.filter((g) => g.rsvpStatus === statusFilter.value)
+  const list = [...base]
+  list.sort((a, b) => compareGuests(a, b, sortMode.value))
+  return list
 })
 
 const yesCount = computed(
@@ -92,21 +99,39 @@ onMounted(() => adminStore.fetchInvites(props.eventId))
     <p v-else-if="error" class="text-red-600 text-sm py-4">{{ error }}</p>
 
     <template v-else>
-      <!-- Filter pills -->
-      <div class="flex flex-wrap gap-2 mb-4">
-        <button
-          v-for="btn in filterButtons"
-          :key="btn.key"
-          @click="statusFilter = btn.key"
-          class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
-          :class="
-            statusFilter === btn.key
-              ? 'bg-primary text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          "
+      <!-- Status filters + sort -->
+      <div
+        class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 mb-4"
+      >
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="btn in filterButtons"
+            :key="btn.key"
+            @click="statusFilter = btn.key"
+            class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+            :class="
+              statusFilter === btn.key
+                ? 'bg-primary text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            "
+          >
+            {{ btn.label }} ({{ btn.countFn() }})
+          </button>
+        </div>
+        <label
+          class="flex items-center gap-2 text-xs text-gray-600 sm:ml-auto shrink-0"
         >
-          {{ btn.label }} ({{ btn.countFn() }})
-        </button>
+          <span class="font-medium text-gray-500">Sort</span>
+          <select
+            v-model="sortMode"
+            class="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-800 focus:ring-2 focus:ring-accent focus:outline-none min-w-0 max-w-full"
+          >
+            <option value="name-asc">Name (A–Z)</option>
+            <option value="name-desc">Name (Z–A)</option>
+            <option value="responded-newest">Response (newest first)</option>
+            <option value="responded-oldest">Response (oldest first)</option>
+          </select>
+        </label>
       </div>
 
       <!-- Empty state -->

@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useHostStore } from '@/stores/host'
 import { formatDate } from '@/utils/date'
+import { compareGuests, type GuestSortMode } from '@/utils/guestSort'
 import { useInviteMessage } from '@/composables/useInviteMessage'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import type { AdminInvite } from '@/types'
@@ -34,6 +35,15 @@ const filterButtons: { key: StatusFilter; label: string }[] = [
   { key: 'no', label: 'Declined' },
   { key: 'pending', label: 'Pending' },
 ]
+
+const guestSortMode = ref<GuestSortMode>('name-asc')
+
+/** Guests for the active status filter, ordered by the current sort mode. */
+const sortedFilteredGuests = computed(() => {
+  const list = [...filteredGuests.value]
+  list.sort((a, b) => compareGuests(a, b, guestSortMode.value))
+  return list
+})
 
 /** Pending RSVPs for an event row (guests minus yes/no). */
 function hostPendingCount(event: { guestCount: number; rsvpYes: number; rsvpNo: number }) {
@@ -222,21 +232,39 @@ onMounted(() => {
             </div>
 
             <template v-else>
-              <!-- Filter pills -->
-              <div class="flex flex-wrap gap-2 mb-4">
-                <button
-                  v-for="btn in filterButtons"
-                  :key="btn.key"
-                  @click="guestFilter = btn.key"
-                  class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
-                  :class="
-                    guestFilter === btn.key
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  "
+              <!-- Status filters + sort -->
+              <div
+                class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 mb-4"
+              >
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    v-for="btn in filterButtons"
+                    :key="btn.key"
+                    @click="guestFilter = btn.key"
+                    class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+                    :class="
+                      guestFilter === btn.key
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    "
+                  >
+                    {{ btn.label }} ({{ filterCount(btn.key) }})
+                  </button>
+                </div>
+                <label
+                  class="flex items-center gap-2 text-xs text-gray-600 sm:ml-auto shrink-0"
                 >
-                  {{ btn.label }} ({{ filterCount(btn.key) }})
-                </button>
+                  <span class="font-medium text-gray-500">Sort</span>
+                  <select
+                    v-model="guestSortMode"
+                    class="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-800 focus:ring-2 focus:ring-accent focus:outline-none min-w-0 max-w-full"
+                  >
+                    <option value="name-asc">Name (A–Z)</option>
+                    <option value="name-desc">Name (Z–A)</option>
+                    <option value="responded-newest">Response (newest first)</option>
+                    <option value="responded-oldest">Response (oldest first)</option>
+                  </select>
+                </label>
               </div>
 
               <!-- Empty states -->
@@ -248,7 +276,7 @@ onMounted(() => {
               </p>
 
               <p
-                v-else-if="filteredGuests.length === 0"
+                v-else-if="sortedFilteredGuests.length === 0"
                 class="text-sm text-gray-400 py-4"
               >
                 No guests match this filter.
@@ -257,7 +285,7 @@ onMounted(() => {
               <!-- Guest cards -->
               <div v-else class="space-y-2">
                 <div
-                  v-for="guest in filteredGuests"
+                  v-for="guest in sortedFilteredGuests"
                   :key="guest.id"
                   class="bg-gray-50 rounded-lg px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1"
                 >
