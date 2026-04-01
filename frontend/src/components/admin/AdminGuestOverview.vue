@@ -100,13 +100,18 @@ onMounted(() => adminStore.fetchInvites(props.eventId))
 
     <template v-else>
       <!-- Status filters + sort -->
-      <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 mb-4">
-        <div class="flex flex-wrap gap-2">
+      <div
+        class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 mb-4"
+      >
+        <!-- 2×2 grid on narrow screens avoids one orphan pill + empty row; flex-wrap from sm up -->
+        <div
+          class="grid grid-cols-2 gap-2 w-full min-w-0 sm:flex sm:flex-wrap sm:flex-1 sm:min-w-48 sm:gap-x-2 sm:gap-y-3"
+        >
           <button
             v-for="btn in filterButtons"
             :key="btn.key"
             @click="statusFilter = btn.key"
-            class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+            class="justify-self-stretch px-3 py-1.5 rounded-full text-xs font-medium transition-colors text-center sm:justify-self-auto sm:w-auto"
             :class="
               statusFilter === btn.key
                 ? 'bg-primary text-white'
@@ -117,12 +122,12 @@ onMounted(() => adminStore.fetchInvites(props.eventId))
           </button>
         </div>
         <label
-          class="flex items-center gap-2 text-xs text-gray-600 sm:ml-auto shrink-0"
+          class="flex w-full min-w-0 items-center gap-2 text-xs text-gray-600 sm:ml-auto sm:w-auto sm:shrink-0"
         >
-          <span class="font-medium text-gray-500">Sort</span>
+          <span class="font-medium text-gray-500 shrink-0">Sort</span>
           <select
             v-model="sortMode"
-            class="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-800 focus:ring-2 focus:ring-accent focus:outline-none min-w-0 max-w-full"
+            class="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-800 focus:ring-2 focus:ring-accent focus:outline-none sm:flex-initial sm:min-w-44"
           >
             <option value="name-asc">Name: A to Z</option>
             <option value="name-desc">Name: Z to A</option>
