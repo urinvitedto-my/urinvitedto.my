@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import type { GalleryItem } from '@/types'
+import { ref, computed, onMounted, onUnmounted, nextTick } from "vue"
+import type { GalleryItem } from "@/types"
 
 const props = defineProps<{
   items: GalleryItem[]
@@ -25,7 +25,7 @@ const showAll = ref(false)
 
 const MOBILE_BREAKPOINT = 768
 const visibleCount = ref(
-  typeof window !== 'undefined' && window.innerWidth >= MOBILE_BREAKPOINT ? 3 : 2,
+  typeof window !== "undefined" && window.innerWidth >= MOBILE_BREAKPOINT ? 3 : 2,
 )
 
 /** Updates visible item count based on screen width. */
@@ -88,16 +88,16 @@ function onPointerDown(e: PointerEvent) {
   startX = e.clientX
   startY = e.clientY
   dragDelta.value = 0
-  window.addEventListener('pointermove', onPointerMove)
-  window.addEventListener('pointerup', onPointerUp)
-  window.addEventListener('pointercancel', onPointerUp)
+  window.addEventListener("pointermove", onPointerMove)
+  window.addEventListener("pointerup", onPointerUp)
+  window.addEventListener("pointercancel", onPointerUp)
 }
 
 /** Removes drag listeners from window. */
 function cleanupDragListeners() {
-  window.removeEventListener('pointermove', onPointerMove)
-  window.removeEventListener('pointerup', onPointerUp)
-  window.removeEventListener('pointercancel', onPointerUp)
+  window.removeEventListener("pointermove", onPointerMove)
+  window.removeEventListener("pointerup", onPointerUp)
+  window.removeEventListener("pointercancel", onPointerUp)
 }
 
 function onPointerMove(e: PointerEvent) {
@@ -168,14 +168,14 @@ function currentItem(): GalleryItem {
 onMounted(() => {
   trackIndex.value = props.items.length
   updateVisibleCount()
-  window.addEventListener('resize', updateVisibleCount)
+  window.addEventListener("resize", updateVisibleCount)
   autoTimer = setInterval(() => {
     if (!isHovered.value) step(1)
   }, 4000)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', updateVisibleCount)
+  window.removeEventListener("resize", updateVisibleCount)
   if (autoTimer) clearInterval(autoTimer)
   if (resetTimer) clearTimeout(resetTimer)
   cleanupDragListeners()
@@ -194,7 +194,7 @@ onUnmounted(() => {
           @click="showAll = !showAll"
           class="text-sm font-medium text-primary hover:text-primary-dark/80 transition-colors flex items-center gap-1"
         >
-          {{ showAll ? 'Show Less' : 'View All' }}
+          {{ showAll ? "Show Less" : "View All" }}
           <svg
             class="w-4 h-4 transition-transform"
             :class="{ 'rotate-180': showAll }"
@@ -202,7 +202,12 @@ onUnmounted(() => {
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
           </svg>
         </button>
       </div>
@@ -215,7 +220,9 @@ onUnmounted(() => {
           class="group cursor-pointer"
           @click="lightboxIndex = idx; lightboxOpen = true"
         >
-          <div class="aspect-4/5 overflow-hidden rounded-xl shadow-sm border border-muted/50 bg-white/80 backdrop-blur">
+          <div
+            class="aspect-4/5 overflow-hidden rounded-xl shadow-sm border border-muted/50 bg-white/80 backdrop-blur"
+          >
             <img
               v-if="item.mediaType === 'photo'"
               :src="item.mediaUrl"
@@ -227,7 +234,11 @@ onUnmounted(() => {
               v-else
               class="w-full h-full bg-primary flex items-center justify-center group-hover:bg-primary-dark transition-colors"
             >
-              <svg class="w-12 h-12 text-accent" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                class="w-12 h-12 text-accent"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M8 5v14l11-7z" />
               </svg>
             </div>

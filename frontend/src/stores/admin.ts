@@ -1,5 +1,5 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { defineStore } from "pinia"
+import { ref, computed } from "vue"
 import {
   adminListEvents,
   adminCreateEvent,
@@ -33,7 +33,7 @@ import {
   adminUpdateCustomContent,
   adminGetEnabledComponents,
   adminUpdateEnabledComponents,
-} from '@/services/api'
+} from "@/services/api"
 import type {
   EventType,
   AdminEvent,
@@ -47,17 +47,17 @@ import type {
   CustomContent,
   EnabledComponents,
   ComponentConfig,
-} from '@/types'
-import { errorMsg } from '@/utils/error'
+} from "@/types"
+import { errorMsg } from "@/utils/error"
 
-export const useAdminStore = defineStore('admin', () => {
+export const useAdminStore = defineStore("admin", () => {
   // --- Events ---
   const events = ref<AdminEvent[]>([])
   const loading = ref(false)
-  const error = ref('')
+  const error = ref("")
 
-  const selectedEvent = computed(() =>
-    events.value.find((e) => e.id === selectedEventId.value) ?? null,
+  const selectedEvent = computed(
+    () => events.value.find((e) => e.id === selectedEventId.value) ?? null,
   )
   const selectedEventId = ref<string | null>(null)
 
@@ -91,7 +91,7 @@ export const useAdminStore = defineStore('admin', () => {
   }
 
   function getSubError(type: string, eventId: string) {
-    return subError.value[subKey(type, eventId)] ?? ''
+    return subError.value[subKey(type, eventId)] ?? ""
   }
 
   // ========================
@@ -101,12 +101,12 @@ export const useAdminStore = defineStore('admin', () => {
   /** Loads all events from the admin API. */
   async function fetchEvents() {
     loading.value = true
-    error.value = ''
+    error.value = ""
     try {
       const data = await adminListEvents()
       events.value = data.events
     } catch (e: unknown) {
-      error.value = errorMsg(e, 'Failed to load events')
+      error.value = errorMsg(e, "Failed to load events")
       throw e
     } finally {
       loading.value = false
@@ -196,14 +196,14 @@ export const useAdminStore = defineStore('admin', () => {
   async function fetchInvites(eventId: string, opts?: SubFetchOpts) {
     if (!opts?.force && hasSubData(invites.value, eventId)) return
 
-    const key = subKey('invites', eventId)
+    const key = subKey("invites", eventId)
     subLoading.value[key] = true
-    subError.value[key] = ''
+    subError.value[key] = ""
     try {
       const data = await adminListInvites(eventId)
       invites.value[eventId] = data.invites
     } catch (e: unknown) {
-      subError.value[key] = errorMsg(e, 'Failed to load invites')
+      subError.value[key] = errorMsg(e, "Failed to load invites")
     } finally {
       subLoading.value[key] = false
     }
@@ -238,7 +238,7 @@ export const useAdminStore = defineStore('admin', () => {
     eventId: string,
     inviteId: string,
     guestId: string,
-    data: { displayName: string; rsvpStatus: 'pending' | 'yes' | 'no' },
+    data: { displayName: string; rsvpStatus: "pending" | "yes" | "no" },
   ) {
     const updated = await adminUpdateGuest(eventId, guestId, data)
     const invite = invites.value[eventId]?.find((i) => i.id === inviteId)
@@ -249,7 +249,11 @@ export const useAdminStore = defineStore('admin', () => {
     return updated
   }
 
-  async function deleteGuestFromInvite(eventId: string, inviteId: string, guestId: string) {
+  async function deleteGuestFromInvite(
+    eventId: string,
+    inviteId: string,
+    guestId: string,
+  ) {
     await adminDeleteGuest(eventId, guestId)
     const invite = invites.value[eventId]?.find((i) => i.id === inviteId)
     if (invite) {
@@ -268,14 +272,14 @@ export const useAdminStore = defineStore('admin', () => {
   async function fetchSchedule(eventId: string, opts?: SubFetchOpts) {
     if (!opts?.force && hasSubData(schedule.value, eventId)) return
 
-    const key = subKey('schedule', eventId)
+    const key = subKey("schedule", eventId)
     subLoading.value[key] = true
-    subError.value[key] = ''
+    subError.value[key] = ""
     try {
       const data = await adminListSchedule(eventId)
       schedule.value[eventId] = data.items
     } catch (e: unknown) {
-      subError.value[key] = errorMsg(e, 'Failed to load schedule')
+      subError.value[key] = errorMsg(e, "Failed to load schedule")
     } finally {
       subLoading.value[key] = false
     }
@@ -295,7 +299,12 @@ export const useAdminStore = defineStore('admin', () => {
   async function updateScheduleItem(
     eventId: string,
     itemId: string,
-    data: { time: string; title: string; description?: string | null; orderIndex?: number | null },
+    data: {
+      time: string
+      title: string
+      description?: string | null
+      orderIndex?: number | null
+    },
   ) {
     const updated = await adminUpdateScheduleItem(eventId, itemId, data)
     const items = schedule.value[eventId]
@@ -325,14 +334,14 @@ export const useAdminStore = defineStore('admin', () => {
   async function fetchFAQs(eventId: string, opts?: SubFetchOpts) {
     if (!opts?.force && hasSubData(faqs.value, eventId)) return
 
-    const key = subKey('faqs', eventId)
+    const key = subKey("faqs", eventId)
     subLoading.value[key] = true
-    subError.value[key] = ''
+    subError.value[key] = ""
     try {
       const data = await adminListFAQs(eventId)
       faqs.value[eventId] = data.items
     } catch (e: unknown) {
-      subError.value[key] = errorMsg(e, 'Failed to load FAQs')
+      subError.value[key] = errorMsg(e, "Failed to load FAQs")
     } finally {
       subLoading.value[key] = false
     }
@@ -382,14 +391,14 @@ export const useAdminStore = defineStore('admin', () => {
   async function fetchGifts(eventId: string, opts?: SubFetchOpts) {
     if (!opts?.force && hasSubData(gifts.value, eventId)) return
 
-    const key = subKey('gifts', eventId)
+    const key = subKey("gifts", eventId)
     subLoading.value[key] = true
-    subError.value[key] = ''
+    subError.value[key] = ""
     try {
       const data = await adminListGifts(eventId)
       gifts.value[eventId] = data.items
     } catch (e: unknown) {
-      subError.value[key] = errorMsg(e, 'Failed to load gifts')
+      subError.value[key] = errorMsg(e, "Failed to load gifts")
     } finally {
       subLoading.value[key] = false
     }
@@ -398,7 +407,7 @@ export const useAdminStore = defineStore('admin', () => {
   async function createGiftItem(
     eventId: string,
     data: {
-      giftType: 'physical' | 'monetary'
+      giftType: "physical" | "monetary"
       title: string
       description?: string | null
       link?: string | null
@@ -415,7 +424,7 @@ export const useAdminStore = defineStore('admin', () => {
     eventId: string,
     itemId: string,
     data: {
-      giftType: 'physical' | 'monetary'
+      giftType: "physical" | "monetary"
       title: string
       description?: string | null
       link?: string | null
@@ -450,14 +459,14 @@ export const useAdminStore = defineStore('admin', () => {
   async function fetchGallery(eventId: string, opts?: SubFetchOpts) {
     if (!opts?.force && hasSubData(gallery.value, eventId)) return
 
-    const key = subKey('gallery', eventId)
+    const key = subKey("gallery", eventId)
     subLoading.value[key] = true
-    subError.value[key] = ''
+    subError.value[key] = ""
     try {
       const data = await adminListGallery(eventId)
       gallery.value[eventId] = data.items
     } catch (e: unknown) {
-      subError.value[key] = errorMsg(e, 'Failed to load gallery')
+      subError.value[key] = errorMsg(e, "Failed to load gallery")
     } finally {
       subLoading.value[key] = false
     }
@@ -466,7 +475,7 @@ export const useAdminStore = defineStore('admin', () => {
   async function createGalleryItem(
     eventId: string,
     data: {
-      mediaType: 'photo' | 'video'
+      mediaType: "photo" | "video"
       mediaUrl: string
       caption?: string | null
       orderIndex?: number | null
@@ -512,13 +521,13 @@ export const useAdminStore = defineStore('admin', () => {
   async function fetchCustomContent(eventId: string, opts?: SubFetchOpts) {
     if (!opts?.force && hasSubData(customContent.value, eventId)) return
 
-    const key = subKey('customContent', eventId)
+    const key = subKey("customContent", eventId)
     subLoading.value[key] = true
-    subError.value[key] = ''
+    subError.value[key] = ""
     try {
       customContent.value[eventId] = await adminGetCustomContent(eventId)
     } catch (e: unknown) {
-      subError.value[key] = errorMsg(e, 'Failed to load custom content')
+      subError.value[key] = errorMsg(e, "Failed to load custom content")
     } finally {
       subLoading.value[key] = false
     }
@@ -541,16 +550,16 @@ export const useAdminStore = defineStore('admin', () => {
   async function fetchEnabledComponents(eventId: string, opts?: SubFetchOpts) {
     if (!opts?.force && hasSubData(enabledComponents.value, eventId)) return
 
-    const key = subKey('enabledComponents', eventId)
+    const key = subKey("enabledComponents", eventId)
     subLoading.value[key] = true
-    subError.value[key] = ''
+    subError.value[key] = ""
     try {
       const data = await adminGetEnabledComponents(eventId)
       enabledComponents.value[eventId] = data.components?.length
         ? data.components.sort((a, b) => a.order - b.order)
         : []
     } catch (e: unknown) {
-      subError.value[key] = errorMsg(e, 'Failed to load component config')
+      subError.value[key] = errorMsg(e, "Failed to load component config")
     } finally {
       subLoading.value[key] = false
     }
@@ -559,7 +568,9 @@ export const useAdminStore = defineStore('admin', () => {
   async function saveEnabledComponents(eventId: string, data: EnabledComponents) {
     const saved = await adminUpdateEnabledComponents(eventId, data)
     if (saved.components?.length) {
-      enabledComponents.value[eventId] = saved.components.sort((a, b) => a.order - b.order)
+      enabledComponents.value[eventId] = saved.components.sort(
+        (a, b) => a.order - b.order,
+      )
     }
     return saved
   }
@@ -572,13 +583,13 @@ export const useAdminStore = defineStore('admin', () => {
   async function swapOrder<T extends { id: string; orderIndex: number }>(
     items: T[],
     itemId: string,
-    direction: 'up' | 'down',
+    direction: "up" | "down",
     updateFn: (id: string, orderIndex: number) => Promise<T>,
   ) {
     const idx = items.findIndex((i) => i.id === itemId)
     if (idx === -1) return
 
-    const swapIdx = direction === 'up' ? idx - 1 : idx + 1
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1
     if (swapIdx < 0 || swapIdx >= items.length) return
 
     const current = items[idx]!
@@ -621,7 +632,7 @@ export const useAdminStore = defineStore('admin', () => {
     events.value = []
     selectedEventId.value = null
     loading.value = false
-    error.value = ''
+    error.value = ""
     invites.value = {}
     schedule.value = {}
     faqs.value = {}

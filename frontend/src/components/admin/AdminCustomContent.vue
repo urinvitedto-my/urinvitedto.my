@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useAdminStore } from '@/stores/admin'
-import { useToast } from '@/composables/useToast'
-import LoadingSpinner from '@/components/LoadingSpinner.vue'
-import type { CustomContent, CustomSection } from '@/types'
+import { ref, computed, onMounted } from "vue"
+import { useAdminStore } from "@/stores/admin"
+import { useToast } from "@/composables/useToast"
+import LoadingSpinner from "@/components/LoadingSpinner.vue"
+import type { CustomContent, CustomSection } from "@/types"
 
 const props = defineProps<{
   eventId: string
@@ -15,16 +15,16 @@ const emit = defineEmits<{ toggle: [] }>()
 const adminStore = useAdminStore()
 const toast = useToast()
 
-const loading = computed(() => adminStore.isSubLoading('customContent', props.eventId))
-const error = computed(() => adminStore.getSubError('customContent', props.eventId))
+const loading = computed(() => adminStore.isSubLoading("customContent", props.eventId))
+const error = computed(() => adminStore.getSubError("customContent", props.eventId))
 
 const saving = ref(false)
 
 const attireGuideEnabled = ref(false)
-const attireGuide = ref({ title: '', description: '', imageUrl: '' })
+const attireGuide = ref({ title: "", description: "", imageUrl: "" })
 
 const locationEnabled = ref(false)
-const location = ref({ parkingInfo: '', accessibilityNotes: '', mapEmbedUrl: '' })
+const location = ref({ parkingInfo: "", accessibilityNotes: "", mapEmbedUrl: "" })
 
 const monetaryEnabled = ref(false)
 const monetary = ref({
@@ -35,22 +35,22 @@ const monetary = ref({
     qrCodeUrl: string
   }[],
 })
-const newAccount = ref({ method: '', number: '', name: '', qrCodeUrl: '' })
+const newAccount = ref({ method: "", number: "", name: "", qrCodeUrl: "" })
 
 const countdownEnabled = ref(false)
-const countdown = ref({ customMessage: '' })
+const countdown = ref({ customMessage: "" })
 
 const customSections = ref<CustomSection[]>([])
 const showAddSection = ref(false)
-const DEFAULT_SECTION_BG = 'transparent'
+const DEFAULT_SECTION_BG = "transparent"
 const newSection = ref({
-  title: '',
-  content: '',
-  image: '',
+  title: "",
+  content: "",
+  image: "",
   bgColor: DEFAULT_SECTION_BG,
 })
 const editingSectionId = ref<string | null>(null)
-const editSection = ref({ title: '', content: '', image: '', bgColor: '', order: 0 })
+const editSection = ref({ title: "", content: "", image: "", bgColor: "", order: 0 })
 
 onMounted(async () => {
   await adminStore.fetchCustomContent(props.eventId)
@@ -63,18 +63,18 @@ function populateFromData(data: CustomContent) {
   if (data.attireGuide) {
     attireGuideEnabled.value = true
     attireGuide.value = {
-      title: data.attireGuide.title || '',
-      description: data.attireGuide.description || '',
-      imageUrl: data.attireGuide.imageUrl || '',
+      title: data.attireGuide.title || "",
+      description: data.attireGuide.description || "",
+      imageUrl: data.attireGuide.imageUrl || "",
     }
   }
 
   if (data.locationDetails) {
     locationEnabled.value = true
     location.value = {
-      parkingInfo: data.locationDetails.parkingInfo || '',
-      accessibilityNotes: data.locationDetails.accessibilityNotes || '',
-      mapEmbedUrl: data.locationDetails.mapEmbedUrl || '',
+      parkingInfo: data.locationDetails.parkingInfo || "",
+      accessibilityNotes: data.locationDetails.accessibilityNotes || "",
+      mapEmbedUrl: data.locationDetails.mapEmbedUrl || "",
     }
   }
 
@@ -85,14 +85,14 @@ function populateFromData(data: CustomContent) {
         method: a.method,
         number: a.number,
         name: a.name,
-        qrCodeUrl: a.qrCodeUrl || '',
+        qrCodeUrl: a.qrCodeUrl || "",
       })),
     }
   }
 
   if (data.countdownTimer) {
     countdownEnabled.value = data.countdownTimer.enabled
-    countdown.value = { customMessage: data.countdownTimer.customMessage || '' }
+    countdown.value = { customMessage: data.countdownTimer.customMessage || "" }
   }
 
   customSections.value = data.customSections || []
@@ -150,9 +150,9 @@ async function handleSave() {
   try {
     const saved = await adminStore.saveCustomContent(props.eventId, buildPayload())
     populateFromData(saved)
-    toast.success('Custom content saved')
+    toast.success("Custom content saved")
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to save')
+    toast.error(e instanceof Error ? e.message : "Failed to save")
   } finally {
     saving.value = false
   }
@@ -167,7 +167,7 @@ function addAccount() {
     name: newAccount.value.name.trim(),
     qrCodeUrl: newAccount.value.qrCodeUrl.trim(),
   })
-  newAccount.value = { method: '', number: '', name: '', qrCodeUrl: '' }
+  newAccount.value = { method: "", number: "", name: "", qrCodeUrl: "" }
 }
 
 /** Removes a monetary account. */
@@ -186,7 +186,7 @@ function addCustomSection() {
     bgColor: newSection.value.bgColor || DEFAULT_SECTION_BG,
     order: customSections.value.length,
   })
-  newSection.value = { title: '', content: '', image: '', bgColor: DEFAULT_SECTION_BG }
+  newSection.value = { title: "", content: "", image: "", bgColor: DEFAULT_SECTION_BG }
   showAddSection.value = false
 }
 
@@ -196,7 +196,7 @@ function startEditSection(section: CustomSection) {
   editSection.value = {
     title: section.title,
     content: section.content,
-    image: section.image || '',
+    image: section.image || "",
     bgColor: section.bgColor || DEFAULT_SECTION_BG,
     order: section.order,
   }
@@ -256,7 +256,7 @@ function removeSection(id: string) {
             <label class="flex items-center gap-2 cursor-pointer">
               <input v-model="attireGuideEnabled" type="checkbox" class="rounded" />
               <span class="text-xs text-gray-500">{{
-                attireGuideEnabled ? 'Enabled' : 'Disabled'
+                attireGuideEnabled ? "Enabled" : "Disabled"
               }}</span>
             </label>
           </div>
@@ -291,7 +291,7 @@ function removeSection(id: string) {
             <label class="flex items-center gap-2 cursor-pointer">
               <input v-model="locationEnabled" type="checkbox" class="rounded" />
               <span class="text-xs text-gray-500">{{
-                locationEnabled ? 'Enabled' : 'Disabled'
+                locationEnabled ? "Enabled" : "Disabled"
               }}</span>
             </label>
           </div>
@@ -326,7 +326,7 @@ function removeSection(id: string) {
             <label class="flex items-center gap-2 cursor-pointer">
               <input v-model="monetaryEnabled" type="checkbox" class="rounded" />
               <span class="text-xs text-gray-500">{{
-                monetaryEnabled ? 'Enabled' : 'Disabled'
+                monetaryEnabled ? "Enabled" : "Disabled"
               }}</span>
             </label>
           </div>
@@ -405,7 +405,7 @@ function removeSection(id: string) {
             <label class="flex items-center gap-2 cursor-pointer">
               <input v-model="countdownEnabled" type="checkbox" class="rounded" />
               <span class="text-xs text-gray-500">{{
-                countdownEnabled ? 'Enabled' : 'Disabled'
+                countdownEnabled ? "Enabled" : "Disabled"
               }}</span>
             </label>
           </div>
@@ -432,7 +432,7 @@ function removeSection(id: string) {
               @click="showAddSection = !showAddSection"
               class="text-xs text-primary hover:underline"
             >
-              {{ showAddSection ? 'Cancel' : '+ Add Section' }}
+              {{ showAddSection ? "Cancel" : "+ Add Section" }}
             </button>
           </div>
 
@@ -579,7 +579,7 @@ function removeSection(id: string) {
             :disabled="saving"
             class="bg-primary text-white font-medium px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 text-sm"
           >
-            {{ saving ? 'Saving...' : 'Save Custom Content' }}
+            {{ saving ? "Saving..." : "Save Custom Content" }}
           </button>
         </div>
       </div>

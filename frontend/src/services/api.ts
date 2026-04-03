@@ -19,11 +19,11 @@ import type {
   Host,
   HostEvent,
   HostGuest,
-} from '@/types'
-import { supabase } from './supabase'
-import router from '@/router'
+} from "@/types"
+import { supabase } from "./supabase"
+import router from "@/router"
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"
 
 /** Parses response JSON, throws with backend message on non-ok status. */
 async function handleResponse<T>(res: Response, fallback: string): Promise<T> {
@@ -31,7 +31,7 @@ async function handleResponse<T>(res: Response, fallback: string): Promise<T> {
     const err = await res.json().catch(() => ({}))
     throw new Error(err.message || fallback)
   }
-  if (res.status === 204 || res.headers.get('content-length') === '0') {
+  if (res.status === 204 || res.headers.get("content-length") === "0") {
     return undefined as T
   }
   return res.json()
@@ -43,7 +43,7 @@ async function handleResponse<T>(res: Response, fallback: string): Promise<T> {
  * to avoid navigator.locks contention across tabs.
  */
 async function getAuthToken(): Promise<string | null> {
-  const { useAuthStore } = await import('@/stores/auth')
+  const { useAuthStore } = await import("@/stores/auth")
   const authStore = useAuthStore()
   return authStore.session?.access_token || null
 }
@@ -51,17 +51,17 @@ async function getAuthToken(): Promise<string | null> {
 /** Wrapper for authenticated fetch. Handles 401 by signing out + redirecting. */
 async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const token = await getAuthToken()
-  if (!token) throw new Error('Not authenticated')
+  if (!token) throw new Error("Not authenticated")
 
   const headers = new Headers(options.headers)
-  headers.set('Authorization', `Bearer ${token}`)
+  headers.set("Authorization", `Bearer ${token}`)
 
   const res = await fetch(url, { ...options, headers })
 
   if (res.status === 401) {
-    await supabase.auth.signOut({ scope: 'local' })
-    router.push('/login')
-    throw new Error('Session expired')
+    await supabase.auth.signOut({ scope: "local" })
+    router.push("/login")
+    throw new Error("Session expired")
   }
 
   return res
@@ -70,9 +70,12 @@ async function authFetch(url: string, options: RequestInit = {}): Promise<Respon
 // --- Public Event API ---
 
 /** Fetches event summary (basic info to determine public/private). */
-export async function getEventSummary(type: EventType, slug: string): Promise<EventSummary> {
+export async function getEventSummary(
+  type: EventType,
+  slug: string,
+): Promise<EventSummary> {
   const res = await fetch(`${API_BASE}/api/v1/events/${type}/${slug}/summary`)
-  return handleResponse(res, 'Failed to fetch event summary')
+  return handleResponse(res, "Failed to fetch event summary")
 }
 
 /** Fetches full event details. For private events, include invite code. */
@@ -82,10 +85,10 @@ export async function getEventDetails(
   inviteCode?: string,
 ): Promise<EventDetailsResponse> {
   const url = new URL(`${API_BASE}/api/v1/events/${type}/${slug}/details`)
-  if (inviteCode) url.searchParams.set('invite', inviteCode)
+  if (inviteCode) url.searchParams.set("invite", inviteCode)
 
   const res = await fetch(url.toString())
-  return handleResponse(res, 'Failed to fetch event details')
+  return handleResponse(res, "Failed to fetch event details")
 }
 
 /** Fetches list of confirmed guests. */
@@ -94,7 +97,7 @@ export async function getConfirmedGuests(
   slug: string,
 ): Promise<ConfirmedGuestsResponse> {
   const res = await fetch(`${API_BASE}/api/v1/events/${type}/${slug}/confirmed-guests`)
-  return handleResponse(res, 'Failed to fetch confirmed guests')
+  return handleResponse(res, "Failed to fetch confirmed guests")
 }
 
 /** Submits RSVP for a guest. */
@@ -104,11 +107,11 @@ export async function submitRSVP(
   data: RSVPRequest,
 ): Promise<RSVPResponse> {
   const res = await fetch(`${API_BASE}/api/v1/events/${type}/${slug}/rsvp`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   })
-  return handleResponse(res, 'Failed to submit RSVP')
+  return handleResponse(res, "Failed to submit RSVP")
 }
 
 // --- Auth API ---
@@ -116,7 +119,7 @@ export async function submitRSVP(
 /** Fetches the current user's email and admin status from the backend. */
 export async function getMe(): Promise<{ email: string; isAdmin: boolean }> {
   const res = await authFetch(`${API_BASE}/api/v1/auth/me`)
-  return handleResponse(res, 'Failed to fetch user info')
+  return handleResponse(res, "Failed to fetch user info")
 }
 
 // --- Admin Event API ---
@@ -124,7 +127,7 @@ export async function getMe(): Promise<{ email: string; isAdmin: boolean }> {
 /** Fetches all events for admin dashboard. */
 export async function adminListEvents(): Promise<{ events: AdminEvent[] }> {
   const res = await authFetch(`${API_BASE}/api/v1/admin/events`)
-  return handleResponse(res, 'Failed to list events')
+  return handleResponse(res, "Failed to list events")
 }
 
 /** Creates a new event. */
@@ -137,11 +140,11 @@ export async function adminCreateEvent(data: {
   location?: string
 }): Promise<AdminEvent> {
   const res = await authFetch(`${API_BASE}/api/v1/admin/events`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   })
-  return handleResponse(res, 'Failed to create event')
+  return handleResponse(res, "Failed to create event")
 }
 
 /** Updates an existing event. */
@@ -161,19 +164,19 @@ export async function adminUpdateEvent(
   },
 ): Promise<AdminEvent> {
   const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   })
-  return handleResponse(res, 'Failed to update event')
+  return handleResponse(res, "Failed to update event")
 }
 
 /** Deletes an event and all related data. */
 export async function adminDeleteEvent(eventId: string): Promise<void> {
   const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}`, {
-    method: 'DELETE',
+    method: "DELETE",
   })
-  await handleResponse<void>(res, 'Failed to delete event')
+  await handleResponse<void>(res, "Failed to delete event")
 }
 
 /** Adds a host to an event. */
@@ -182,27 +185,32 @@ export async function adminAddHost(
   data: { email: string; displayName: string },
 ): Promise<AdminHost> {
   const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/hosts`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   })
-  return handleResponse(res, 'Failed to add host')
+  return handleResponse(res, "Failed to add host")
 }
 
 /** Removes a host from an event. */
 export async function adminDeleteHost(eventId: string, hostId: string): Promise<void> {
-  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/hosts/${hostId}`, {
-    method: 'DELETE',
-  })
-  await handleResponse<void>(res, 'Failed to delete host')
+  const res = await authFetch(
+    `${API_BASE}/api/v1/admin/events/${eventId}/hosts/${hostId}`,
+    {
+      method: "DELETE",
+    },
+  )
+  await handleResponse<void>(res, "Failed to delete host")
 }
 
 // --- Admin Invite/Guest API ---
 
 /** Fetches all invites with guests for an event. */
-export async function adminListInvites(eventId: string): Promise<{ invites: AdminInvite[] }> {
+export async function adminListInvites(
+  eventId: string,
+): Promise<{ invites: AdminInvite[] }> {
   const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/invites`)
-  return handleResponse(res, 'Failed to list invites')
+  return handleResponse(res, "Failed to list invites")
 }
 
 /** Creates a new invite with auto-generated code. */
@@ -211,19 +219,25 @@ export async function adminCreateInvite(
   data: { label?: string | null },
 ): Promise<AdminInvite> {
   const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/invites`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   })
-  return handleResponse(res, 'Failed to create invite')
+  return handleResponse(res, "Failed to create invite")
 }
 
 /** Deletes an invite and all its guests. */
-export async function adminDeleteInvite(eventId: string, inviteId: string): Promise<void> {
-  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/invites/${inviteId}`, {
-    method: 'DELETE',
-  })
-  await handleResponse<void>(res, 'Failed to delete invite')
+export async function adminDeleteInvite(
+  eventId: string,
+  inviteId: string,
+): Promise<void> {
+  const res = await authFetch(
+    `${API_BASE}/api/v1/admin/events/${eventId}/invites/${inviteId}`,
+    {
+      method: "DELETE",
+    },
+  )
+  await handleResponse<void>(res, "Failed to delete invite")
 }
 
 /** Adds a guest to an invite. */
@@ -235,34 +249,43 @@ export async function adminAddGuest(
   const res = await authFetch(
     `${API_BASE}/api/v1/admin/events/${eventId}/invites/${inviteId}/guests`,
     {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     },
   )
-  return handleResponse(res, 'Failed to add guest')
+  return handleResponse(res, "Failed to add guest")
 }
 
 /** Updates a guest's name or RSVP status. */
 export async function adminUpdateGuest(
   eventId: string,
   guestId: string,
-  data: { displayName: string; rsvpStatus: 'pending' | 'yes' | 'no' },
+  data: { displayName: string; rsvpStatus: "pending" | "yes" | "no" },
 ): Promise<AdminGuest> {
-  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/guests/${guestId}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  })
-  return handleResponse(res, 'Failed to update guest')
+  const res = await authFetch(
+    `${API_BASE}/api/v1/admin/events/${eventId}/guests/${guestId}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  )
+  return handleResponse(res, "Failed to update guest")
 }
 
 /** Removes a guest. */
-export async function adminDeleteGuest(eventId: string, guestId: string): Promise<void> {
-  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/guests/${guestId}`, {
-    method: 'DELETE',
-  })
-  await handleResponse<void>(res, 'Failed to delete guest')
+export async function adminDeleteGuest(
+  eventId: string,
+  guestId: string,
+): Promise<void> {
+  const res = await authFetch(
+    `${API_BASE}/api/v1/admin/events/${eventId}/guests/${guestId}`,
+    {
+      method: "DELETE",
+    },
+  )
+  await handleResponse<void>(res, "Failed to delete guest")
 }
 
 // --- Admin Schedule API ---
@@ -272,34 +295,47 @@ export async function adminListSchedule(
   eventId: string,
 ): Promise<{ items: AdminScheduleItem[] }> {
   const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/schedule`)
-  return handleResponse(res, 'Failed to list schedule')
+  return handleResponse(res, "Failed to list schedule")
 }
 
 /** Creates a new schedule item. */
 export async function adminCreateScheduleItem(
   eventId: string,
-  data: { time: string; title: string; description?: string | null; orderIndex?: number | null },
+  data: {
+    time: string
+    title: string
+    description?: string | null
+    orderIndex?: number | null
+  },
 ): Promise<AdminScheduleItem> {
   const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/schedule`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   })
-  return handleResponse(res, 'Failed to create schedule item')
+  return handleResponse(res, "Failed to create schedule item")
 }
 
 /** Updates a schedule item. */
 export async function adminUpdateScheduleItem(
   eventId: string,
   itemId: string,
-  data: { time: string; title: string; description?: string | null; orderIndex?: number | null },
+  data: {
+    time: string
+    title: string
+    description?: string | null
+    orderIndex?: number | null
+  },
 ): Promise<AdminScheduleItem> {
-  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/schedule/${itemId}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  })
-  return handleResponse(res, 'Failed to update schedule item')
+  const res = await authFetch(
+    `${API_BASE}/api/v1/admin/events/${eventId}/schedule/${itemId}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  )
+  return handleResponse(res, "Failed to update schedule item")
 }
 
 /** Deletes a schedule item. */
@@ -307,10 +343,13 @@ export async function adminDeleteScheduleItem(
   eventId: string,
   itemId: string,
 ): Promise<void> {
-  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/schedule/${itemId}`, {
-    method: 'DELETE',
-  })
-  await handleResponse<void>(res, 'Failed to delete schedule item')
+  const res = await authFetch(
+    `${API_BASE}/api/v1/admin/events/${eventId}/schedule/${itemId}`,
+    {
+      method: "DELETE",
+    },
+  )
+  await handleResponse<void>(res, "Failed to delete schedule item")
 }
 
 // --- Admin FAQ API ---
@@ -318,7 +357,7 @@ export async function adminDeleteScheduleItem(
 /** Fetches all FAQs for an event. */
 export async function adminListFAQs(eventId: string): Promise<{ items: AdminFAQ[] }> {
   const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/faqs`)
-  return handleResponse(res, 'Failed to list FAQs')
+  return handleResponse(res, "Failed to list FAQs")
 }
 
 /** Creates a new FAQ. */
@@ -327,11 +366,11 @@ export async function adminCreateFAQ(
   data: { question: string; answer: string; orderIndex?: number | null },
 ): Promise<AdminFAQ> {
   const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/faqs`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   })
-  return handleResponse(res, 'Failed to create FAQ')
+  return handleResponse(res, "Failed to create FAQ")
 }
 
 /** Updates a FAQ. */
@@ -340,20 +379,26 @@ export async function adminUpdateFAQ(
   itemId: string,
   data: { question: string; answer: string; orderIndex?: number | null },
 ): Promise<AdminFAQ> {
-  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/faqs/${itemId}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  })
-  return handleResponse(res, 'Failed to update FAQ')
+  const res = await authFetch(
+    `${API_BASE}/api/v1/admin/events/${eventId}/faqs/${itemId}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  )
+  return handleResponse(res, "Failed to update FAQ")
 }
 
 /** Deletes a FAQ. */
 export async function adminDeleteFAQ(eventId: string, itemId: string): Promise<void> {
-  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/faqs/${itemId}`, {
-    method: 'DELETE',
-  })
-  await handleResponse<void>(res, 'Failed to delete FAQ')
+  const res = await authFetch(
+    `${API_BASE}/api/v1/admin/events/${eventId}/faqs/${itemId}`,
+    {
+      method: "DELETE",
+    },
+  )
+  await handleResponse<void>(res, "Failed to delete FAQ")
 }
 
 // --- Admin Gift API ---
@@ -361,14 +406,14 @@ export async function adminDeleteFAQ(eventId: string, itemId: string): Promise<v
 /** Fetches all gifts for an event. */
 export async function adminListGifts(eventId: string): Promise<{ items: AdminGift[] }> {
   const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/gifts`)
-  return handleResponse(res, 'Failed to list gifts')
+  return handleResponse(res, "Failed to list gifts")
 }
 
 /** Creates a new gift. */
 export async function adminCreateGift(
   eventId: string,
   data: {
-    giftType: 'physical' | 'monetary'
+    giftType: "physical" | "monetary"
     title: string
     description?: string | null
     link?: string | null
@@ -376,11 +421,11 @@ export async function adminCreateGift(
   },
 ): Promise<AdminGift> {
   const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/gifts`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   })
-  return handleResponse(res, 'Failed to create gift')
+  return handleResponse(res, "Failed to create gift")
 }
 
 /** Updates a gift. */
@@ -388,53 +433,61 @@ export async function adminUpdateGift(
   eventId: string,
   itemId: string,
   data: {
-    giftType: 'physical' | 'monetary'
+    giftType: "physical" | "monetary"
     title: string
     description?: string | null
     link?: string | null
     orderIndex?: number | null
   },
 ): Promise<AdminGift> {
-  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/gifts/${itemId}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  })
-  return handleResponse(res, 'Failed to update gift')
+  const res = await authFetch(
+    `${API_BASE}/api/v1/admin/events/${eventId}/gifts/${itemId}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  )
+  return handleResponse(res, "Failed to update gift")
 }
 
 /** Deletes a gift. */
 export async function adminDeleteGift(eventId: string, itemId: string): Promise<void> {
-  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/gifts/${itemId}`, {
-    method: 'DELETE',
-  })
-  await handleResponse<void>(res, 'Failed to delete gift')
+  const res = await authFetch(
+    `${API_BASE}/api/v1/admin/events/${eventId}/gifts/${itemId}`,
+    {
+      method: "DELETE",
+    },
+  )
+  await handleResponse<void>(res, "Failed to delete gift")
 }
 
 // --- Admin Gallery API ---
 
 /** Fetches all gallery items for an event. */
-export async function adminListGallery(eventId: string): Promise<{ items: AdminGalleryItem[] }> {
+export async function adminListGallery(
+  eventId: string,
+): Promise<{ items: AdminGalleryItem[] }> {
   const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/gallery`)
-  return handleResponse(res, 'Failed to list gallery')
+  return handleResponse(res, "Failed to list gallery")
 }
 
 /** Creates a new gallery item. */
 export async function adminCreateGalleryItem(
   eventId: string,
   data: {
-    mediaType: 'photo' | 'video'
+    mediaType: "photo" | "video"
     mediaUrl: string
     caption?: string | null
     orderIndex?: number | null
   },
 ): Promise<AdminGalleryItem> {
   const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/gallery`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   })
-  return handleResponse(res, 'Failed to create gallery item')
+  return handleResponse(res, "Failed to create gallery item")
 }
 
 /** Updates a gallery item (caption and order). */
@@ -443,28 +496,39 @@ export async function adminUpdateGalleryItem(
   itemId: string,
   data: { caption?: string | null; orderIndex?: number | null },
 ): Promise<AdminGalleryItem> {
-  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/gallery/${itemId}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  })
-  return handleResponse(res, 'Failed to update gallery item')
+  const res = await authFetch(
+    `${API_BASE}/api/v1/admin/events/${eventId}/gallery/${itemId}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  )
+  return handleResponse(res, "Failed to update gallery item")
 }
 
 /** Deletes a gallery item. */
-export async function adminDeleteGalleryItem(eventId: string, itemId: string): Promise<void> {
-  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/gallery/${itemId}`, {
-    method: 'DELETE',
-  })
-  await handleResponse<void>(res, 'Failed to delete gallery item')
+export async function adminDeleteGalleryItem(
+  eventId: string,
+  itemId: string,
+): Promise<void> {
+  const res = await authFetch(
+    `${API_BASE}/api/v1/admin/events/${eventId}/gallery/${itemId}`,
+    {
+      method: "DELETE",
+    },
+  )
+  await handleResponse<void>(res, "Failed to delete gallery item")
 }
 
 // --- Admin Custom Content API ---
 
 /** Fetches the custom_content JSONB for an event. */
 export async function adminGetCustomContent(eventId: string): Promise<CustomContent> {
-  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/custom-content`)
-  return handleResponse(res, 'Failed to get custom content')
+  const res = await authFetch(
+    `${API_BASE}/api/v1/admin/events/${eventId}/custom-content`,
+  )
+  return handleResponse(res, "Failed to get custom content")
 }
 
 /** Replaces the custom_content JSONB for an event. */
@@ -472,20 +536,27 @@ export async function adminUpdateCustomContent(
   eventId: string,
   data: CustomContent,
 ): Promise<CustomContent> {
-  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/custom-content`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  })
-  return handleResponse(res, 'Failed to update custom content')
+  const res = await authFetch(
+    `${API_BASE}/api/v1/admin/events/${eventId}/custom-content`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  )
+  return handleResponse(res, "Failed to update custom content")
 }
 
 // --- Admin Enabled Components API ---
 
 /** Fetches the enabled_components JSONB for an event. */
-export async function adminGetEnabledComponents(eventId: string): Promise<EnabledComponents> {
-  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/enabled-components`)
-  return handleResponse(res, 'Failed to get enabled components')
+export async function adminGetEnabledComponents(
+  eventId: string,
+): Promise<EnabledComponents> {
+  const res = await authFetch(
+    `${API_BASE}/api/v1/admin/events/${eventId}/enabled-components`,
+  )
+  return handleResponse(res, "Failed to get enabled components")
 }
 
 /** Replaces the enabled_components JSONB for an event. */
@@ -493,12 +564,15 @@ export async function adminUpdateEnabledComponents(
   eventId: string,
   data: EnabledComponents,
 ): Promise<EnabledComponents> {
-  const res = await authFetch(`${API_BASE}/api/v1/admin/events/${eventId}/enabled-components`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  })
-  return handleResponse(res, 'Failed to update enabled components')
+  const res = await authFetch(
+    `${API_BASE}/api/v1/admin/events/${eventId}/enabled-components`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  )
+  return handleResponse(res, "Failed to update enabled components")
 }
 
 // --- Host API ---
@@ -506,13 +580,13 @@ export async function adminUpdateEnabledComponents(
 /** Fetches events for the authenticated host. */
 export async function getHostEvents(): Promise<{ events: HostEvent[] }> {
   const res = await authFetch(`${API_BASE}/api/v1/host/events`)
-  return handleResponse(res, 'Failed to fetch events')
+  return handleResponse(res, "Failed to fetch events")
 }
 
 /** Fetches guests for an event (host must be linked). */
 export async function getHostGuests(eventId: string): Promise<{ guests: HostGuest[] }> {
   const res = await authFetch(`${API_BASE}/api/v1/host/events/${eventId}/guests`)
-  return handleResponse(res, 'Failed to fetch guests')
+  return handleResponse(res, "Failed to fetch guests")
 }
 
 /** Fetches invites with guests and hosts for an event (host must be linked). */
@@ -520,5 +594,5 @@ export async function getHostInvites(
   eventId: string,
 ): Promise<{ invites: AdminInvite[]; hosts: Host[] }> {
   const res = await authFetch(`${API_BASE}/api/v1/host/events/${eventId}/invites`)
-  return handleResponse(res, 'Failed to fetch invites')
+  return handleResponse(res, "Failed to fetch invites")
 }

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { useAdminStore } from '@/stores/admin'
-import { toISOOrUndefined, toDatetimeLocal } from '@/utils/date'
-import type { AdminEvent } from '@/types'
+import { ref, watch } from "vue"
+import { useAdminStore } from "@/stores/admin"
+import { toISOOrUndefined, toDatetimeLocal } from "@/utils/date"
+import type { AdminEvent } from "@/types"
 
 const props = defineProps<{ event: AdminEvent }>()
 const emit = defineEmits<{ saved: []; cancel: [] }>()
@@ -13,16 +13,16 @@ const form = ref({
   type: props.event.type,
   slug: props.event.slug,
   title: props.event.title,
-  description: props.event.description || '',
+  description: props.event.description || "",
   isPublic: props.event.isPublic,
   startsAt: toDatetimeLocal(props.event.startsAt),
-  location: props.event.location || '',
-  coverImageUrl: props.event.coverImageUrl || '',
-  locationPhotoUrl: props.event.locationPhotoUrl || '',
-  musicUrl: props.event.musicUrl || '',
+  location: props.event.location || "",
+  coverImageUrl: props.event.coverImageUrl || "",
+  locationPhotoUrl: props.event.locationPhotoUrl || "",
+  musicUrl: props.event.musicUrl || "",
 })
 const loading = ref(false)
-const error = ref('')
+const error = ref("")
 
 watch(
   () => props.event,
@@ -31,13 +31,13 @@ watch(
       type: ev.type,
       slug: ev.slug,
       title: ev.title,
-      description: ev.description || '',
+      description: ev.description || "",
       isPublic: ev.isPublic,
       startsAt: toDatetimeLocal(ev.startsAt),
-      location: ev.location || '',
-      coverImageUrl: ev.coverImageUrl || '',
-      locationPhotoUrl: ev.locationPhotoUrl || '',
-      musicUrl: ev.musicUrl || '',
+      location: ev.location || "",
+      coverImageUrl: ev.coverImageUrl || "",
+      locationPhotoUrl: ev.locationPhotoUrl || "",
+      musicUrl: ev.musicUrl || "",
     }
   },
 )
@@ -45,7 +45,7 @@ watch(
 /** Saves edits to the event. */
 async function handleSubmit() {
   loading.value = true
-  error.value = ''
+  error.value = ""
 
   try {
     await adminStore.updateEvent(props.event.id, {
@@ -60,9 +60,9 @@ async function handleSubmit() {
       locationPhotoUrl: form.value.locationPhotoUrl || null,
       musicUrl: form.value.musicUrl || null,
     })
-    emit('saved')
+    emit("saved")
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Failed to update event'
+    error.value = e instanceof Error ? e.message : "Failed to update event"
   } finally {
     loading.value = false
   }
@@ -193,7 +193,7 @@ async function handleSubmit() {
         :disabled="loading"
         class="bg-primary text-white font-medium px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
       >
-        {{ loading ? 'Saving...' : 'Save Changes' }}
+        {{ loading ? "Saving..." : "Save Changes" }}
       </button>
       <button
         type="button"

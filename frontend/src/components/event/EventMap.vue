@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { LocationDetails } from '@/types'
+import type { LocationDetails } from "@/types"
 
 defineProps<{
   locationDetails: LocationDetails

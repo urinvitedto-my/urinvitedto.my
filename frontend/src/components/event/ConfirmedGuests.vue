@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed } from "vue"
 
 const PREVIEW_LIMIT = 4
 
@@ -19,15 +19,24 @@ const visibleGuests = computed(() =>
 
 <template>
   <section class="confirmed-guests pb-16 px-4">
-    <div class="max-w-3xl mx-auto bg-primary-dark/60 p-4 rounded-lg shadow-lg shadow-primary-dark">
-      <h2 class="text-4xl font-bold text-guest-bg text-center mb-2 font-kaushan text-shadow-md text-shadow-black/35">
+    <div
+      class="max-w-3xl mx-auto bg-primary-dark/60 p-4 rounded-lg shadow-lg shadow-primary-dark"
+    >
+      <h2
+        class="text-4xl font-bold text-guest-bg text-center mb-2 font-kaushan text-shadow-md text-shadow-black/35"
+      >
         Who's Coming
       </h2>
-      <p class="text-white text-center text-lg mb-8 text-shadow-md text-shadow-black/35">
-        {{ count }} guest{{ count !== 1 ? 's' : '' }} attending
+      <p
+        class="text-white text-center text-lg mb-8 text-shadow-md text-shadow-black/35"
+      >
+        {{ count }} guest{{ count !== 1 ? "s" : "" }} attending
       </p>
 
-      <div v-if="guests.length === 0" class="text-center text-white py-8 text-shadow-md text-shadow-black/35">
+      <div
+        v-if="guests.length === 0"
+        class="text-center text-white py-8 text-shadow-md text-shadow-black/35"
+      >
         No confirmed guests yet
       </div>
 
@@ -59,7 +68,7 @@ const visibleGuests = computed(() =>
             @click="expanded = !expanded"
             class="text-white/80 hover:text-white text-sm underline underline-offset-4 transition-colors cursor-pointer text-shadow-md text-shadow-black/35"
           >
-            {{ expanded ? 'Show less' : `View all ${guests.length} guests` }}
+            {{ expanded ? "Show less" : `View all ${guests.length} guests` }}
           </button>
         </div>
       </template>

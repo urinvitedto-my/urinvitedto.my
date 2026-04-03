@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { ScheduleItem } from '@/types'
-import { formatTimeOnly } from '@/utils/date'
+import type { ScheduleItem } from "@/types"
+import { formatTimeOnly } from "@/utils/date"
 
 defineProps<{
   items: ScheduleItem[]

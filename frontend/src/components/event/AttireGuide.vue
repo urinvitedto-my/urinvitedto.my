@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { AttireGuide } from '@/types'
+import { computed } from "vue"
+import type { AttireGuide } from "@/types"
 
 const props = defineProps<{
   attireGuide: AttireGuide

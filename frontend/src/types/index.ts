@@ -1,6 +1,6 @@
 // API response types matching backend models
 
-export type EventType = 'wedding' | 'birthday' | 'party'
+export type EventType = "wedding" | "birthday" | "party"
 
 export interface EventSummary {
   id: string
@@ -39,7 +39,7 @@ export interface Host {
 export interface Guest {
   id: string
   displayName: string
-  rsvpStatus: 'pending' | 'yes' | 'no'
+  rsvpStatus: "pending" | "yes" | "no"
   rsvpMessage?: string
   rsvpAt?: string
 }
@@ -67,7 +67,7 @@ export interface FAQ {
 
 export interface GalleryItem {
   id: string
-  mediaType: 'photo' | 'video'
+  mediaType: "photo" | "video"
   mediaUrl: string
   caption?: string
   orderIndex: number
@@ -75,7 +75,7 @@ export interface GalleryItem {
 
 export interface Gift {
   id: string
-  giftType: 'physical' | 'monetary'
+  giftType: "physical" | "monetary"
   title: string
   description?: string
   link?: string
@@ -101,14 +101,14 @@ export interface ConfirmedGuestsResponse {
 export interface RSVPRequest {
   inviteCode: string
   guestId: string
-  status: 'yes' | 'no'
+  status: "yes" | "no"
   message?: string
 }
 
 export interface RSVPResponse {
   id: string
   displayName: string
-  rsvpStatus: 'pending' | 'yes' | 'no'
+  rsvpStatus: "pending" | "yes" | "no"
   rsvpMessage?: string
   rsvpAt?: string
 }
@@ -188,7 +188,7 @@ export interface HostEvent {
 export interface HostGuest {
   id: string
   displayName: string
-  rsvpStatus: 'pending' | 'yes' | 'no'
+  rsvpStatus: "pending" | "yes" | "no"
   rsvpMessage: string | null
   rsvpAt: string | null
 }
@@ -205,7 +205,7 @@ export interface AdminHost {
 export interface AdminGuest {
   id: string
   displayName: string
-  rsvpStatus: 'pending' | 'yes' | 'no'
+  rsvpStatus: "pending" | "yes" | "no"
   rsvpMessage?: string
   rsvpAt?: string
   createdAt: string
@@ -238,7 +238,7 @@ export interface AdminFAQ {
 
 export interface AdminGift {
   id: string
-  giftType: 'physical' | 'monetary'
+  giftType: "physical" | "monetary"
   title: string
   description?: string
   link?: string
@@ -248,7 +248,7 @@ export interface AdminGift {
 
 export interface AdminGalleryItem {
   id: string
-  mediaType: 'photo' | 'video'
+  mediaType: "photo" | "video"
   mediaUrl: string
   caption?: string
   orderIndex: number

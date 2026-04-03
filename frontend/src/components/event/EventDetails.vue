@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import type { Event, GalleryItem } from '@/types'
-import { formatDateFull } from '@/utils/date'
+import { ref, computed, onMounted, onUnmounted } from "vue"
+import type { Event, GalleryItem } from "@/types"
+import { formatDateFull } from "@/utils/date"
 
 const props = defineProps<{
   event: Event
@@ -9,7 +9,7 @@ const props = defineProps<{
 }>()
 
 /** Caption value on gallery rows used to pick hero slideshow images (max 3). */
-const EVENT_DETAILS_BG_CAPTION = 'event_details_background'
+const EVENT_DETAILS_BG_CAPTION = "event_details_background"
 
 const currentIndex = ref(0)
 
@@ -17,7 +17,7 @@ const currentIndex = ref(0)
 const slideshowPhotos = computed(() => {
   const tagged = props.gallery
     .filter(
-      (item) => item.mediaType === 'photo' && item.caption === EVENT_DETAILS_BG_CAPTION,
+      (item) => item.mediaType === "photo" && item.caption === EVENT_DETAILS_BG_CAPTION,
     )
     .sort((a, b) => a.orderIndex - b.orderIndex)
   return tagged
@@ -25,8 +25,8 @@ const slideshowPhotos = computed(() => {
 
 /** Splits title into lines around "&" for stacked display. */
 const titleParts = computed(() => {
-  if (!props.event.title.includes('&')) return null
-  return props.event.title.split('&').map((part) => part.trim())
+  if (!props.event.title.includes("&")) return null
+  return props.event.title.split("&").map((part) => part.trim())
 })
 
 let slideshowTimer: ReturnType<typeof setInterval> | null = null
@@ -64,7 +64,7 @@ onUnmounted(() => {
       <h1
         class="text-8xl md:text-8xl lg:text-9xl font-normal text-white mb-6"
         style="
-          font-family: 'Lavishly Yours', cursive;
+          font-family: &quot;Lavishly Yours&quot;, cursive;
           text-transform: none;
           letter-spacing: normal;
         "
@@ -101,7 +101,11 @@ onUnmounted(() => {
       <p
         v-if="event.description"
         class="mb-2 text-gray-300 whitespace-pre-wrap max-w-2xl mx-auto text-xl md:text-3xl font-bold"
-        style="font-family: 'Cormorant Garamond', 'Playfair Display', 'Georgia', serif"
+        style="
+          font-family:
+            &quot;Cormorant Garamond&quot;, &quot;Playfair Display&quot;,
+            &quot;Georgia&quot;, serif;
+        "
       >
         {{ event.description }}
       </p>

@@ -1,24 +1,24 @@
 <script setup lang="ts">
 const navItems = [
-  { id: 'section-top', label: 'Top' },
-  { id: 'section-countdown', label: 'Countdown' },
-  { id: 'section-gallery', label: 'Gallery' },
-  { id: 'section-location', label: 'Venue' },
-  { id: 'section-rsvp', label: 'RSVP' },
+  { id: "section-top", label: "Top" },
+  { id: "section-countdown", label: "Countdown" },
+  { id: "section-gallery", label: "Gallery" },
+  { id: "section-location", label: "Venue" },
+  { id: "section-rsvp", label: "RSVP" },
 ]
 
 /**
  * Smooth-scrolls to a section by its element id, or to the top if not found.
  */
 function scrollToSection(sectionId: string) {
-  if (sectionId === 'section-top') {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+  if (sectionId === "section-top") {
+    window.scrollTo({ top: 0, behavior: "smooth" })
     return
   }
 
   const el = document.getElementById(sectionId)
   if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    el.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 }
 </script>
@@ -82,7 +82,9 @@ function scrollToSection(sectionId: string) {
           viewBox="0 0 24 24"
           fill="currentColor"
         >
-          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" />
+          <path
+            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"
+          />
         </svg>
 
         <!-- Contact / ID card -->

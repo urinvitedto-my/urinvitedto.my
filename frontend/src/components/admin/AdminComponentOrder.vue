@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useAdminStore } from '@/stores/admin'
-import { useToast } from '@/composables/useToast'
-import LoadingSpinner from '@/components/LoadingSpinner.vue'
-import type { ComponentConfig } from '@/types'
+import { ref, computed, onMounted } from "vue"
+import { useAdminStore } from "@/stores/admin"
+import { useToast } from "@/composables/useToast"
+import LoadingSpinner from "@/components/LoadingSpinner.vue"
+import type { ComponentConfig } from "@/types"
 
 const props = defineProps<{
   eventId: string
@@ -16,37 +16,37 @@ const adminStore = useAdminStore()
 const toast = useToast()
 
 const loading = computed(() =>
-  adminStore.isSubLoading('enabledComponents', props.eventId),
+  adminStore.isSubLoading("enabledComponents", props.eventId),
 )
-const error = computed(() => adminStore.getSubError('enabledComponents', props.eventId))
+const error = computed(() => adminStore.getSubError("enabledComponents", props.eventId))
 
 const saving = ref(false)
 const components = ref<ComponentConfig[]>([])
 
 const DEFAULT_COMPONENTS: ComponentConfig[] = [
-  { name: 'EventDetails', enabled: true, order: 1 },
-  { name: 'LocationPhoto', enabled: true, order: 2 },
-  { name: 'CountdownTimer', enabled: true, order: 3 },
-  { name: 'EventMap', enabled: true, order: 4 },
-  { name: 'EventSchedule', enabled: true, order: 5 },
-  { name: 'EventGallery', enabled: true, order: 6 },
-  { name: 'AttireGuide', enabled: true, order: 7 },
-  { name: 'EventFAQ', enabled: true, order: 8 },
-  { name: 'MonetaryGifts', enabled: true, order: 9 },
-  { name: 'GiftGuide', enabled: true, order: 10 },
+  { name: "EventDetails", enabled: true, order: 1 },
+  { name: "LocationPhoto", enabled: true, order: 2 },
+  { name: "CountdownTimer", enabled: true, order: 3 },
+  { name: "EventMap", enabled: true, order: 4 },
+  { name: "EventSchedule", enabled: true, order: 5 },
+  { name: "EventGallery", enabled: true, order: 6 },
+  { name: "AttireGuide", enabled: true, order: 7 },
+  { name: "EventFAQ", enabled: true, order: 8 },
+  { name: "MonetaryGifts", enabled: true, order: 9 },
+  { name: "GiftGuide", enabled: true, order: 10 },
 ]
 
 const DISPLAY_NAMES: Record<string, string> = {
-  EventDetails: 'Event Details',
-  LocationPhoto: 'Location Photo',
-  CountdownTimer: 'Countdown Timer',
-  EventMap: 'Map & Directions',
-  EventSchedule: 'Schedule',
-  EventGallery: 'Gallery',
-  AttireGuide: 'Attire Guide',
-  EventFAQ: 'FAQs',
-  MonetaryGifts: 'Monetary Gifts',
-  GiftGuide: 'Gift Guide',
+  EventDetails: "Event Details",
+  LocationPhoto: "Location Photo",
+  CountdownTimer: "Countdown Timer",
+  EventMap: "Map & Directions",
+  EventSchedule: "Schedule",
+  EventGallery: "Gallery",
+  AttireGuide: "Attire Guide",
+  EventFAQ: "FAQs",
+  MonetaryGifts: "Monetary Gifts",
+  GiftGuide: "Gift Guide",
 }
 
 onMounted(async () => {
@@ -72,7 +72,7 @@ function syncCustomSectionEntries(comps: ComponentConfig[]): ComponentConfig[] {
   const sectionIds = new Set(sections.map((s) => s.id))
   const result = [...comps]
 
-  const legacyIdx = result.findIndex((c) => c.name === 'CustomSections')
+  const legacyIdx = result.findIndex((c) => c.name === "CustomSections")
   if (legacyIdx !== -1) {
     const legacyComp = result[legacyIdx]!
     const expanded = sections.map((s, i) => ({
@@ -93,7 +93,7 @@ function syncCustomSectionEntries(comps: ComponentConfig[]): ComponentConfig[] {
   })
 
   const filtered = result.filter((c) => {
-    if (c.name.startsWith('CustomSection:')) {
+    if (c.name.startsWith("CustomSection:")) {
       return sectionIds.has(c.name.slice(14))
     }
     return true
@@ -118,9 +118,9 @@ async function handleSave() {
     if (saved.components?.length) {
       components.value = saved.components.sort((a, b) => a.order - b.order)
     }
-    toast.success('Component order saved')
+    toast.success("Component order saved")
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to save')
+    toast.error(e instanceof Error ? e.message : "Failed to save")
   } finally {
     saving.value = false
   }
@@ -132,8 +132,8 @@ function resetToDefaults() {
 }
 
 /** Moves a component up or down in order. */
-function moveComponent(index: number, direction: 'up' | 'down') {
-  const swapIndex = direction === 'up' ? index - 1 : index + 1
+function moveComponent(index: number, direction: "up" | "down") {
+  const swapIndex = direction === "up" ? index - 1 : index + 1
   if (swapIndex < 0 || swapIndex >= components.value.length) return
 
   const temp = components.value[index]!.order
@@ -145,11 +145,11 @@ function moveComponent(index: number, direction: 'up' | 'down') {
 
 /** Returns a readable name for a component key. */
 function displayName(name: string): string {
-  if (name.startsWith('CustomSection:')) {
+  if (name.startsWith("CustomSection:")) {
     const sectionId = name.slice(14)
     const sections = adminStore.getCustomContent(props.eventId)?.customSections ?? []
     const section = sections.find((s) => s.id === sectionId)
-    return section ? `Custom: ${section.title}` : 'Custom Section'
+    return section ? `Custom: ${section.title}` : "Custom Section"
   }
   return DISPLAY_NAMES[name] || name
 }
@@ -225,7 +225,7 @@ function displayName(name: string): string {
             :disabled="saving"
             class="bg-primary text-white font-medium px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 text-sm"
           >
-            {{ saving ? 'Saving...' : 'Save Component Order' }}
+            {{ saving ? "Saving..." : "Save Component Order" }}
           </button>
           <button
             @click="resetToDefaults"

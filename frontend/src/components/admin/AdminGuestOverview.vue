@@ -1,27 +1,27 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { ref } from 'vue'
-import { useAdminStore } from '@/stores/admin'
-import { formatDate } from '@/utils/date'
-import { compareGuests, type GuestSortMode } from '@/utils/guestSort'
-import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import { computed, onMounted } from "vue"
+import { ref } from "vue"
+import { useAdminStore } from "@/stores/admin"
+import { formatDate } from "@/utils/date"
+import { compareGuests, type GuestSortMode } from "@/utils/guestSort"
+import LoadingSpinner from "@/components/LoadingSpinner.vue"
 
 const props = defineProps<{ eventId: string }>()
 
 const adminStore = useAdminStore()
 
 const invites = computed(() => adminStore.getInvites(props.eventId))
-const loading = computed(() => adminStore.isSubLoading('invites', props.eventId))
-const error = computed(() => adminStore.getSubError('invites', props.eventId))
+const loading = computed(() => adminStore.isSubLoading("invites", props.eventId))
+const error = computed(() => adminStore.getSubError("invites", props.eventId))
 
-type StatusFilter = 'all' | 'yes' | 'no' | 'pending'
-const statusFilter = ref<StatusFilter>('all')
-const sortMode = ref<GuestSortMode>('name-asc')
+type StatusFilter = "all" | "yes" | "no" | "pending"
+const statusFilter = ref<StatusFilter>("all")
+const sortMode = ref<GuestSortMode>("name-asc")
 
 interface FlatGuest {
   id: string
   displayName: string
-  rsvpStatus: 'pending' | 'yes' | 'no'
+  rsvpStatus: "pending" | "yes" | "no"
   rsvpMessage?: string
   rsvpAt?: string
   inviteLabel?: string
@@ -49,7 +49,7 @@ const flatGuests = computed<FlatGuest[]>(() => {
 
 const filteredGuests = computed(() => {
   const base =
-    statusFilter.value === 'all'
+    statusFilter.value === "all"
       ? flatGuests.value
       : flatGuests.value.filter((g) => g.rsvpStatus === statusFilter.value)
   const list = [...base]
@@ -58,31 +58,31 @@ const filteredGuests = computed(() => {
 })
 
 const yesCount = computed(
-  () => flatGuests.value.filter((g) => g.rsvpStatus === 'yes').length,
+  () => flatGuests.value.filter((g) => g.rsvpStatus === "yes").length,
 )
 const noCount = computed(
-  () => flatGuests.value.filter((g) => g.rsvpStatus === 'no').length,
+  () => flatGuests.value.filter((g) => g.rsvpStatus === "no").length,
 )
 const pendingCount = computed(
-  () => flatGuests.value.filter((g) => g.rsvpStatus === 'pending').length,
+  () => flatGuests.value.filter((g) => g.rsvpStatus === "pending").length,
 )
 
 function rsvpBadgeClass(status: string): string {
   switch (status) {
-    case 'yes':
-      return 'bg-green-100 text-green-700'
-    case 'no':
-      return 'bg-red-100 text-red-700'
+    case "yes":
+      return "bg-green-100 text-green-700"
+    case "no":
+      return "bg-red-100 text-red-700"
     default:
-      return 'bg-gray-100 text-gray-600'
+      return "bg-gray-100 text-gray-600"
   }
 }
 
 const filterButtons: { key: StatusFilter; label: string; countFn: () => number }[] = [
-  { key: 'all', label: 'All', countFn: () => flatGuests.value.length },
-  { key: 'yes', label: 'Confirmed', countFn: () => yesCount.value },
-  { key: 'no', label: 'Declined', countFn: () => noCount.value },
-  { key: 'pending', label: 'Pending', countFn: () => pendingCount.value },
+  { key: "all", label: "All", countFn: () => flatGuests.value.length },
+  { key: "yes", label: "Confirmed", countFn: () => yesCount.value },
+  { key: "no", label: "Declined", countFn: () => noCount.value },
+  { key: "pending", label: "Pending", countFn: () => pendingCount.value },
 ]
 
 onMounted(() => adminStore.fetchInvites(props.eventId))
@@ -100,9 +100,7 @@ onMounted(() => adminStore.fetchInvites(props.eventId))
 
     <template v-else>
       <!-- Status filters + sort -->
-      <div
-        class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 mb-4"
-      >
+      <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 mb-4">
         <!-- 2×2 grid on narrow screens avoids one orphan pill + empty row; flex-wrap from sm up -->
         <div
           class="grid grid-cols-2 gap-2 w-full min-w-0 sm:flex sm:flex-wrap sm:flex-1 sm:min-w-48 sm:gap-x-2 sm:gap-y-3"

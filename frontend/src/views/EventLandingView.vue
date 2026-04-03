@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { storeToRefs } from 'pinia'
-import { useEventStore } from '@/stores/event'
-import type { EventType } from '@/types'
-import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import { ref, computed, onMounted, onUnmounted } from "vue"
+import { useRouter } from "vue-router"
+import { storeToRefs } from "pinia"
+import { useEventStore } from "@/stores/event"
+import type { EventType } from "@/types"
+import LoadingSpinner from "@/components/LoadingSpinner.vue"
 
 const props = defineProps<{
   type: EventType
@@ -13,17 +13,17 @@ const props = defineProps<{
 
 const router = useRouter()
 const eventStore = useEventStore()
-const inviteCode = ref('')
+const inviteCode = ref("")
 const submitting = ref(false)
 
 const loading = ref(true)
-const error = ref('')
+const error = ref("")
 const { eventSummary, eventDetails } = storeToRefs(eventStore)
 
 /** Splits title into lines around "&" for stacked display. */
 const titleParts = computed(() => {
-  if (!eventSummary.value?.title.includes('&')) return null
-  return eventSummary.value.title.split('&').map((part) => part.trim())
+  if (!eventSummary.value?.title.includes("&")) return null
+  return eventSummary.value.title.split("&").map((part) => part.trim())
 })
 
 onMounted(async () => {
@@ -37,7 +37,7 @@ onUnmounted(() => {
 /** Loads event summary, then details if public. */
 async function loadEvent() {
   loading.value = true
-  error.value = ''
+  error.value = ""
 
   try {
     await eventStore.fetchSummary(props.type, props.slug)
@@ -46,7 +46,7 @@ async function loadEvent() {
       await eventStore.fetchDetails(props.type, props.slug)
     }
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Failed to load event'
+    error.value = e instanceof Error ? e.message : "Failed to load event"
   } finally {
     loading.value = false
   }
@@ -55,12 +55,12 @@ async function loadEvent() {
 /** Handles invite code submission for private events. */
 async function handleInviteSubmit() {
   if (!inviteCode.value.trim()) {
-    error.value = 'Please enter your invite code'
+    error.value = "Please enter your invite code"
     return
   }
 
   submitting.value = true
-  error.value = ''
+  error.value = ""
 
   try {
     await eventStore.fetchDetails(
@@ -69,12 +69,12 @@ async function handleInviteSubmit() {
       inviteCode.value.toUpperCase(),
     )
     router.push({
-      name: 'guest',
+      name: "guest",
       params: { type: props.type, slug: props.slug },
       query: { invite: inviteCode.value.toUpperCase() },
     })
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Invalid invite code'
+    error.value = e instanceof Error ? e.message : "Invalid invite code"
   } finally {
     submitting.value = false
   }
@@ -200,7 +200,7 @@ async function handleInviteSubmit() {
                   d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                 />
               </svg>
-              {{ submitting ? 'Checking Guest List...' : 'Open Invitation' }}
+              {{ submitting ? "Checking Guest List..." : "Open Invitation" }}
             </button>
 
             <p v-if="error" class="text-red-300 text-center text-sm">{{ error }}</p>
@@ -227,7 +227,7 @@ async function handleInviteSubmit() {
 }
 
 .landing-title {
-  font-family: 'Lavishly Yours', cursive;
+  font-family: "Lavishly Yours", cursive;
   font-size: clamp(4rem, 14vw, 6rem);
   font-weight: 400;
   letter-spacing: normal;

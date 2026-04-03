@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { formatDate } from '@/utils/date'
-import type { AdminEvent, EventType } from '@/types'
+import { ref, computed } from "vue"
+import { formatDate } from "@/utils/date"
+import type { AdminEvent, EventType } from "@/types"
 
 const props = defineProps<{
   events: AdminEvent[]
@@ -10,11 +10,11 @@ const props = defineProps<{
 
 const emit = defineEmits<{ select: [eventId: string] }>()
 
-const search = ref('')
-const typeFilter = ref<EventType | 'all'>('all')
-const visibilityFilter = ref<'all' | 'public' | 'private'>('all')
-const sortBy = ref<'date' | 'title' | 'created'>('created')
-const sortDir = ref<'asc' | 'desc'>('desc')
+const search = ref("")
+const typeFilter = ref<EventType | "all">("all")
+const visibilityFilter = ref<"all" | "public" | "private">("all")
+const sortBy = ref<"date" | "title" | "created">("created")
+const sortDir = ref<"asc" | "desc">("desc")
 
 /** Filters and sorts events based on current controls. */
 const filteredEvents = computed(() => {
@@ -27,37 +27,37 @@ const filteredEvents = computed(() => {
     )
   }
 
-  if (typeFilter.value !== 'all') {
+  if (typeFilter.value !== "all") {
     list = list.filter((e) => e.type === typeFilter.value)
   }
 
-  if (visibilityFilter.value === 'public') {
+  if (visibilityFilter.value === "public") {
     list = list.filter((e) => e.isPublic)
-  } else if (visibilityFilter.value === 'private') {
+  } else if (visibilityFilter.value === "private") {
     list = list.filter((e) => !e.isPublic)
   }
 
   const sorted = [...list].sort((a, b) => {
     let cmp = 0
     switch (sortBy.value) {
-      case 'date':
-        cmp = (a.startsAt ?? '').localeCompare(b.startsAt ?? '')
+      case "date":
+        cmp = (a.startsAt ?? "").localeCompare(b.startsAt ?? "")
         break
-      case 'title':
+      case "title":
         cmp = a.title.localeCompare(b.title)
         break
-      case 'created':
+      case "created":
         cmp = a.createdAt.localeCompare(b.createdAt)
         break
     }
-    return sortDir.value === 'asc' ? cmp : -cmp
+    return sortDir.value === "asc" ? cmp : -cmp
   })
 
   return sorted
 })
 
 function toggleSortDir() {
-  sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
+  sortDir.value = sortDir.value === "asc" ? "desc" : "asc"
 }
 
 function pendingCount(event: AdminEvent): number {
@@ -112,7 +112,7 @@ function pendingCount(event: AdminEvent): number {
           class="px-2 py-1.5 border bg-white border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
           :title="sortDir === 'asc' ? 'Ascending' : 'Descending'"
         >
-          {{ sortDir === 'asc' ? '↑' : '↓' }}
+          {{ sortDir === "asc" ? "↑" : "↓" }}
         </button>
       </div>
     </div>
@@ -147,19 +147,19 @@ function pendingCount(event: AdminEvent): number {
               {{ event.type }}
             </span>
             <span class="text-xs text-gray-400">{{
-              event.isPublic ? 'Public' : 'Private'
+              event.isPublic ? "Public" : "Private"
             }}</span>
           </div>
 
           <h4 class="text-sm font-semibold text-primary truncate">{{ event.title }}</h4>
 
           <p class="text-xs text-gray-500 truncate mt-0.5">
-            {{ formatDate(event.startsAt) }} · {{ event.location || 'No location' }}
+            {{ formatDate(event.startsAt) }} · {{ event.location || "No location" }}
           </p>
 
           <div class="flex items-center gap-2 mt-1.5 text-xs text-gray-500">
             <span
-              >{{ event.guestCount }} guest{{ event.guestCount !== 1 ? 's' : '' }}</span
+              >{{ event.guestCount }} guest{{ event.guestCount !== 1 ? "s" : "" }}</span
             >
             <span class="text-gray-300">|</span>
             <span class="text-green-600">{{ event.rsvpYes }} yes</span>

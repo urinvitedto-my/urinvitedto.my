@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
-import { storeToRefs } from 'pinia'
-import { useHostStore } from '@/stores/host'
-import { formatDate } from '@/utils/date'
-import { compareGuests, type GuestSortMode } from '@/utils/guestSort'
-import { useInviteMessage } from '@/composables/useInviteMessage'
-import LoadingSpinner from '@/components/LoadingSpinner.vue'
-import type { AdminInvite } from '@/types'
+import { ref, computed, onMounted } from "vue"
+import { RouterLink } from "vue-router"
+import { storeToRefs } from "pinia"
+import { useHostStore } from "@/stores/host"
+import { formatDate } from "@/utils/date"
+import { compareGuests, type GuestSortMode } from "@/utils/guestSort"
+import { useInviteMessage } from "@/composables/useInviteMessage"
+import LoadingSpinner from "@/components/LoadingSpinner.vue"
+import type { AdminInvite } from "@/types"
 
 const hostStore = useHostStore()
 const {
@@ -27,16 +27,16 @@ const {
   pendingCount,
 } = storeToRefs(hostStore)
 
-type StatusFilter = 'all' | 'yes' | 'no' | 'pending'
+type StatusFilter = "all" | "yes" | "no" | "pending"
 
 const filterButtons: { key: StatusFilter; label: string }[] = [
-  { key: 'all', label: 'All' },
-  { key: 'yes', label: 'Confirmed' },
-  { key: 'no', label: 'Declined' },
-  { key: 'pending', label: 'Pending' },
+  { key: "all", label: "All" },
+  { key: "yes", label: "Confirmed" },
+  { key: "no", label: "Declined" },
+  { key: "pending", label: "Pending" },
 ]
 
-const guestSortMode = ref<GuestSortMode>('name-asc')
+const guestSortMode = ref<GuestSortMode>("name-asc")
 
 /** Guests for the active status filter, ordered by the current sort mode. */
 const sortedFilteredGuests = computed(() => {
@@ -57,13 +57,13 @@ function hostPendingCount(event: {
 /** Returns the count for each filter button. */
 function filterCount(key: StatusFilter): number {
   switch (key) {
-    case 'all':
+    case "all":
       return totalCount.value
-    case 'yes':
+    case "yes":
       return yesCount.value
-    case 'no':
+    case "no":
       return noCount.value
-    case 'pending':
+    case "pending":
       return pendingCount.value
   }
 }
@@ -71,12 +71,12 @@ function filterCount(key: StatusFilter): number {
 /** Returns the RSVP badge CSS classes for a status. */
 function rsvpBadgeClass(status: string): string {
   switch (status) {
-    case 'yes':
-      return 'bg-green-100 text-green-700'
-    case 'no':
-      return 'bg-red-100 text-red-700'
+    case "yes":
+      return "bg-green-100 text-green-700"
+    case "no":
+      return "bg-red-100 text-red-700"
     default:
-      return 'bg-gray-100 text-gray-600'
+      return "bg-gray-100 text-gray-600"
   }
 }
 
@@ -187,7 +187,7 @@ onMounted(() => {
                 >
                   <span
                     >{{ event.guestCount }} guest{{
-                      event.guestCount !== 1 ? 's' : ''
+                      event.guestCount !== 1 ? "s" : ""
                     }}</span
                   >
                   <span
@@ -396,7 +396,7 @@ onMounted(() => {
                               }}</span>
                               <span v-if="invite.guests.length" class="ml-2">
                                 &middot;
-                                {{ invite.guests.map((g) => g.displayName).join(', ') }}
+                                {{ invite.guests.map((g) => g.displayName).join(", ") }}
                               </span>
                             </div>
                           </div>
@@ -438,7 +438,7 @@ onMounted(() => {
                                 d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
                               />
                             </svg>
-                            {{ copiedInviteId === invite.id ? 'Copied!' : 'Copy' }}
+                            {{ copiedInviteId === invite.id ? "Copied!" : "Copy" }}
                           </button>
                         </div>
                         <pre

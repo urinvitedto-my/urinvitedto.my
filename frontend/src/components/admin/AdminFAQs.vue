@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useAdminStore } from '@/stores/admin'
-import { useToast } from '@/composables/useToast'
-import LoadingSpinner from '@/components/LoadingSpinner.vue'
-import type { AdminFAQ } from '@/types'
+import { ref, computed, onMounted } from "vue"
+import { useAdminStore } from "@/stores/admin"
+import { useToast } from "@/composables/useToast"
+import LoadingSpinner from "@/components/LoadingSpinner.vue"
+import type { AdminFAQ } from "@/types"
 
 const props = defineProps<{
   eventId: string
@@ -16,15 +16,15 @@ const adminStore = useAdminStore()
 const toast = useToast()
 
 const items = computed(() => adminStore.getFAQs(props.eventId))
-const loading = computed(() => adminStore.isSubLoading('faqs', props.eventId))
-const error = computed(() => adminStore.getSubError('faqs', props.eventId))
+const loading = computed(() => adminStore.isSubLoading("faqs", props.eventId))
+const error = computed(() => adminStore.getSubError("faqs", props.eventId))
 
 const showCreateForm = ref(false)
-const createForm = ref({ question: '', answer: '' })
+const createForm = ref({ question: "", answer: "" })
 const createLoading = ref(false)
 
 const editingItemId = ref<string | null>(null)
-const editForm = ref({ question: '', answer: '', orderIndex: 0 })
+const editForm = ref({ question: "", answer: "", orderIndex: 0 })
 const editLoading = ref(false)
 
 onMounted(() => adminStore.fetchFAQs(props.eventId))
@@ -39,9 +39,9 @@ async function handleCreate() {
       answer: createForm.value.answer.trim(),
     })
     showCreateForm.value = false
-    createForm.value = { question: '', answer: '' }
+    createForm.value = { question: "", answer: "" }
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to create FAQ')
+    toast.error(e instanceof Error ? e.message : "Failed to create FAQ")
   } finally {
     createLoading.value = false
   }
@@ -74,7 +74,7 @@ async function handleUpdate() {
     })
     editingItemId.value = null
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to update FAQ')
+    toast.error(e instanceof Error ? e.message : "Failed to update FAQ")
   } finally {
     editLoading.value = false
   }
@@ -82,16 +82,16 @@ async function handleUpdate() {
 
 /** Deletes a FAQ. */
 async function handleDelete(itemId: string) {
-  if (!(await toast.confirm('Delete this FAQ?'))) return
+  if (!(await toast.confirm("Delete this FAQ?"))) return
   try {
     await adminStore.deleteFAQItem(props.eventId, itemId)
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to delete FAQ')
+    toast.error(e instanceof Error ? e.message : "Failed to delete FAQ")
   }
 }
 
 /** Moves an item up or down in the order. */
-async function moveItem(itemId: string, direction: 'up' | 'down') {
+async function moveItem(itemId: string, direction: "up" | "down") {
   try {
     await adminStore.swapOrder(items.value, itemId, direction, (id, orderIndex) => {
       const item = items.value.find((i) => i.id === id)!
@@ -102,7 +102,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
       })
     })
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to reorder')
+    toast.error(e instanceof Error ? e.message : "Failed to reorder")
   }
 }
 </script>
@@ -129,7 +129,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
         @click="showCreateForm = !showCreateForm"
         class="text-sm text-primary hover:underline"
       >
-        {{ showCreateForm ? 'Cancel' : '+ Add FAQ' }}
+        {{ showCreateForm ? "Cancel" : "+ Add FAQ" }}
       </button>
     </div>
 
@@ -162,7 +162,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
             :disabled="createLoading"
             class="bg-primary text-white font-medium px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
           >
-            {{ createLoading ? 'Adding...' : 'Add FAQ' }}
+            {{ createLoading ? "Adding..." : "Add FAQ" }}
           </button>
         </form>
       </div>
@@ -275,7 +275,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
                   :disabled="editLoading"
                   class="text-sm bg-primary text-white px-3 py-1.5 rounded-lg hover:bg-primary-dark disabled:opacity-50"
                 >
-                  {{ editLoading ? 'Saving...' : 'Save' }}
+                  {{ editLoading ? "Saving..." : "Save" }}
                 </button>
                 <button
                   type="button"

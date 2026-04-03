@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CustomSection } from '@/types'
+import type { CustomSection } from "@/types"
 
 defineProps<{
   section: CustomSection

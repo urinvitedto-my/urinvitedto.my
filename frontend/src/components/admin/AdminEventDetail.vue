@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { formatDate } from '@/utils/date'
-import { useToast } from '@/composables/useToast'
-import { useAdminStore } from '@/stores/admin'
-import type { AdminEvent } from '@/types'
+import { ref } from "vue"
+import { formatDate } from "@/utils/date"
+import { useToast } from "@/composables/useToast"
+import { useAdminStore } from "@/stores/admin"
+import type { AdminEvent } from "@/types"
 
-import AdminEditEventForm from './AdminEditEventForm.vue'
-import AdminGuestOverview from './AdminGuestOverview.vue'
-import AdminHosts from './AdminHosts.vue'
-import AdminInvites from './AdminInvites.vue'
-import AdminSchedule from './AdminSchedule.vue'
-import AdminFAQs from './AdminFAQs.vue'
-import AdminGifts from './AdminGifts.vue'
-import AdminGallery from './AdminGallery.vue'
-import AdminCustomContent from './AdminCustomContent.vue'
-import AdminComponentOrder from './AdminComponentOrder.vue'
+import AdminEditEventForm from "./AdminEditEventForm.vue"
+import AdminGuestOverview from "./AdminGuestOverview.vue"
+import AdminHosts from "./AdminHosts.vue"
+import AdminInvites from "./AdminInvites.vue"
+import AdminSchedule from "./AdminSchedule.vue"
+import AdminFAQs from "./AdminFAQs.vue"
+import AdminGifts from "./AdminGifts.vue"
+import AdminGallery from "./AdminGallery.vue"
+import AdminCustomContent from "./AdminCustomContent.vue"
+import AdminComponentOrder from "./AdminComponentOrder.vue"
 
 const props = defineProps<{ event: AdminEvent }>()
 const emit = defineEmits<{ deleted: [] }>()
@@ -22,7 +22,7 @@ const emit = defineEmits<{ deleted: [] }>()
 const adminStore = useAdminStore()
 const toast = useToast()
 
-const activeTab = ref('guests')
+const activeTab = ref("guests")
 const isEditing = ref(false)
 const refreshKey = ref(0)
 const refreshing = ref(false)
@@ -37,15 +37,15 @@ async function handleRefresh() {
 }
 
 const tabs = [
-  { key: 'guests', label: 'Guests' },
-  { key: 'hosts', label: 'Hosts' },
-  { key: 'invites', label: 'Invites' },
-  { key: 'schedule', label: 'Schedule' },
-  { key: 'faqs', label: 'FAQs' },
-  { key: 'gifts', label: 'Gifts' },
-  { key: 'gallery', label: 'Gallery' },
-  { key: 'customContent', label: 'Content' },
-  { key: 'componentOrder', label: 'Order' },
+  { key: "guests", label: "Guests" },
+  { key: "hosts", label: "Hosts" },
+  { key: "invites", label: "Invites" },
+  { key: "schedule", label: "Schedule" },
+  { key: "faqs", label: "FAQs" },
+  { key: "gifts", label: "Gifts" },
+  { key: "gallery", label: "Gallery" },
+  { key: "customContent", label: "Content" },
+  { key: "componentOrder", label: "Order" },
 ]
 
 /** Generates the public URL for an event. */
@@ -57,15 +57,15 @@ function getEventUrl(event: AdminEvent): string {
 async function handleDelete() {
   if (
     !(await toast.confirm(
-      'Delete this event? This will remove all related data (hosts, invites, guests, etc.) and cannot be undone.',
+      "Delete this event? This will remove all related data (hosts, invites, guests, etc.) and cannot be undone.",
     ))
   )
     return
   try {
     await adminStore.deleteEvent(props.event.id)
-    emit('deleted')
+    emit("deleted")
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to delete event')
+    toast.error(e instanceof Error ? e.message : "Failed to delete event")
   }
 }
 
@@ -87,7 +87,7 @@ function noop() {}
               {{ event.type }}
             </span>
             <span class="text-xs text-gray-500">{{
-              event.isPublic ? 'Public' : 'Private'
+              event.isPublic ? "Public" : "Private"
             }}</span>
           </div>
           <h2 class="text-xl font-bold text-primary">{{ event.title }}</h2>
@@ -95,7 +95,7 @@ function noop() {}
             {{ event.description }}
           </p>
           <p class="text-sm text-gray-500 mt-1">
-            {{ formatDate(event.startsAt) }} · {{ event.location || 'No location' }}
+            {{ formatDate(event.startsAt) }} · {{ event.location || "No location" }}
           </p>
         </div>
 

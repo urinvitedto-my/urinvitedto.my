@@ -1,25 +1,25 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { storeToRefs } from 'pinia'
-import { useEventStore } from '@/stores/event'
-import type { EventType } from '@/types'
-import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import { ref, onMounted, onUnmounted, computed } from "vue"
+import { useRoute } from "vue-router"
+import { storeToRefs } from "pinia"
+import { useEventStore } from "@/stores/event"
+import type { EventType } from "@/types"
+import LoadingSpinner from "@/components/LoadingSpinner.vue"
 
-import EventDetails from '@/components/event/EventDetails.vue'
-import LocationPhoto from '@/components/event/LocationPhoto.vue'
-import CountdownTimer from '@/components/event/CountdownTimer.vue'
-import EventMap from '@/components/event/EventMap.vue'
-import EventSchedule from '@/components/event/EventSchedule.vue'
-import EventGallery from '@/components/event/EventGallery.vue'
-import AttireGuide from '@/components/event/AttireGuide.vue'
-import EventFAQ from '@/components/event/EventFAQ.vue'
-import MonetaryGifts from '@/components/event/MonetaryGifts.vue'
-import GiftGuide from '@/components/event/GiftGuide.vue'
-import CustomSection from '@/components/event/CustomSection.vue'
-import InviteRSVP from '@/components/event/InviteRSVP.vue'
-import ConfirmedGuests from '@/components/event/ConfirmedGuests.vue'
-import GuestBottomNav from '@/components/GuestBottomNav.vue'
+import EventDetails from "@/components/event/EventDetails.vue"
+import LocationPhoto from "@/components/event/LocationPhoto.vue"
+import CountdownTimer from "@/components/event/CountdownTimer.vue"
+import EventMap from "@/components/event/EventMap.vue"
+import EventSchedule from "@/components/event/EventSchedule.vue"
+import EventGallery from "@/components/event/EventGallery.vue"
+import AttireGuide from "@/components/event/AttireGuide.vue"
+import EventFAQ from "@/components/event/EventFAQ.vue"
+import MonetaryGifts from "@/components/event/MonetaryGifts.vue"
+import GiftGuide from "@/components/event/GiftGuide.vue"
+import CustomSection from "@/components/event/CustomSection.vue"
+import InviteRSVP from "@/components/event/InviteRSVP.vue"
+import ConfirmedGuests from "@/components/event/ConfirmedGuests.vue"
+import GuestBottomNav from "@/components/GuestBottomNav.vue"
 
 const props = defineProps<{
   type: EventType
@@ -39,7 +39,7 @@ const {
 
 const inviteCode = computed(() => {
   const code = route.query.invite
-  return typeof code === 'string' ? code.toUpperCase() : ''
+  return typeof code === "string" ? code.toUpperCase() : ""
 })
 
 /** Maps custom section IDs to their data for quick lookup in the template. */
@@ -50,7 +50,7 @@ const customSectionsMap = computed(() => {
 
 const isMuted = ref(false)
 let audioEl: HTMLAudioElement | null = null
-const activationEvents = ['scroll', 'click', 'touchstart', 'keydown'] as const
+const activationEvents = ["scroll", "click", "touchstart", "keydown"] as const
 
 /** Starts music on first user interaction. */
 function startMusic() {
@@ -87,7 +87,7 @@ function cleanupAudio() {
   activationEvents.forEach((evt) => window.removeEventListener(evt, startMusic))
   if (audioEl) {
     audioEl.pause()
-    audioEl.src = ''
+    audioEl.src = ""
     audioEl = null
   }
 }
@@ -298,10 +298,10 @@ async function loadEventData() {
 }
 
 .guest-view::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
-  background-image: url('https://olwskoxfukhqkalcmdeq.supabase.co/storage/v1/object/public/event-media/71537c23-2b2c-42ab-a6b8-9d9e1746cbfc/flower_background_v1.png');
+  background-image: url("https://olwskoxfukhqkalcmdeq.supabase.co/storage/v1/object/public/event-media/71537c23-2b2c-42ab-a6b8-9d9e1746cbfc/flower_background_v1.png");
   background-repeat: repeat;
   background-size: 100% auto;
   opacity: 0.4;
@@ -311,7 +311,7 @@ async function loadEventData() {
 
 .guest-view :deep(h1),
 .guest-view :deep(h2) {
-  font-family: 'Kaushan Script', cursive;
+  font-family: "Kaushan Script", cursive;
   font-weight: 300;
   letter-spacing: 0.15em;
 }

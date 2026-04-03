@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useAdminStore } from '@/stores/admin'
-import { useToast } from '@/composables/useToast'
-import { useInviteMessage } from '@/composables/useInviteMessage'
-import LoadingSpinner from '@/components/LoadingSpinner.vue'
-import type { AdminGuest, AdminInvite } from '@/types'
+import { ref, computed, onMounted } from "vue"
+import { storeToRefs } from "pinia"
+import { useAdminStore } from "@/stores/admin"
+import { useToast } from "@/composables/useToast"
+import { useInviteMessage } from "@/composables/useInviteMessage"
+import LoadingSpinner from "@/components/LoadingSpinner.vue"
+import type { AdminGuest, AdminInvite } from "@/types"
 
 const props = defineProps<{
   eventId: string
@@ -46,23 +46,23 @@ async function copyMessage(invite: AdminInvite) {
 }
 
 const invites = computed(() => adminStore.getInvites(props.eventId))
-const loading = computed(() => adminStore.isSubLoading('invites', props.eventId))
-const error = computed(() => adminStore.getSubError('invites', props.eventId))
+const loading = computed(() => adminStore.isSubLoading("invites", props.eventId))
+const error = computed(() => adminStore.getSubError("invites", props.eventId))
 
 const showCreateForm = ref(false)
-const createLabel = ref('')
+const createLabel = ref("")
 const createLoading = ref(false)
 
 const addingGuestInviteId = ref<string | null>(null)
-const guestName = ref('')
+const guestName = ref("")
 const guestLoading = ref(false)
 
-type RsvpStatus = 'pending' | 'yes' | 'no'
+type RsvpStatus = "pending" | "yes" | "no"
 
 const editingGuestId = ref<string | null>(null)
 const editGuestForm = ref<{ displayName: string; rsvpStatus: RsvpStatus }>({
-  displayName: '',
-  rsvpStatus: 'pending',
+  displayName: "",
+  rsvpStatus: "pending",
 })
 const editGuestLoading = ref(false)
 
@@ -76,9 +76,9 @@ async function handleCreateInvite() {
       label: createLabel.value || null,
     })
     showCreateForm.value = false
-    createLabel.value = ''
+    createLabel.value = ""
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to create invite')
+    toast.error(e instanceof Error ? e.message : "Failed to create invite")
   } finally {
     createLoading.value = false
   }
@@ -86,11 +86,11 @@ async function handleCreateInvite() {
 
 /** Deletes an invite and all its guests. */
 async function handleDeleteInvite(inviteId: string) {
-  if (!(await toast.confirm('Delete this invite and all its guests?'))) return
+  if (!(await toast.confirm("Delete this invite and all its guests?"))) return
   try {
     await adminStore.deleteInvite(props.eventId, inviteId)
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to delete invite')
+    toast.error(e instanceof Error ? e.message : "Failed to delete invite")
   }
 }
 
@@ -102,9 +102,9 @@ async function handleAddGuest(inviteId: string) {
     await adminStore.addGuestToInvite(props.eventId, inviteId, {
       displayName: guestName.value.trim(),
     })
-    guestName.value = ''
+    guestName.value = ""
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to add guest')
+    toast.error(e instanceof Error ? e.message : "Failed to add guest")
   } finally {
     guestLoading.value = false
   }
@@ -133,7 +133,7 @@ async function handleUpdateGuest(inviteId: string) {
     )
     editingGuestId.value = null
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to update guest')
+    toast.error(e instanceof Error ? e.message : "Failed to update guest")
   } finally {
     editGuestLoading.value = false
   }
@@ -141,23 +141,23 @@ async function handleUpdateGuest(inviteId: string) {
 
 /** Deletes a guest. */
 async function handleDeleteGuest(inviteId: string, guestId: string) {
-  if (!(await toast.confirm('Remove this guest?'))) return
+  if (!(await toast.confirm("Remove this guest?"))) return
   try {
     await adminStore.deleteGuestFromInvite(props.eventId, inviteId, guestId)
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to delete guest')
+    toast.error(e instanceof Error ? e.message : "Failed to delete guest")
   }
 }
 
 /** Returns a CSS class for RSVP status badges. */
 function rsvpClass(status: string): string {
   switch (status) {
-    case 'yes':
-      return 'bg-green-100 text-green-700'
-    case 'no':
-      return 'bg-red-100 text-red-700'
+    case "yes":
+      return "bg-green-100 text-green-700"
+    case "no":
+      return "bg-red-100 text-red-700"
     default:
-      return 'bg-gray-100 text-gray-600'
+      return "bg-gray-100 text-gray-600"
   }
 }
 </script>
@@ -184,7 +184,7 @@ function rsvpClass(status: string): string {
         @click="showCreateForm = !showCreateForm"
         class="text-sm text-primary hover:underline"
       >
-        {{ showCreateForm ? 'Cancel' : '+ Add Invite' }}
+        {{ showCreateForm ? "Cancel" : "+ Add Invite" }}
       </button>
     </div>
 
@@ -208,7 +208,7 @@ function rsvpClass(status: string): string {
             :disabled="createLoading"
             class="bg-primary text-white font-medium px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 shrink-0"
           >
-            {{ createLoading ? 'Creating...' : 'Create Invite' }}
+            {{ createLoading ? "Creating..." : "Create Invite" }}
           </button>
         </form>
         <p class="text-xs text-gray-500 mt-2">
@@ -249,7 +249,7 @@ function rsvpClass(status: string): string {
               }}</span>
               <span class="text-xs text-gray-400">
                 {{ invite.guests.length }} guest{{
-                  invite.guests.length !== 1 ? 's' : ''
+                  invite.guests.length !== 1 ? "s" : ""
                 }}
               </span>
             </div>
@@ -360,13 +360,15 @@ function rsvpClass(status: string): string {
                   :disabled="guestLoading"
                   class="text-sm bg-primary text-white px-3 py-1.5 rounded-lg hover:bg-primary-dark disabled:opacity-50 shrink-0"
                 >
-                  {{ guestLoading ? 'Adding...' : 'Add' }}
+                  {{ guestLoading ? "Adding..." : "Add" }}
                 </button>
                 <button
                   type="button"
                   @click="
-                    addingGuestInviteId = null;
-                    guestName = ''
+                    () => {
+                      addingGuestInviteId = null
+                      guestName = ''
+                    }
                   "
                   class="text-sm text-gray-500 hover:text-gray-700"
                 >
@@ -435,7 +437,7 @@ function rsvpClass(status: string): string {
                     d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
                   />
                 </svg>
-                {{ copiedInviteId === invite.id ? 'Copied!' : 'Copy' }}
+                {{ copiedInviteId === invite.id ? "Copied!" : "Copy" }}
               </button>
             </div>
             <pre

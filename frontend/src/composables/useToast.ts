@@ -1,7 +1,7 @@
 /** Lightweight toast notification composable (replaces alert/confirm). */
-import { ref } from 'vue'
+import { ref } from "vue"
 
-export type ToastType = 'success' | 'error' | 'info'
+export type ToastType = "success" | "error" | "info"
 
 export interface Toast {
   id: number
@@ -16,12 +16,12 @@ export interface ConfirmState {
 }
 
 const toasts = ref<Toast[]>([])
-const confirmState = ref<ConfirmState>({ visible: false, message: '', resolve: null })
+const confirmState = ref<ConfirmState>({ visible: false, message: "", resolve: null })
 let nextId = 0
 
 export function useToast() {
   /** Shows a toast notification. */
-  function show(message: string, type: ToastType = 'info', duration = 3000) {
+  function show(message: string, type: ToastType = "info", duration = 3000) {
     const id = nextId++
     toasts.value.push({ id, message, type })
     setTimeout(() => dismiss(id), duration)
@@ -32,11 +32,11 @@ export function useToast() {
   }
 
   function success(message: string) {
-    show(message, 'success')
+    show(message, "success")
   }
 
   function error(message: string) {
-    show(message, 'error', 5000)
+    show(message, "error", 5000)
   }
 
   /** Replaces native confirm() -- returns a promise that resolves to true/false. */
@@ -48,8 +48,17 @@ export function useToast() {
 
   function resolveConfirm(result: boolean) {
     confirmState.value.resolve?.(result)
-    confirmState.value = { visible: false, message: '', resolve: null }
+    confirmState.value = { visible: false, message: "", resolve: null }
   }
 
-  return { toasts, confirmState, show, dismiss, success, error, confirm, resolveConfirm }
+  return {
+    toasts,
+    confirmState,
+    show,
+    dismiss,
+    success,
+    error,
+    confirm,
+    resolveConfirm,
+  }
 }

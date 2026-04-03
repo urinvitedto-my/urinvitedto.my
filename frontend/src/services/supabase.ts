@@ -1,15 +1,15 @@
 // Supabase client for auth
-import { createClient } from '@supabase/supabase-js'
-import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js"
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js"
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase env vars not set. Auth features will not work.')
+  console.warn("Supabase env vars not set. Auth features will not work.")
 }
 
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '')
+export const supabase = createClient(supabaseUrl || "", supabaseAnonKey || "")
 
 /** Signs in with email and password. */
 export async function signIn(email: string, password: string) {
@@ -24,7 +24,7 @@ export async function signIn(email: string, password: string) {
  * deadlock when multiple tabs share the same Supabase client.
  */
 export async function signOut() {
-  const { error } = await supabase.auth.signOut({ scope: 'local' })
+  const { error } = await supabase.auth.signOut({ scope: "local" })
   if (error) throw error
 }
 

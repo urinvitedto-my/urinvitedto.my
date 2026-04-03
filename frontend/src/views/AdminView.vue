@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useAuthStore } from '@/stores/auth'
-import { useAdminStore } from '@/stores/admin'
-import LoadingSpinner from '@/components/LoadingSpinner.vue'
-import AdminCreateEventForm from '@/components/admin/AdminCreateEventForm.vue'
-import AdminEventSidebar from '@/components/admin/AdminEventSidebar.vue'
-import AdminEventDetail from '@/components/admin/AdminEventDetail.vue'
+import { ref, computed, onMounted, onUnmounted, watch } from "vue"
+import { storeToRefs } from "pinia"
+import { useAuthStore } from "@/stores/auth"
+import { useAdminStore } from "@/stores/admin"
+import LoadingSpinner from "@/components/LoadingSpinner.vue"
+import AdminCreateEventForm from "@/components/admin/AdminCreateEventForm.vue"
+import AdminEventSidebar from "@/components/admin/AdminEventSidebar.vue"
+import AdminEventDetail from "@/components/admin/AdminEventDetail.vue"
 
 const authStore = useAuthStore()
 const adminStore = useAdminStore()
@@ -25,10 +25,10 @@ const showCreateForm = ref(false)
 const detailRemountKey = ref(0)
 
 /** Matches Tailwind `lg` — only one of mobile vs desktop detail panels should mount. */
-const MOBILE_MAX_WIDTH = '(max-width: 1023px)'
+const MOBILE_MAX_WIDTH = "(max-width: 1023px)"
 
 const isMobileLayout = ref(
-  typeof window !== 'undefined' ? window.matchMedia(MOBILE_MAX_WIDTH).matches : false,
+  typeof window !== "undefined" ? window.matchMedia(MOBILE_MAX_WIDTH).matches : false,
 )
 
 const selectedEvent = computed(
@@ -47,7 +47,7 @@ function selectEvent(eventId: string) {
     detailRemountKey.value += 1
   }
   selectedEventId.value = eventId
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+  window.scrollTo({ top: 0, behavior: "smooth" })
 }
 
 /** Goes back to event list on mobile. */
@@ -68,8 +68,8 @@ onMounted(async () => {
     isMobileLayout.value = mql.matches
   }
   syncLayout()
-  mql.addEventListener('change', syncLayout)
-  onUnmounted(() => mql.removeEventListener('change', syncLayout))
+  mql.addEventListener("change", syncLayout)
+  onUnmounted(() => mql.removeEventListener("change", syncLayout))
 
   try {
     await adminStore.fetchEvents()
@@ -127,7 +127,7 @@ watch(isAdmin, async (newVal) => {
             @click="showCreateForm = !showCreateForm"
             class="bg-accent text-black font-medium px-4 py-2 rounded-lg hover:bg-accent-dark transition-colors"
           >
-            {{ showCreateForm ? 'Cancel' : '+ Create Event' }}
+            {{ showCreateForm ? "Cancel" : "+ Create Event" }}
           </button>
         </div>
 
@@ -182,7 +182,10 @@ watch(isAdmin, async (newVal) => {
 
           <!-- Desktop Detail Panel -->
           <div class="hidden lg:block flex-1 min-w-0">
-            <div v-if="selectedEvent && !isMobileLayout" class="bg-white rounded-lg shadow-sm p-6">
+            <div
+              v-if="selectedEvent && !isMobileLayout"
+              class="bg-white rounded-lg shadow-sm p-6"
+            >
               <AdminEventDetail
                 :key="`${selectedEvent.id}-${detailRemountKey}`"
                 :event="selectedEvent"

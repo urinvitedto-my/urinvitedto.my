@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useAdminStore } from '@/stores/admin'
-import { useToast } from '@/composables/useToast'
-import type { AdminHost } from '@/types'
+import { ref } from "vue"
+import { useAdminStore } from "@/stores/admin"
+import { useToast } from "@/composables/useToast"
+import type { AdminHost } from "@/types"
 
 const props = defineProps<{
   eventId: string
@@ -16,24 +16,24 @@ const adminStore = useAdminStore()
 const toast = useToast()
 
 const showForm = ref(false)
-const form = ref({ email: '', displayName: '' })
+const form = ref({ email: "", displayName: "" })
 const loading = ref(false)
-const error = ref('')
+const error = ref("")
 
 /** Adds a host to the event. */
 async function handleAdd() {
   loading.value = true
-  error.value = ''
+  error.value = ""
 
   try {
     await adminStore.addHost(props.eventId, {
       email: form.value.email,
       displayName: form.value.displayName,
     })
-    form.value = { email: '', displayName: '' }
+    form.value = { email: "", displayName: "" }
     showForm.value = false
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Failed to add host'
+    error.value = e instanceof Error ? e.message : "Failed to add host"
   } finally {
     loading.value = false
   }
@@ -41,12 +41,12 @@ async function handleAdd() {
 
 /** Removes a host after confirmation. */
 async function handleDelete(hostId: string) {
-  if (!(await toast.confirm('Remove this host?'))) return
+  if (!(await toast.confirm("Remove this host?"))) return
 
   try {
     await adminStore.deleteHost(props.eventId, hostId)
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to remove host')
+    toast.error(e instanceof Error ? e.message : "Failed to remove host")
   }
 }
 </script>
@@ -73,7 +73,7 @@ async function handleDelete(hostId: string) {
         @click="showForm = !showForm"
         class="text-sm text-primary hover:underline"
       >
-        {{ showForm ? 'Cancel' : '+ Add Host' }}
+        {{ showForm ? "Cancel" : "+ Add Host" }}
       </button>
     </div>
 
@@ -136,7 +136,7 @@ async function handleDelete(hostId: string) {
             :disabled="loading"
             class="bg-primary text-white font-medium px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
           >
-            {{ loading ? 'Adding...' : 'Add Host' }}
+            {{ loading ? "Adding..." : "Add Host" }}
           </button>
         </form>
       </div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Gift } from '@/types'
+import type { Gift } from "@/types"
 
 defineProps<{
   gifts: Gift[]

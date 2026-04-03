@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useAdminStore } from '@/stores/admin'
-import { toISOOrUndefined } from '@/utils/date'
-import type { EventType } from '@/types'
+import { ref } from "vue"
+import { useAdminStore } from "@/stores/admin"
+import { toISOOrUndefined } from "@/utils/date"
+import type { EventType } from "@/types"
 
 const emit = defineEmits<{ created: []; cancel: [] }>()
 
@@ -16,20 +16,20 @@ const form = ref<{
   startsAt: string
   location: string
 }>({
-  type: 'wedding',
-  slug: '',
-  title: '',
+  type: "wedding",
+  slug: "",
+  title: "",
   isPublic: false,
-  startsAt: '',
-  location: '',
+  startsAt: "",
+  location: "",
 })
 const loading = ref(false)
-const error = ref('')
+const error = ref("")
 
 /** Creates a new event from the form data. */
 async function handleSubmit() {
   loading.value = true
-  error.value = ''
+  error.value = ""
 
   try {
     await adminStore.createEvent({
@@ -40,9 +40,9 @@ async function handleSubmit() {
       startsAt: toISOOrUndefined(form.value.startsAt),
       location: form.value.location || undefined,
     })
-    emit('created')
+    emit("created")
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Failed to create event'
+    error.value = e instanceof Error ? e.message : "Failed to create event"
   } finally {
     loading.value = false
   }
@@ -122,7 +122,7 @@ async function handleSubmit() {
           :disabled="loading"
           class="bg-primary text-white font-medium px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
         >
-          {{ loading ? 'Creating...' : 'Create Event' }}
+          {{ loading ? "Creating..." : "Create Event" }}
         </button>
         <button
           type="button"

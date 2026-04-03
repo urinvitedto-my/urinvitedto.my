@@ -1,23 +1,23 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { defineStore } from "pinia"
+import { ref, computed } from "vue"
 import {
   signIn as authSignIn,
   signOut as authSignOut,
   getSession,
   onAuthStateChange,
-} from '@/services/supabase'
-import { getMe } from '@/services/api'
-import { useAdminStore } from '@/stores/admin'
-import type { User, Session } from '@supabase/supabase-js'
+} from "@/services/supabase"
+import { getMe } from "@/services/api"
+import { useAdminStore } from "@/stores/admin"
+import type { User, Session } from "@supabase/supabase-js"
 
-export const useAuthStore = defineStore('auth', () => {
+export const useAuthStore = defineStore("auth", () => {
   const user = ref<User | null>(null)
   const session = ref<Session | null>(null)
   const isAdmin = ref(false)
   const initialized = ref(false)
 
   const isLoggedIn = computed(() => !!session.value)
-  const userEmail = computed(() => user.value?.email ?? '')
+  const userEmail = computed(() => user.value?.email ?? "")
 
   /**
    * Checks admin status via the backend /auth/me endpoint.
@@ -34,7 +34,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   let initPromise: Promise<void> | null = null
   let subscription:
-    | ReturnType<typeof onAuthStateChange>['data']['subscription']
+    | ReturnType<typeof onAuthStateChange>["data"]["subscription"]
     | null = null
 
   /**
@@ -58,9 +58,9 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     const { data } = onAuthStateChange(async (event, newSession) => {
-      if (event === 'INITIAL_SESSION') return
+      if (event === "INITIAL_SESSION") return
 
-      if (event === 'SIGNED_OUT') {
+      if (event === "SIGNED_OUT") {
         session.value = null
         user.value = null
         isAdmin.value = false
@@ -75,7 +75,7 @@ export const useAuthStore = defineStore('auth', () => {
         // Supabase emits SIGNED_IN again on tab focus (session recovery), not only on login.
         // Only hit /auth/me when the access token actually changed.
         if (
-          event === 'SIGNED_IN' &&
+          event === "SIGNED_IN" &&
           newSession.user?.email &&
           newSession.access_token !== previousAccessToken
         ) {
@@ -115,7 +115,7 @@ export const useAuthStore = defineStore('auth', () => {
     const adminStore = useAdminStore()
     adminStore.$reset()
 
-    const { useHostStore } = await import('@/stores/host')
+    const { useHostStore } = await import("@/stores/host")
     const hostStore = useHostStore()
     hostStore.$reset()
   }

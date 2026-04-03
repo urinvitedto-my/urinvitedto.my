@@ -1,30 +1,30 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { ref } from "vue"
+import { useRouter } from "vue-router"
+import { useAuthStore } from "@/stores/auth"
 
 const router = useRouter()
 const authStore = useAuthStore()
-const email = ref('')
-const password = ref('')
+const email = ref("")
+const password = ref("")
 const loading = ref(false)
-const error = ref('')
+const error = ref("")
 
 /** Handles login form submission. */
 async function handleLogin() {
   if (!email.value || !password.value) {
-    error.value = 'Please enter email and password'
+    error.value = "Please enter email and password"
     return
   }
 
   loading.value = true
-  error.value = ''
+  error.value = ""
 
   try {
     await authStore.login(email.value, password.value)
-    router.push('/host/dashboard')
+    router.push("/host/dashboard")
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Login failed'
+    error.value = e instanceof Error ? e.message : "Login failed"
   } finally {
     loading.value = false
   }
@@ -80,7 +80,7 @@ async function handleLogin() {
           :disabled="loading"
           class="w-full bg-accent text-black font-semibold py-3 rounded-lg hover:bg-accent-dark transition-colors disabled:opacity-50"
         >
-          {{ loading ? 'Signing in...' : 'Sign In' }}
+          {{ loading ? "Signing in..." : "Sign In" }}
         </button>
       </form>
     </div>

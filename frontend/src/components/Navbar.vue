@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { storeToRefs } from 'pinia'
-import { useAuthStore } from '@/stores/auth'
+import { ref, computed, onMounted, onUnmounted } from "vue"
+import { useRouter, useRoute } from "vue-router"
+import { storeToRefs } from "pinia"
+import { useAuthStore } from "@/stores/auth"
 
 const router = useRouter()
 const route = useRoute()
@@ -17,7 +17,7 @@ let lastScrollY = 0
  */
 const useLightNav = computed(() => {
   const name = route.name
-  return typeof name === 'string' && ['event-landing', 'guest'].includes(name)
+  return typeof name === "string" && ["event-landing", "guest"].includes(name)
 })
 
 /**
@@ -42,19 +42,19 @@ function handleScroll() {
  */
 function handleClickOutside(e: MouseEvent) {
   const target = e.target as HTMLElement
-  if (!target.closest('[data-navbar-menu]')) {
+  if (!target.closest("[data-navbar-menu]")) {
     menuOpen.value = false
   }
 }
 
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll, { passive: true })
-  document.addEventListener('click', handleClickOutside)
+  window.addEventListener("scroll", handleScroll, { passive: true })
+  document.addEventListener("click", handleClickOutside)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
-  document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener("scroll", handleScroll)
+  document.removeEventListener("click", handleClickOutside)
 })
 
 /**
@@ -68,9 +68,9 @@ async function handleLogout() {
     menuOpen.value = false
     const name = route.name
     const isPublicRoute =
-      typeof name === 'string' && ['event-landing', 'guest'].includes(name)
+      typeof name === "string" && ["event-landing", "guest"].includes(name)
     if (!isPublicRoute) {
-      router.push('/')
+      router.push("/")
     }
   }
 }

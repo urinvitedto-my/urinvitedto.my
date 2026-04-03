@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MonetaryGiftsConfig } from '@/types'
+import type { MonetaryGiftsConfig } from "@/types"
 
 defineProps<{
   config: MonetaryGiftsConfig
@@ -11,10 +11,10 @@ async function downloadQr(url: string, label: string) {
     const res = await fetch(url)
     const blob = await res.blob()
     const blobUrl = URL.createObjectURL(blob)
-    const a = document.createElement('a')
+    const a = document.createElement("a")
     a.href = blobUrl
     a.download = `${label}-qr-code.png`
-    a.style.display = 'none'
+    a.style.display = "none"
     document.body.appendChild(a)
     a.click()
     setTimeout(() => {
@@ -22,7 +22,7 @@ async function downloadQr(url: string, label: string) {
       URL.revokeObjectURL(blobUrl)
     }, 500)
   } catch {
-    window.open(url, '_blank')
+    window.open(url, "_blank")
   }
 }
 </script>

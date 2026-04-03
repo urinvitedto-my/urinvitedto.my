@@ -1,8 +1,12 @@
 /// <reference types="vite/client" />
 
-declare module '*.vue' {
-  import type { DefineComponent } from 'vue'
-  const component: DefineComponent<Record<string, unknown>, Record<string, unknown>, unknown>
+declare module "*.vue" {
+  import type { DefineComponent } from "vue"
+  const component: DefineComponent<
+    Record<string, unknown>,
+    Record<string, unknown>,
+    unknown
+  >
   export default component
 }
 
@@ -16,9 +20,9 @@ interface ImportMeta {
   readonly env: ImportMetaEnv
 }
 
-import 'vue-router'
+import "vue-router"
 
-declare module 'vue-router' {
+declare module "vue-router" {
   interface RouteMeta {
     requiresAuth?: boolean
     requiresAdmin?: boolean

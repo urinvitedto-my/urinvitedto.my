@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useAdminStore } from '@/stores/admin'
-import { useToast } from '@/composables/useToast'
-import LoadingSpinner from '@/components/LoadingSpinner.vue'
-import { toISO, toDatetimeLocal, formatTime } from '@/utils/date'
-import type { AdminScheduleItem } from '@/types'
+import { ref, computed, onMounted } from "vue"
+import { useAdminStore } from "@/stores/admin"
+import { useToast } from "@/composables/useToast"
+import LoadingSpinner from "@/components/LoadingSpinner.vue"
+import { toISO, toDatetimeLocal, formatTime } from "@/utils/date"
+import type { AdminScheduleItem } from "@/types"
 
 const props = defineProps<{
   eventId: string
@@ -17,15 +17,15 @@ const adminStore = useAdminStore()
 const toast = useToast()
 
 const items = computed(() => adminStore.getSchedule(props.eventId))
-const loading = computed(() => adminStore.isSubLoading('schedule', props.eventId))
-const error = computed(() => adminStore.getSubError('schedule', props.eventId))
+const loading = computed(() => adminStore.isSubLoading("schedule", props.eventId))
+const error = computed(() => adminStore.getSubError("schedule", props.eventId))
 
 const showCreateForm = ref(false)
-const createForm = ref({ time: '', title: '', description: '' })
+const createForm = ref({ time: "", title: "", description: "" })
 const createLoading = ref(false)
 
 const editingItemId = ref<string | null>(null)
-const editForm = ref({ time: '', title: '', description: '', orderIndex: 0 })
+const editForm = ref({ time: "", title: "", description: "", orderIndex: 0 })
 const editLoading = ref(false)
 
 onMounted(() => adminStore.fetchSchedule(props.eventId))
@@ -41,9 +41,9 @@ async function handleCreate() {
       description: createForm.value.description.trim() || null,
     })
     showCreateForm.value = false
-    createForm.value = { time: '', title: '', description: '' }
+    createForm.value = { time: "", title: "", description: "" }
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to create schedule item')
+    toast.error(e instanceof Error ? e.message : "Failed to create schedule item")
   } finally {
     createLoading.value = false
   }
@@ -55,7 +55,7 @@ function startEdit(item: AdminScheduleItem) {
   editForm.value = {
     time: toDatetimeLocal(item.time),
     title: item.title,
-    description: item.description || '',
+    description: item.description || "",
     orderIndex: item.orderIndex,
   }
 }
@@ -74,7 +74,7 @@ async function handleUpdate() {
     })
     editingItemId.value = null
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to update schedule item')
+    toast.error(e instanceof Error ? e.message : "Failed to update schedule item")
   } finally {
     editLoading.value = false
   }
@@ -82,16 +82,16 @@ async function handleUpdate() {
 
 /** Deletes a schedule item. */
 async function handleDelete(itemId: string) {
-  if (!(await toast.confirm('Delete this schedule item?'))) return
+  if (!(await toast.confirm("Delete this schedule item?"))) return
   try {
     await adminStore.deleteScheduleItem(props.eventId, itemId)
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to delete schedule item')
+    toast.error(e instanceof Error ? e.message : "Failed to delete schedule item")
   }
 }
 
 /** Moves an item up or down in the order. */
-async function moveItem(itemId: string, direction: 'up' | 'down') {
+async function moveItem(itemId: string, direction: "up" | "down") {
   try {
     await adminStore.swapOrder(items.value, itemId, direction, (id, orderIndex) => {
       const item = items.value.find((i) => i.id === id)!
@@ -103,7 +103,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
       })
     })
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to reorder')
+    toast.error(e instanceof Error ? e.message : "Failed to reorder")
   }
 }
 </script>
@@ -130,7 +130,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
         @click="showCreateForm = !showCreateForm"
         class="text-sm text-primary hover:underline"
       >
-        {{ showCreateForm ? 'Cancel' : '+ Add Item' }}
+        {{ showCreateForm ? "Cancel" : "+ Add Item" }}
       </button>
     </div>
 
@@ -175,7 +175,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
             :disabled="createLoading"
             class="bg-primary text-white font-medium px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
           >
-            {{ createLoading ? 'Adding...' : 'Add to Schedule' }}
+            {{ createLoading ? "Adding..." : "Add to Schedule" }}
           </button>
         </form>
       </div>
@@ -312,7 +312,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
                   :disabled="editLoading"
                   class="text-sm bg-primary text-white px-3 py-1.5 rounded-lg hover:bg-primary-dark disabled:opacity-50"
                 >
-                  {{ editLoading ? 'Saving...' : 'Save' }}
+                  {{ editLoading ? "Saving..." : "Save" }}
                 </button>
                 <button
                   type="button"

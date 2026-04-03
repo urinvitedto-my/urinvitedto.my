@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { useEventStore } from '@/stores/event'
-import type { EventType, Invite, Guest } from '@/types'
+import { ref, watch } from "vue"
+import { useEventStore } from "@/stores/event"
+import type { EventType, Invite, Guest } from "@/types"
 
 const eventStore = useEventStore()
 
@@ -17,7 +17,7 @@ const emit = defineEmits<{
 }>()
 
 interface GuestState {
-  status: 'yes' | 'no' | null
+  status: "yes" | "no" | null
   message: string
   submitting: boolean
   submitted: boolean
@@ -31,11 +31,11 @@ const guestStates = ref<Record<string, GuestState>>({})
 function initGuest(guest: Guest) {
   if (guestStates.value[guest.id]) return
   guestStates.value[guest.id] = {
-    status: guest.rsvpStatus === 'pending' ? null : (guest.rsvpStatus as 'yes' | 'no'),
-    message: guest.rsvpMessage || '',
+    status: guest.rsvpStatus === "pending" ? null : (guest.rsvpStatus as "yes" | "no"),
+    message: guest.rsvpMessage || "",
     submitting: false,
-    submitted: guest.rsvpStatus !== 'pending',
-    error: '',
+    submitted: guest.rsvpStatus !== "pending",
+    error: "",
   }
 }
 
@@ -44,10 +44,10 @@ function getState(guestId: string): GuestState {
   if (!guestStates.value[guestId]) {
     guestStates.value[guestId] = {
       status: null,
-      message: '',
+      message: "",
       submitting: false,
       submitted: false,
-      error: '',
+      error: "",
     }
   }
   return guestStates.value[guestId]
@@ -63,10 +63,10 @@ watch(
 /**
  * Selects RSVP status for a guest.
  */
-function selectStatus(guestId: string, status: 'yes' | 'no') {
+function selectStatus(guestId: string, status: "yes" | "no") {
   const state = getState(guestId)
   state.status = status
-  state.error = ''
+  state.error = ""
 }
 
 /**
@@ -76,12 +76,12 @@ async function handleSubmit(guest: Guest) {
   const state = getState(guest.id)
 
   if (!state.status) {
-    state.error = 'Please select Yes or No'
+    state.error = "Please select Yes or No"
     return
   }
 
   state.submitting = true
-  state.error = ''
+  state.error = ""
 
   try {
     await eventStore.submitRSVP(props.type, props.slug, {
@@ -91,9 +91,9 @@ async function handleSubmit(guest: Guest) {
       message: state.message || undefined,
     })
     state.submitted = true
-    emit('rsvpUpdated')
+    emit("rsvpUpdated")
   } catch (e: unknown) {
-    state.error = e instanceof Error ? e.message : 'Failed to submit RSVP'
+    state.error = e instanceof Error ? e.message : "Failed to submit RSVP"
   } finally {
     state.submitting = false
   }
@@ -132,7 +132,7 @@ async function handleSubmit(guest: Guest) {
                   : 'bg-guest-bg text-red-500',
               ]"
             >
-              {{ getState(guest.id).status === 'yes' ? 'Attending' : 'Not Attending' }}
+              {{ getState(guest.id).status === "yes" ? "Attending" : "Not Attending" }}
             </span>
           </div>
 
@@ -186,7 +186,7 @@ async function handleSubmit(guest: Guest) {
                 :disabled="getState(guest.id).submitting"
                 class="w-full mt-2 bg-accent text-black text-sm font-semibold py-2 rounded-lg hover:bg-accent-dark transition-colors disabled:opacity-50"
               >
-                {{ getState(guest.id).submitting ? 'Submitting...' : 'Confirm RSVP' }}
+                {{ getState(guest.id).submitting ? "Submitting..." : "Confirm RSVP" }}
               </button>
             </template>
           </template>

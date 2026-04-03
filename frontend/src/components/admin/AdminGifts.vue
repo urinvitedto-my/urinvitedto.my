@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useAdminStore } from '@/stores/admin'
-import { useToast } from '@/composables/useToast'
-import LoadingSpinner from '@/components/LoadingSpinner.vue'
-import type { AdminGift } from '@/types'
+import { ref, computed, onMounted } from "vue"
+import { useAdminStore } from "@/stores/admin"
+import { useToast } from "@/composables/useToast"
+import LoadingSpinner from "@/components/LoadingSpinner.vue"
+import type { AdminGift } from "@/types"
 
 const props = defineProps<{
   eventId: string
@@ -16,10 +16,10 @@ const adminStore = useAdminStore()
 const toast = useToast()
 
 const items = computed(() => adminStore.getGifts(props.eventId))
-const loading = computed(() => adminStore.isSubLoading('gifts', props.eventId))
-const error = computed(() => adminStore.getSubError('gifts', props.eventId))
+const loading = computed(() => adminStore.isSubLoading("gifts", props.eventId))
+const error = computed(() => adminStore.getSubError("gifts", props.eventId))
 
-type GiftType = 'physical' | 'monetary'
+type GiftType = "physical" | "monetary"
 
 const showCreateForm = ref(false)
 const createForm = ref<{
@@ -28,10 +28,10 @@ const createForm = ref<{
   description: string
   link: string
 }>({
-  giftType: 'physical',
-  title: '',
-  description: '',
-  link: '',
+  giftType: "physical",
+  title: "",
+  description: "",
+  link: "",
 })
 const createLoading = ref(false)
 
@@ -43,10 +43,10 @@ const editForm = ref<{
   link: string
   orderIndex: number
 }>({
-  giftType: 'physical',
-  title: '',
-  description: '',
-  link: '',
+  giftType: "physical",
+  title: "",
+  description: "",
+  link: "",
   orderIndex: 0,
 })
 const editLoading = ref(false)
@@ -65,9 +65,9 @@ async function handleCreate() {
       link: createForm.value.link.trim() || null,
     })
     showCreateForm.value = false
-    createForm.value = { giftType: 'physical', title: '', description: '', link: '' }
+    createForm.value = { giftType: "physical", title: "", description: "", link: "" }
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to create gift')
+    toast.error(e instanceof Error ? e.message : "Failed to create gift")
   } finally {
     createLoading.value = false
   }
@@ -79,8 +79,8 @@ function startEdit(item: AdminGift) {
   editForm.value = {
     giftType: item.giftType,
     title: item.title,
-    description: item.description || '',
-    link: item.link || '',
+    description: item.description || "",
+    link: item.link || "",
     orderIndex: item.orderIndex,
   }
 }
@@ -99,7 +99,7 @@ async function handleUpdate() {
     })
     editingItemId.value = null
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to update gift')
+    toast.error(e instanceof Error ? e.message : "Failed to update gift")
   } finally {
     editLoading.value = false
   }
@@ -107,16 +107,16 @@ async function handleUpdate() {
 
 /** Deletes a gift. */
 async function handleDelete(itemId: string) {
-  if (!(await toast.confirm('Delete this gift?'))) return
+  if (!(await toast.confirm("Delete this gift?"))) return
   try {
     await adminStore.deleteGiftItem(props.eventId, itemId)
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to delete gift')
+    toast.error(e instanceof Error ? e.message : "Failed to delete gift")
   }
 }
 
 /** Moves an item up or down in the order. */
-async function moveItem(itemId: string, direction: 'up' | 'down') {
+async function moveItem(itemId: string, direction: "up" | "down") {
   try {
     await adminStore.swapOrder(items.value, itemId, direction, (id, orderIndex) => {
       const item = items.value.find((i) => i.id === id)!
@@ -129,15 +129,15 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
       })
     })
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to reorder')
+    toast.error(e instanceof Error ? e.message : "Failed to reorder")
   }
 }
 
 /** Returns badge class for gift type. */
-function giftTypeClass(type: 'physical' | 'monetary'): string {
-  return type === 'monetary'
-    ? 'bg-yellow-100 text-yellow-700'
-    : 'bg-blue-100 text-blue-700'
+function giftTypeClass(type: "physical" | "monetary"): string {
+  return type === "monetary"
+    ? "bg-yellow-100 text-yellow-700"
+    : "bg-blue-100 text-blue-700"
 }
 </script>
 
@@ -163,7 +163,7 @@ function giftTypeClass(type: 'physical' | 'monetary'): string {
         @click="showCreateForm = !showCreateForm"
         class="text-sm text-primary hover:underline"
       >
-        {{ showCreateForm ? 'Cancel' : '+ Add Gift' }}
+        {{ showCreateForm ? "Cancel" : "+ Add Gift" }}
       </button>
     </div>
 
@@ -222,7 +222,7 @@ function giftTypeClass(type: 'physical' | 'monetary'): string {
             :disabled="createLoading"
             class="bg-primary text-white font-medium px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
           >
-            {{ createLoading ? 'Adding...' : 'Add Gift' }}
+            {{ createLoading ? "Adding..." : "Add Gift" }}
           </button>
         </form>
       </div>
@@ -380,7 +380,7 @@ function giftTypeClass(type: 'physical' | 'monetary'): string {
                   :disabled="editLoading"
                   class="text-sm bg-primary text-white px-3 py-1.5 rounded-lg hover:bg-primary-dark disabled:opacity-50"
                 >
-                  {{ editLoading ? 'Saving...' : 'Save' }}
+                  {{ editLoading ? "Saving..." : "Save" }}
                 </button>
                 <button
                   type="button"

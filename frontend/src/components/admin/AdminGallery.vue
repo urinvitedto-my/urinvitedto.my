@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { supabase } from '@/services/supabase'
-import { useAdminStore } from '@/stores/admin'
-import { useToast } from '@/composables/useToast'
-import LoadingSpinner from '@/components/LoadingSpinner.vue'
-import type { AdminGalleryItem } from '@/types'
+import { ref, computed, onMounted } from "vue"
+import { supabase } from "@/services/supabase"
+import { useAdminStore } from "@/stores/admin"
+import { useToast } from "@/composables/useToast"
+import LoadingSpinner from "@/components/LoadingSpinner.vue"
+import type { AdminGalleryItem } from "@/types"
 
 const props = defineProps<{
   eventId: string
@@ -17,18 +17,18 @@ const adminStore = useAdminStore()
 const toast = useToast()
 
 const items = computed(() => adminStore.getGallery(props.eventId))
-const loading = computed(() => adminStore.isSubLoading('gallery', props.eventId))
-const error = computed(() => adminStore.getSubError('gallery', props.eventId))
+const loading = computed(() => adminStore.isSubLoading("gallery", props.eventId))
+const error = computed(() => adminStore.getSubError("gallery", props.eventId))
 
 const uploading = ref(false)
-const uploadError = ref('')
+const uploadError = ref("")
 const fileInput = ref<HTMLInputElement | null>(null)
 
 const editingItemId = ref<string | null>(null)
-const editForm = ref({ caption: '', orderIndex: 0 })
+const editForm = ref({ caption: "", orderIndex: 0 })
 const editLoading = ref(false)
 
-const BUCKET = 'event-media'
+const BUCKET = "event-media"
 
 /** Matches common image extensions when the browser leaves MIME empty. */
 const IMAGE_NAME_RE =
@@ -55,15 +55,15 @@ function maxGalleryOrdinalFromUrls(galleryItems: AdminGalleryItem[]): number {
 /** True when the name has a non-empty segment after the last dot (e.g. photo.jpg, not "photo"). */
 function hasFilenameExtension(file: File): boolean {
   const name = file.name.trim()
-  if (!name.includes('.')) return false
-  const ext = name.split('.').pop()?.trim()
+  if (!name.includes(".")) return false
+  const ext = name.split(".").pop()?.trim()
   return !!ext && ext.length > 0
 }
 
 /** Returns true for images we accept: has a filename extension and image MIME or known image ext. */
 function isAllowedImageFile(file: File): boolean {
   if (!hasFilenameExtension(file)) return false
-  if (file.type.startsWith('image/')) return true
+  if (file.type.startsWith("image/")) return true
   if (!file.type && IMAGE_NAME_RE.test(file.name)) return true
   return false
 }
@@ -73,8 +73,8 @@ function isAllowedImageFile(file: File): boolean {
  * a short random suffix keeps keys unique. Only call for files that passed isAllowedImageFile.
  */
 function buildStoragePath(file: File, ordinal: number): string {
-  const ext = file.name.split('.').pop()!.trim().toLowerCase()
-  const label = String(ordinal).padStart(3, '0')
+  const ext = file.name.split(".").pop()!.trim().toLowerCase()
+  const label = String(ordinal).padStart(3, "0")
   const random = Math.random().toString(36).slice(2, 8)
   return `${props.eventId}/_gallery/${label}-${random}.${ext}`
 }
@@ -94,7 +94,7 @@ async function handleFileUpload(event: Event) {
   if (!files || files.length === 0) return
 
   uploading.value = true
-  uploadError.value = ''
+  uploadError.value = ""
 
   try {
     const picked = Array.from(files)
@@ -103,7 +103,7 @@ async function handleFileUpload(event: Event) {
     if (skipped > 0) {
       toast.error(
         skipped === picked.length
-          ? 'Only image files with a file extension are allowed (e.g. .jpg, .png, .gif).'
+          ? "Only image files with a file extension are allowed (e.g. .jpg, .png, .gif)."
           : `Skipped ${skipped} file(s) — use images only, each with a file extension.`,
       )
     }
@@ -116,24 +116,24 @@ async function handleFileUpload(event: Event) {
 
       const { error: uploadErr } = await supabase.storage
         .from(BUCKET)
-        .upload(path, file, { contentType: file.type || 'application/octet-stream' })
+        .upload(path, file, { contentType: file.type || "application/octet-stream" })
 
       if (uploadErr) throw new Error(uploadErr.message)
 
       const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(path)
 
       await adminStore.createGalleryItem(props.eventId, {
-        mediaType: 'photo',
+        mediaType: "photo",
         mediaUrl: urlData.publicUrl,
       })
     }
 
-    toast.success('Upload complete')
+    toast.success("Upload complete")
   } catch (e: unknown) {
-    uploadError.value = e instanceof Error ? e.message : 'Failed to upload'
+    uploadError.value = e instanceof Error ? e.message : "Failed to upload"
   } finally {
     uploading.value = false
-    if (fileInput.value) fileInput.value.value = ''
+    if (fileInput.value) fileInput.value.value = ""
   }
 }
 
@@ -141,7 +141,7 @@ async function handleFileUpload(event: Event) {
 function startEdit(item: AdminGalleryItem) {
   editingItemId.value = item.id
   editForm.value = {
-    caption: item.caption || '',
+    caption: item.caption || "",
     orderIndex: item.orderIndex,
   }
 }
@@ -158,9 +158,9 @@ async function handleUpdate() {
       orderIndex: editForm.value.orderIndex,
     })
     editingItemId.value = null
-    toast.success('Gallery item updated')
+    toast.success("Gallery item updated")
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to update gallery item')
+    toast.error(e instanceof Error ? e.message : "Failed to update gallery item")
   } finally {
     editLoading.value = false
   }
@@ -168,7 +168,7 @@ async function handleUpdate() {
 
 /** Deletes a gallery item and its file from storage. */
 async function handleDelete(item: AdminGalleryItem) {
-  const confirmed = await toast.confirm('Delete this gallery item?')
+  const confirmed = await toast.confirm("Delete this gallery item?")
   if (!confirmed) return
 
   try {
@@ -179,14 +179,14 @@ async function handleDelete(item: AdminGalleryItem) {
       await supabase.storage.from(BUCKET).remove([storagePath])
     }
 
-    toast.success('Gallery item deleted')
+    toast.success("Gallery item deleted")
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to delete gallery item')
+    toast.error(e instanceof Error ? e.message : "Failed to delete gallery item")
   }
 }
 
 /** Moves an item up or down in the order. */
-async function moveItem(itemId: string, direction: 'up' | 'down') {
+async function moveItem(itemId: string, direction: "up" | "down") {
   try {
     await adminStore.swapOrder(
       adminStore.getGallery(props.eventId),
@@ -196,7 +196,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
         adminStore.updateGalleryItem(props.eventId, id, { orderIndex }),
     )
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Failed to reorder')
+    toast.error(e instanceof Error ? e.message : "Failed to reorder")
   }
 }
 </script>
@@ -223,7 +223,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
           class="text-sm text-primary hover:underline cursor-pointer"
           :class="{ 'opacity-50 pointer-events-none': uploading }"
         >
-          {{ uploading ? 'Uploading...' : '+ Upload' }}
+          {{ uploading ? "Uploading..." : "+ Upload" }}
           <input
             ref="fileInput"
             type="file"
@@ -287,7 +287,7 @@ async function moveItem(itemId: string, direction: 'up' | 'down') {
                   :disabled="editLoading"
                   class="text-xs bg-primary text-white px-2.5 py-1 rounded-lg hover:bg-primary-dark disabled:opacity-50"
                 >
-                  {{ editLoading ? 'Saving...' : 'Save' }}
+                  {{ editLoading ? "Saving..." : "Save" }}
                 </button>
                 <button
                   type="button"
