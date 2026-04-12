@@ -51,9 +51,7 @@ onUnmounted(() => {
     <Navbar v-if="showNavbar" />
     <main class="flex-1">
       <RouterView v-slot="{ Component }">
-        <Transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </Transition>
+        <component :is="Component" />
       </RouterView>
     </main>
     <Footer v-if="showFooter" />
@@ -61,13 +59,3 @@ onUnmounted(() => {
   </div>
 </template>
 
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.15s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>
