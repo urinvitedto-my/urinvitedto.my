@@ -3,7 +3,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from "vue"
 import { storeToRefs } from "pinia"
 import { useAuthStore } from "@/stores/auth"
 import { useAdminStore } from "@/stores/admin"
-import LoadingSpinner from "@/components/LoadingSpinner.vue"
+import { usePageLoading } from "@/composables/usePageLoading"
 import AdminCreateEventForm from "@/components/admin/AdminCreateEventForm.vue"
 import AdminEventSidebar from "@/components/admin/AdminEventSidebar.vue"
 import AdminEventDetail from "@/components/admin/AdminEventDetail.vue"
@@ -62,7 +62,10 @@ function handleDeleted() {
   selectedEventId.value = null
 }
 
+const { startPageLoading, stopPageLoading } = usePageLoading()
+
 onMounted(async () => {
+  startPageLoading()
   const mql = window.matchMedia(MOBILE_MAX_WIDTH)
   const syncLayout = () => {
     isMobileLayout.value = mql.matches
@@ -75,6 +78,8 @@ onMounted(async () => {
     await adminStore.fetchEvents()
   } catch {
     // error is in adminStore.error
+  } finally {
+    stopPageLoading()
   }
 })
 
@@ -139,65 +144,62 @@ watch(isAdmin, async (newVal) => {
           @cancel="showCreateForm = false"
         />
 
-        <!-- Loading -->
-        <div v-if="eventsLoading" class="flex items-center justify-center py-12">
-          <LoadingSpinner size="md" />
-        </div>
-
-        <!-- Error -->
-        <div
-          v-else-if="eventsError"
-          class="flex flex-col items-center justify-center text-center min-h-[60vh]"
-        >
-          <h2 class="text-2xl font-bold text-primary mb-2">Something went wrong</h2>
-          <p class="text-base text-gray-500 mb-6 max-w-sm">{{ eventsError }}</p>
-          <button
-            @click="adminStore.fetchEvents()"
-            class="bg-accent text-black font-semibold px-8 py-3 rounded-lg text-base hover:bg-accent-dark transition-colors"
-          >
-            Try again
-          </button>
-        </div>
-
-        <!-- Empty -->
-        <div
-          v-else-if="events.length === 0"
-          class="bg-white rounded-lg shadow-sm p-8 text-center"
-        >
-          <p class="text-gray-500">No events yet. Create your first event!</p>
-        </div>
-
-        <!-- Split View (desktop keeps both panels visible) -->
-        <div v-else class="flex flex-col lg:flex-row gap-6 lg:items-start">
-          <!-- Sidebar / Event List -->
+        <template v-if="!eventsLoading">
+          <!-- Error -->
           <div
-            class="w-full lg:w-[340px] lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] shrink-0"
+            v-if="eventsError"
+            class="flex flex-col items-center justify-center text-center min-h-[60vh]"
           >
-            <AdminEventSidebar
-              :events="events"
-              :selected-event-id="selectedEventId"
-              @select="selectEvent"
-            />
+            <h2 class="text-2xl font-bold text-primary mb-2">Something went wrong</h2>
+            <p class="text-base text-gray-500 mb-6 max-w-sm">{{ eventsError }}</p>
+            <button
+              @click="adminStore.fetchEvents()"
+              class="bg-accent text-black font-semibold px-8 py-3 rounded-lg text-base hover:bg-accent-dark transition-colors"
+            >
+              Try again
+            </button>
           </div>
 
-          <!-- Desktop Detail Panel -->
-          <div class="hidden lg:block flex-1 min-w-0">
+          <!-- Empty -->
+          <div
+            v-else-if="events.length === 0"
+            class="bg-white rounded-lg shadow-sm p-8 text-center"
+          >
+            <p class="text-gray-500">No events yet. Create your first event!</p>
+          </div>
+
+          <!-- Split View (desktop keeps both panels visible) -->
+          <div v-else class="flex flex-col lg:flex-row gap-6 lg:items-start">
+            <!-- Sidebar / Event List -->
             <div
-              v-if="selectedEvent && !isMobileLayout"
-              class="bg-white rounded-lg shadow-sm p-6"
+              class="w-full lg:w-[340px] lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] shrink-0"
             >
-              <AdminEventDetail
-                :key="`${selectedEvent.id}-${detailRemountKey}`"
-                :event="selectedEvent"
-                @deleted="handleDeleted"
+              <AdminEventSidebar
+                :events="events"
+                :selected-event-id="selectedEventId"
+                @select="selectEvent"
               />
             </div>
 
-            <div v-else class="bg-white rounded-lg shadow-sm p-8 text-center">
-              <p class="text-gray-400">Select an event to manage</p>
+            <!-- Desktop Detail Panel -->
+            <div class="hidden lg:block flex-1 min-w-0">
+              <div
+                v-if="selectedEvent && !isMobileLayout"
+                class="bg-white rounded-lg shadow-sm p-6"
+              >
+                <AdminEventDetail
+                  :key="`${selectedEvent.id}-${detailRemountKey}`"
+                  :event="selectedEvent"
+                  @deleted="handleDeleted"
+                />
+              </div>
+
+              <div v-else class="bg-white rounded-lg shadow-sm p-8 text-center">
+                <p class="text-gray-400">Select an event to manage</p>
+              </div>
             </div>
           </div>
-        </div>
+        </template>
       </div>
     </div>
   </div>

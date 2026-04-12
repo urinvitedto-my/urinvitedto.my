@@ -4,7 +4,7 @@ import { useRouter } from "vue-router"
 import { storeToRefs } from "pinia"
 import { useEventStore } from "@/stores/event"
 import type { EventType } from "@/types"
-import LoadingSpinner from "@/components/LoadingSpinner.vue"
+import { usePageLoading } from "@/composables/usePageLoading"
 
 const props = defineProps<{
   type: EventType
@@ -16,7 +16,7 @@ const eventStore = useEventStore()
 const inviteCode = ref("")
 const submitting = ref(false)
 
-const loading = ref(true)
+const { startPageLoading, stopPageLoading } = usePageLoading()
 const error = ref("")
 const { eventSummary, eventDetails } = storeToRefs(eventStore)
 
@@ -27,7 +27,9 @@ const titleParts = computed(() => {
 })
 
 onMounted(async () => {
+  startPageLoading()
   await loadEvent()
+  stopPageLoading()
 })
 
 onUnmounted(() => {
@@ -36,7 +38,6 @@ onUnmounted(() => {
 
 /** Loads event summary, then details if public. */
 async function loadEvent() {
-  loading.value = true
   error.value = ""
 
   try {
@@ -47,8 +48,6 @@ async function loadEvent() {
     }
   } catch (e: unknown) {
     error.value = e instanceof Error ? e.message : "Failed to load event"
-  } finally {
-    loading.value = false
   }
 }
 
@@ -83,17 +82,9 @@ async function handleInviteSubmit() {
 
 <template>
   <div class="event-landing-view">
-    <!-- Loading -->
-    <div
-      v-if="loading"
-      class="landing-fullscreen bg-primary flex items-start pt-[12vh] md:items-center md:pt-0 justify-center"
-    >
-      <LoadingSpinner />
-    </div>
-
     <!-- Error (no event loaded) -->
     <div
-      v-else-if="error && !eventSummary"
+      v-if="error && !eventSummary"
       class="landing-fullscreen bg-primary flex items-start pt-[12vh] md:items-center md:pt-0 justify-center"
     >
       <div class="text-center px-4">
