@@ -26,13 +26,9 @@ export function useInviteMessage(
     return `${window.location.origin}/${event.value.type}/${event.value.slug}`
   })
 
-  const visibleHosts = computed(() =>
-    hosts.value.filter((h) => h.displayName !== "Admin"),
-  )
-
   /** Formats host names with possessive (e.g. "Jester & Sione's"). */
   function formatHostNames(): string {
-    const names = visibleHosts.value.map((h) => h.displayName)
+    const names = hosts.value.map((h) => h.displayName)
     if (names.length === 0) return ""
     if (names.length === 1) return `${names[0]}'s`
     const last = names.pop()
@@ -84,7 +80,7 @@ export function useInviteMessage(
   /** Returns the closing line(s) with an emoji matching the event tone. */
   function getClosingLines(eventType: string): string[] {
     if (eventType === "wedding") {
-      const [a, b] = visibleHosts.value.map((h) => h.displayName)
+      const [a, b] = hosts.value.map((h) => h.displayName)
       return ["💙", "", "Love,", `${a} and ${b}`]
     }
     if (eventType === "birthday") return ["🎈"]
