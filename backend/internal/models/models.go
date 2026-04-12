@@ -241,6 +241,11 @@ type CreateInviteRequest struct {
 	Label *string `json:"label"`
 }
 
+// UpdateInviteRequest is the request body for updating an invite's label.
+type UpdateInviteRequest struct {
+	Label *string `json:"label"`
+}
+
 // AddGuestRequest is the request body for adding a guest to an invite.
 type AddGuestRequest struct {
 	DisplayName string `json:"displayName"`

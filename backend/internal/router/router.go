@@ -94,6 +94,7 @@ func (rm *Router) SetupRouter() *chi.Mux {
 			ar.Delete("/events/{id}/hosts/{hostId}", h.DeleteHost)
 			ar.Get("/events/{id}/invites", h.ListInvites)
 			ar.Post("/events/{id}/invites", h.CreateInvite)
+			ar.Put("/events/{id}/invites/{inviteId}", h.UpdateInvite)
 			ar.Delete("/events/{id}/invites/{inviteId}", h.DeleteInvite)
 			ar.Post("/events/{id}/invites/{inviteId}/guests", h.AddGuest)
 			ar.Put("/events/{id}/guests/{guestId}", h.UpdateGuest)

@@ -132,6 +132,47 @@ func (h *Handlers) CreateInvite(w http.ResponseWriter, r *http.Request) {
 		fmt.Sprintf("Failed to generate unique code after %d attempts", maxCodeRetries))
 }
 
+// UpdateInvite handles PUT /admin/events/:id/invites/:inviteId - updates an invite's label.
+func (h *Handlers) UpdateInvite(w http.ResponseWriter, r *http.Request) {
+	eventID := chi.URLParam(r, "id")
+	inviteID := chi.URLParam(r, "inviteId")
+
+	var req models.UpdateInviteRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.writeError(w, http.StatusBadRequest, "invalid_body", "Invalid request body")
+		return
+	}
+
+	ctx := r.Context()
+
+	var invite models.AdminInvite
+	err := h.db.QueryRow(ctx, `
+		UPDATE invites SET label = $1
+		WHERE id = $2 AND event_id = $3
+		RETURNING id, invite_code, label, created_at
+	`, req.Label, inviteID, eventID).Scan(
+		&invite.ID, &invite.InviteCode, &invite.Label, &invite.CreatedAt,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			h.writeError(w, http.StatusNotFound, "not_found", "Invite not found")
+			return
+		}
+		slog.Error("DB error updating invite", "error", err)
+		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to update invite")
+		return
+	}
+
+	// include guests in the response
+	guests, err := h.fetchInviteGuests(ctx, invite.ID)
+	if err != nil {
+		slog.Error("Error fetching guests", "inviteId", invite.ID, "error", err)
+	}
+	invite.Guests = guests
+
+	h.writeJSON(w, http.StatusOK, invite)
+}
+
 // DeleteInvite handles DELETE /admin/events/:id/invites/:inviteId - removes an invite and its guests.
 func (h *Handlers) DeleteInvite(w http.ResponseWriter, r *http.Request) {
 	eventID := chi.URLParam(r, "id")
