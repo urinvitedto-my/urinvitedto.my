@@ -16,14 +16,14 @@ const router = createRouter({
       name: "event-landing",
       component: () => import("@/views/EventLandingView.vue"),
       props: true,
-      meta: { hideFooter: true, hideNavbar: true },
+      meta: { hideFooter: true, hideNavbar: true, showLoader: true },
     },
     {
       path: "/:type(wedding|birthday|party)/:slug/guest",
       name: "guest",
       component: () => import("@/views/GuestView.vue"),
       props: true,
-      meta: { hideFooter: true, hideNavbar: true },
+      meta: { hideFooter: true, hideNavbar: true, showLoader: true },
     },
     {
       path: "/login",
@@ -35,13 +35,13 @@ const router = createRouter({
       path: "/host/dashboard",
       name: "host-dashboard",
       component: () => import("@/views/HostDashboardView.vue"),
-      meta: { hideFooter: true, requiresAuth: true },
+      meta: { hideFooter: true, requiresAuth: true, showLoader: true },
     },
     {
       path: "/admin",
       name: "admin",
       component: () => import("@/views/AdminView.vue"),
-      meta: { hideFooter: true, requiresAuth: true, requiresAdmin: true },
+      meta: { hideFooter: true, requiresAuth: true, requiresAdmin: true, showLoader: true },
     },
     {
       path: "/:pathMatch(.*)*",

@@ -15,11 +15,11 @@ const { pageLoading } = usePageLoading()
 const showNavbar = computed(() => !route.meta.hideNavbar)
 const showFooter = computed(() => !route.meta.hideFooter)
 
-/** True while a lazy-loaded route chunk is being downloaded. */
-const routeLoading = ref(true)
+/** True while a lazy-loaded route chunk is being downloaded for a loader-enabled route. */
+const routeLoading = ref(!!route.meta.showLoader)
 
-router.beforeEach(() => {
-  routeLoading.value = true
+router.beforeEach((to) => {
+  routeLoading.value = !!to.meta.showLoader
 })
 
 router.afterEach(() => {
