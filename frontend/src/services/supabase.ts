@@ -28,6 +28,20 @@ export async function signOut() {
   if (error) throw error
 }
 
+/** Sends a password reset email via Supabase. */
+export async function resetPassword(email: string) {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  })
+  if (error) throw error
+}
+
+/** Updates the current user's password (requires an active session from the reset link). */
+export async function updatePassword(newPassword: string) {
+  const { error } = await supabase.auth.updateUser({ password: newPassword })
+  if (error) throw error
+}
+
 /** Gets the current session. */
 export async function getSession() {
   const { data, error } = await supabase.auth.getSession()

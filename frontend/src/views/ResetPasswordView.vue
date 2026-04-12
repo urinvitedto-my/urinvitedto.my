@@ -1,98 +1,84 @@
 <script setup lang="ts">
-import { ref } from "vue"
+import { ref, onBeforeUnmount } from "vue"
 import { useRouter } from "vue-router"
 import { useAuthStore } from "@/stores/auth"
-import { resetPassword } from "@/services/supabase"
+import { updatePassword } from "@/services/supabase"
 
 const router = useRouter()
 const authStore = useAuthStore()
-const email = ref("")
 const password = ref("")
+const confirmPassword = ref("")
 const showPassword = ref(false)
 const loading = ref(false)
 const error = ref("")
-const resetLoading = ref(false)
-const resetMessage = ref("")
+const success = ref(false)
+const passwordUpdated = ref(false)
 
-/** Handles login form submission. */
-async function handleLogin() {
-  if (!email.value || !password.value) {
-    error.value = "Please enter email and password"
+/** If the user leaves this page without updating their password, log them out. */
+onBeforeUnmount(() => {
+  if (!passwordUpdated.value) {
+    authStore.logout()
+  }
+})
+
+async function handleReset() {
+  if (!password.value || !confirmPassword.value) {
+    error.value = "Please fill in both fields"
+    return
+  }
+
+  if (password.value.length < 6) {
+    error.value = "Password must be at least 6 characters"
+    return
+  }
+
+  if (password.value !== confirmPassword.value) {
+    error.value = "Passwords do not match"
     return
   }
 
   loading.value = true
   error.value = ""
-  resetMessage.value = ""
 
   try {
-    await authStore.login(email.value, password.value)
-    router.push("/host/dashboard")
+    await updatePassword(password.value)
+    passwordUpdated.value = true
+    success.value = true
+    setTimeout(() => router.push("/host/dashboard"), 2000)
   } catch (e: unknown) {
-    error.value = sentenceCase(e instanceof Error ? e.message : "Login failed")
+    error.value = e instanceof Error ? e.message : "Failed to update password"
   } finally {
     loading.value = false
-  }
-}
-
-/** Capitalizes the first letter of a string. */
-function sentenceCase(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1)
-}
-
-/** Sends a password reset email via Supabase. */
-async function handleForgotPassword() {
-  if (!email.value) {
-    error.value = "Please enter your email first"
-    return
-  }
-
-  resetLoading.value = true
-  error.value = ""
-  resetMessage.value = ""
-
-  try {
-    await resetPassword(email.value)
-    resetMessage.value = "Password reset email sent. Check your inbox."
-  } catch (e: unknown) {
-    error.value = sentenceCase(e instanceof Error ? e.message : "Failed to send reset email")
-  } finally {
-    resetLoading.value = false
   }
 }
 </script>
 
 <template>
   <div
-    class="login-view min-h-screen flex items-center justify-center pt-24 pb-12 px-4"
+    class="min-h-screen flex items-center justify-center pt-24 pb-12 px-4"
   >
     <div class="max-w-md w-full">
       <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-primary">LOG IN</h1>
-        <p class="text-gray-600 mt-2">Sign in to continue to your dashboard</p>
+        <h1 class="text-3xl font-bold text-primary">RESET PASSWORD</h1>
+        <p class="text-gray-600 mt-2">Enter your new password</p>
+      </div>
+
+      <div
+        v-if="success"
+        class="bg-white rounded-lg shadow-sm p-8 text-center space-y-4"
+      >
+        <p class="text-green-600 font-medium">Password updated successfully!</p>
+        <p class="text-gray-500 text-sm">Redirecting to dashboard...</p>
       </div>
 
       <form
-        @submit.prevent="handleLogin"
+        v-else
+        @submit.prevent="handleReset"
         class="bg-white rounded-lg shadow-sm p-8 space-y-6"
       >
         <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-            Email
-          </label>
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            required
-            class="w-full px-4 py-3 border border-muted rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-            :disabled="loading"
-          />
-        </div>
-
-        <div>
           <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-            Password
+            New Password
           </label>
           <div class="relative">
             <input
@@ -109,7 +95,6 @@ async function handleForgotPassword() {
               class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
               tabindex="-1"
             >
-              <!-- Eye open (password hidden) -->
               <svg
                 v-if="!showPassword"
                 class="w-5 h-5"
@@ -129,7 +114,6 @@ async function handleForgotPassword() {
                   d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                 />
               </svg>
-              <!-- Eye closed (password visible) -->
               <svg
                 v-else
                 class="w-5 h-5"
@@ -146,32 +130,30 @@ async function handleForgotPassword() {
               </svg>
             </button>
           </div>
-          <div class="mt-2 text-right">
-            <button
-              type="button"
-              @click="handleForgotPassword"
-              :disabled="resetLoading"
-              class="text-sm text-accent hover:text-accent-dark transition-colors disabled:opacity-50"
-            >
-              {{ resetLoading ? "Sending..." : "Forgot password?" }}
-            </button>
-          </div>
         </div>
 
-        <div
-          v-if="error || resetMessage"
-          class="rounded-lg px-4 py-3 text-sm text-center"
-          :class="error ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'"
-        >
-          {{ error || resetMessage }}
+        <div>
+          <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-2">
+            Confirm Password
+          </label>
+          <input
+            id="confirm-password"
+            v-model="confirmPassword"
+            :type="showPassword ? 'text' : 'password'"
+            required
+            class="w-full px-4 py-3 border border-muted rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
+            :disabled="loading"
+          />
         </div>
+
+        <p v-if="error" class="text-red-600 text-sm">{{ error }}</p>
 
         <button
           type="submit"
           :disabled="loading"
           class="w-full bg-accent text-black font-semibold py-3 rounded-lg hover:bg-accent-dark transition-colors disabled:opacity-50"
         >
-          {{ loading ? "Signing in..." : "Sign In" }}
+          {{ loading ? "Updating..." : "Update Password" }}
         </button>
       </form>
     </div>

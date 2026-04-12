@@ -8,6 +8,7 @@ import {
 } from "@/services/supabase"
 import { getMe } from "@/services/api"
 import { useAdminStore } from "@/stores/admin"
+import router from "@/router"
 import type { User, Session } from "@supabase/supabase-js"
 
 export const useAuthStore = defineStore("auth", () => {
@@ -64,6 +65,13 @@ export const useAuthStore = defineStore("auth", () => {
         session.value = null
         user.value = null
         isAdmin.value = false
+        return
+      }
+
+      if (event === "PASSWORD_RECOVERY") {
+        session.value = newSession
+        user.value = newSession?.user ?? null
+        router.push("/reset-password")
         return
       }
 
