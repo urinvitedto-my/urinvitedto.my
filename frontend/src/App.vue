@@ -12,8 +12,13 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const { pageLoading } = usePageLoading()
-const showNavbar = computed(() => !route.meta.hideNavbar)
-const showFooter = computed(() => !route.meta.hideFooter)
+
+/** Hide navbar/footer until the router resolves the initial route (prevents flash on reload). */
+const routerReady = ref(false)
+router.isReady().then(() => { routerReady.value = true })
+
+const showNavbar = computed(() => routerReady.value && !route.meta.hideNavbar)
+const showFooter = computed(() => routerReady.value && !route.meta.hideFooter)
 
 /** True while a lazy-loaded route chunk is being downloaded for a loader-enabled route. */
 const routeLoading = ref(!!route.meta.showLoader)
