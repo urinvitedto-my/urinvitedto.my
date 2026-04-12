@@ -6,10 +6,12 @@ import { useHostStore } from "@/stores/host"
 import { formatDate } from "@/utils/date"
 import { compareGuests, type GuestSortMode } from "@/utils/guestSort"
 import { useInviteMessage } from "@/composables/useInviteMessage"
+import { usePageLoading } from "@/composables/usePageLoading"
 import LoadingSpinner from "@/components/LoadingSpinner.vue"
 import type { AdminInvite } from "@/types"
 
 const hostStore = useHostStore()
+const { startPageLoading, stopPageLoading } = usePageLoading()
 const {
   events,
   selectedEvent,
@@ -111,8 +113,10 @@ async function copyMessage(invite: AdminInvite) {
   }
 }
 
-onMounted(() => {
-  hostStore.fetchEvents()
+onMounted(async () => {
+  startPageLoading()
+  await hostStore.fetchEvents()
+  stopPageLoading()
 })
 </script>
 
@@ -124,14 +128,7 @@ onMounted(() => {
       </div>
 
       <div
-        v-if="eventsLoading && !selectedEvent"
-        class="flex items-center justify-center py-20"
-      >
-        <LoadingSpinner />
-      </div>
-
-      <div
-        v-else-if="error"
+        v-if="error && !eventsLoading"
         class="flex flex-col items-center justify-center text-center min-h-[60vh]"
       >
         <h2 class="text-2xl font-bold text-primary mb-2">Something went wrong</h2>
@@ -144,7 +141,7 @@ onMounted(() => {
         </button>
       </div>
 
-      <div v-else class="grid md:grid-cols-3 gap-8">
+      <div v-else-if="!eventsLoading || selectedEvent" class="grid md:grid-cols-3 gap-8">
         <div
           class="bg-white rounded-lg shadow-sm p-6 md:sticky md:top-24 md:self-start"
         >

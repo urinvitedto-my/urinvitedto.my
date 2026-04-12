@@ -4,7 +4,7 @@ import { useRoute } from "vue-router"
 import { storeToRefs } from "pinia"
 import { useEventStore } from "@/stores/event"
 import type { EventType } from "@/types"
-import LoadingSpinner from "@/components/LoadingSpinner.vue"
+import { usePageLoading } from "@/composables/usePageLoading"
 
 import EventDetails from "@/components/event/EventDetails.vue"
 import LocationPhoto from "@/components/event/LocationPhoto.vue"
@@ -30,7 +30,6 @@ const route = useRoute()
 const eventStore = useEventStore()
 
 const {
-  loading,
   error,
   eventDetails: eventData,
   confirmedGuests,
@@ -92,8 +91,12 @@ function cleanupAudio() {
   }
 }
 
+const { startPageLoading, stopPageLoading } = usePageLoading()
+
 onMounted(async () => {
+  startPageLoading()
   await loadEventData()
+  stopPageLoading()
   initAudio()
 })
 
@@ -150,14 +153,9 @@ async function loadEventData() {
       </svg>
     </button>
 
-    <!-- Loading -->
-    <div v-if="loading" class="flex items-center justify-center py-20">
-      <LoadingSpinner />
-    </div>
-
     <!-- Error -->
     <div
-      v-else-if="error"
+      v-if="error"
       class="flex flex-col items-center justify-center text-center min-h-[60vh] px-4"
     >
       <h2 class="text-2xl font-bold text-primary mb-2 font-sans!">
