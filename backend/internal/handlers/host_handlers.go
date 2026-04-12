@@ -10,6 +10,7 @@ import (
 )
 
 // GetHostEvents handles GET /host/events - returns events for the authenticated host.
+// Admins see all events; regular users see only events where they are a host.
 func (h *Handlers) GetHostEvents(w http.ResponseWriter, r *http.Request) {
 	// get email from context (set by auth middleware)
 	email, ok := r.Context().Value(UserEmailKey).(string)
@@ -22,18 +23,36 @@ func (h *Handlers) GetHostEvents(w http.ResponseWriter, r *http.Request) {
 	emailLower := strings.ToLower(strings.TrimSpace(email))
 	slog.Info("Fetching host events", "email", emailLower)
 
-	// fetch events where user is a host (by auth_user_id OR contact_email), with guest RSVP stats
-	rows, err := h.db.Query(ctx, `
-		SELECT DISTINCT e.id, e.type, e.slug, e.title, e.is_public, e.starts_at, e.location, e.created_at,
-			COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = e.id), 0),
-			COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = e.id AND g.rsvp_status = 'yes'), 0),
-			COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = e.id AND g.rsvp_status = 'no'), 0)
-		FROM events e
-		INNER JOIN hosts h ON h.event_id = e.id
-		LEFT JOIN auth.users u ON u.id = h.auth_user_id
-		WHERE LOWER(u.email) = $1 OR LOWER(h.contact_email) = $1
-		ORDER BY e.starts_at DESC NULLS LAST
-	`, emailLower)
+	isAdmin, _ := h.IsAdmin(ctx, emailLower)
+
+	var query string
+	var args []any
+
+	if isAdmin {
+		// admins see every event
+		query = `
+			SELECT e.id, e.type, e.slug, e.title, e.is_public, e.starts_at, e.location, e.created_at,
+				COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = e.id), 0),
+				COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = e.id AND g.rsvp_status = 'yes'), 0),
+				COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = e.id AND g.rsvp_status = 'no'), 0)
+			FROM events e
+			ORDER BY e.starts_at DESC NULLS LAST`
+	} else {
+		// regular users see only events where they are a host
+		query = `
+			SELECT DISTINCT e.id, e.type, e.slug, e.title, e.is_public, e.starts_at, e.location, e.created_at,
+				COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = e.id), 0),
+				COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = e.id AND g.rsvp_status = 'yes'), 0),
+				COALESCE((SELECT COUNT(*) FROM guests g JOIN invites i ON g.invite_id = i.id WHERE i.event_id = e.id AND g.rsvp_status = 'no'), 0)
+			FROM events e
+			INNER JOIN hosts h ON h.event_id = e.id
+			LEFT JOIN auth.users u ON u.id = h.auth_user_id
+			WHERE LOWER(u.email) = $1 OR LOWER(h.contact_email) = $1
+			ORDER BY e.starts_at DESC NULLS LAST`
+		args = append(args, emailLower)
+	}
+
+	rows, err := h.db.Query(ctx, query, args...)
 	if err != nil {
 		slog.Error("DB error fetching host events", "error", err)
 		h.writeError(
@@ -72,7 +91,7 @@ func (h *Handlers) GetHostEvents(w http.ResponseWriter, r *http.Request) {
 	h.writeJSON(w, http.StatusOK, models.HostEventsResponse{Events: events})
 }
 
-// GetHostGuests handles GET /host/events/:eventId/guests - returns guests for an event if the user is a host.
+// GetHostGuests handles GET /host/events/:eventId/guests - returns guests for an event if the user is a host or admin.
 func (h *Handlers) GetHostGuests(w http.ResponseWriter, r *http.Request) {
 	email, ok := r.Context().Value(UserEmailKey).(string)
 	if !ok || email == "" {
@@ -89,18 +108,26 @@ func (h *Handlers) GetHostGuests(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	emailLower := strings.ToLower(strings.TrimSpace(email))
 
-	// verify user is a host of this event (auth_user_id OR contact_email)
-	var isHost bool
-	err := h.db.QueryRow(ctx, `
-		SELECT EXISTS(
-			SELECT 1 FROM hosts h
-			LEFT JOIN auth.users u ON u.id = h.auth_user_id
-			WHERE h.event_id = $1 AND (LOWER(u.email) = $2 OR LOWER(h.contact_email) = $2)
-		)
-	`, eventID, emailLower).Scan(&isHost)
-	if err != nil || !isHost {
-		h.writeError(w, http.StatusForbidden, "forbidden", "Not a host of this event")
-		return
+	// admins can access any event; regular users must be a host
+	isAdmin, _ := h.IsAdmin(ctx, emailLower)
+	if !isAdmin {
+		var isHost bool
+		err := h.db.QueryRow(ctx, `
+			SELECT EXISTS(
+				SELECT 1 FROM hosts h
+				LEFT JOIN auth.users u ON u.id = h.auth_user_id
+				WHERE h.event_id = $1 AND (LOWER(u.email) = $2 OR LOWER(h.contact_email) = $2)
+			)
+		`, eventID, emailLower).Scan(&isHost)
+		if err != nil || !isHost {
+			h.writeError(
+				w,
+				http.StatusForbidden,
+				"forbidden",
+				"Not a host of this event",
+			)
+			return
+		}
 	}
 
 	rows, err := h.db.Query(ctx, `
@@ -109,7 +136,12 @@ func (h *Handlers) GetHostGuests(w http.ResponseWriter, r *http.Request) {
 	`, eventID)
 	if err != nil {
 		slog.Error("DB error fetching host guests", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to fetch guests")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to fetch guests",
+		)
 		return
 	}
 	defer rows.Close()
@@ -117,7 +149,14 @@ func (h *Handlers) GetHostGuests(w http.ResponseWriter, r *http.Request) {
 	guests := []models.AdminGuest{}
 	for rows.Next() {
 		var g models.AdminGuest
-		if err := rows.Scan(&g.ID, &g.DisplayName, &g.RsvpStatus, &g.RsvpMessage, &g.RsvpAt, &g.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&g.ID,
+			&g.DisplayName,
+			&g.RsvpStatus,
+			&g.RsvpMessage,
+			&g.RsvpAt,
+			&g.CreatedAt,
+		); err != nil {
 			slog.Error("Error scanning guest", "error", err)
 			continue
 		}
@@ -127,7 +166,7 @@ func (h *Handlers) GetHostGuests(w http.ResponseWriter, r *http.Request) {
 	h.writeJSON(w, http.StatusOK, models.HostGuestsResponse{Guests: guests})
 }
 
-// GetHostInvites handles GET /host/events/:eventId/invites - returns invites with guests for an event if the user is a host.
+// GetHostInvites handles GET /host/events/:eventId/invites - returns invites with guests for an event if the user is a host or admin.
 func (h *Handlers) GetHostInvites(w http.ResponseWriter, r *http.Request) {
 	email, ok := r.Context().Value(UserEmailKey).(string)
 	if !ok || email == "" {
@@ -144,17 +183,26 @@ func (h *Handlers) GetHostInvites(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	emailLower := strings.ToLower(strings.TrimSpace(email))
 
-	var isHost bool
-	err := h.db.QueryRow(ctx, `
-		SELECT EXISTS(
-			SELECT 1 FROM hosts h
-			LEFT JOIN auth.users u ON u.id = h.auth_user_id
-			WHERE h.event_id = $1 AND (LOWER(u.email) = $2 OR LOWER(h.contact_email) = $2)
-		)
-	`, eventID, emailLower).Scan(&isHost)
-	if err != nil || !isHost {
-		h.writeError(w, http.StatusForbidden, "forbidden", "Not a host of this event")
-		return
+	// admins can access any event; regular users must be a host
+	isAdmin, _ := h.IsAdmin(ctx, emailLower)
+	if !isAdmin {
+		var isHost bool
+		err := h.db.QueryRow(ctx, `
+			SELECT EXISTS(
+				SELECT 1 FROM hosts h
+				LEFT JOIN auth.users u ON u.id = h.auth_user_id
+				WHERE h.event_id = $1 AND (LOWER(u.email) = $2 OR LOWER(h.contact_email) = $2)
+			)
+		`, eventID, emailLower).Scan(&isHost)
+		if err != nil || !isHost {
+			h.writeError(
+				w,
+				http.StatusForbidden,
+				"forbidden",
+				"Not a host of this event",
+			)
+			return
+		}
 	}
 
 	rows, err := h.db.Query(ctx, `
@@ -164,7 +212,12 @@ func (h *Handlers) GetHostInvites(w http.ResponseWriter, r *http.Request) {
 	`, eventID)
 	if err != nil {
 		slog.Error("DB error fetching host invites", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to fetch invites")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to fetch invites",
+		)
 		return
 	}
 	defer rows.Close()
@@ -172,7 +225,12 @@ func (h *Handlers) GetHostInvites(w http.ResponseWriter, r *http.Request) {
 	invites := []models.AdminInvite{}
 	for rows.Next() {
 		var inv models.AdminInvite
-		if err := rows.Scan(&inv.ID, &inv.InviteCode, &inv.Label, &inv.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&inv.ID,
+			&inv.InviteCode,
+			&inv.Label,
+			&inv.CreatedAt,
+		); err != nil {
 			slog.Error("Error scanning invite", "error", err)
 			continue
 		}
@@ -193,5 +251,9 @@ func (h *Handlers) GetHostInvites(w http.ResponseWriter, r *http.Request) {
 		hosts = []models.Host{}
 	}
 
-	h.writeJSON(w, http.StatusOK, models.HostInvitesResponse{Invites: invites, Hosts: hosts})
+	h.writeJSON(
+		w,
+		http.StatusOK,
+		models.HostInvitesResponse{Invites: invites, Hosts: hosts},
+	)
 }
