@@ -59,6 +59,10 @@ const guestLoading = ref(false)
 
 type RsvpStatus = "pending" | "yes" | "no"
 
+const editingLabelId = ref<string | null>(null)
+const editLabelValue = ref("")
+const editLabelLoading = ref(false)
+
 const editingGuestId = ref<string | null>(null)
 const editGuestForm = ref<{ displayName: string; rsvpStatus: RsvpStatus }>({
   displayName: "",
@@ -91,6 +95,27 @@ async function handleDeleteInvite(inviteId: string) {
     await adminStore.deleteInvite(props.eventId, inviteId)
   } catch (e: unknown) {
     toast.error(e instanceof Error ? e.message : "Failed to delete invite")
+  }
+}
+
+/** Opens edit mode for an invite label. */
+function startEditLabel(invite: AdminInvite) {
+  editingLabelId.value = invite.id
+  editLabelValue.value = invite.label ?? ""
+}
+
+/** Saves invite label edits. */
+async function handleUpdateLabel(inviteId: string) {
+  editLabelLoading.value = true
+  try {
+    await adminStore.updateInvite(props.eventId, inviteId, {
+      label: editLabelValue.value.trim() || null,
+    })
+    editingLabelId.value = null
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : "Failed to update invite label")
+  } finally {
+    editLabelLoading.value = false
   }
 }
 
@@ -244,9 +269,44 @@ function rsvpClass(status: string): string {
               >
                 {{ invite.inviteCode }}
               </code>
-              <span v-if="invite.label" class="text-sm text-gray-600">{{
-                invite.label
-              }}</span>
+              <template v-if="editingLabelId === invite.id">
+                <form
+                  @submit.prevent="handleUpdateLabel(invite.id)"
+                  class="flex items-center gap-2"
+                >
+                  <input
+                    v-model="editLabelValue"
+                    type="text"
+                    placeholder="Label (optional)"
+                    class="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-accent focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    :disabled="editLabelLoading"
+                    class="text-xs bg-primary text-white px-2 py-1 rounded hover:bg-primary-dark disabled:opacity-50"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    @click="editingLabelId = null"
+                    class="text-xs text-gray-500 hover:text-gray-700"
+                  >
+                    Cancel
+                  </button>
+                </form>
+              </template>
+              <template v-else>
+                <span v-if="invite.label" class="text-sm text-gray-600">{{
+                  invite.label
+                }}</span>
+                <button
+                  @click="startEditLabel(invite)"
+                  class="text-xs text-primary hover:underline"
+                >
+                  {{ invite.label ? "Edit" : "Add Label" }}
+                </button>
+              </template>
               <span class="text-xs text-gray-400">
                 {{ invite.guests.length }} guest{{
                   invite.guests.length !== 1 ? "s" : ""

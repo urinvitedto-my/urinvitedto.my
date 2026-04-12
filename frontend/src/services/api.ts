@@ -226,6 +226,23 @@ export async function adminCreateInvite(
   return handleResponse(res, "Failed to create invite")
 }
 
+/** Updates an invite's label. */
+export async function adminUpdateInvite(
+  eventId: string,
+  inviteId: string,
+  data: { label?: string | null },
+): Promise<AdminInvite> {
+  const res = await authFetch(
+    `${API_BASE}/api/v1/admin/events/${eventId}/invites/${inviteId}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  )
+  return handleResponse(res, "Failed to update invite")
+}
+
 /** Deletes an invite and all its guests. */
 export async function adminDeleteInvite(
   eventId: string,

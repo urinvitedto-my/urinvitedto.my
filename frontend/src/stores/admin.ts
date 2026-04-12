@@ -9,6 +9,7 @@ import {
   adminDeleteHost,
   adminListInvites,
   adminCreateInvite,
+  adminUpdateInvite,
   adminDeleteInvite,
   adminAddGuest,
   adminUpdateGuest,
@@ -214,6 +215,19 @@ export const useAdminStore = defineStore("admin", () => {
     if (!invites.value[eventId]) invites.value[eventId] = []
     invites.value[eventId].unshift(newInvite)
     return newInvite
+  }
+
+  async function updateInvite(
+    eventId: string,
+    inviteId: string,
+    data: { label?: string | null },
+  ) {
+    const updated = await adminUpdateInvite(eventId, inviteId, data)
+    if (invites.value[eventId]) {
+      const idx = invites.value[eventId].findIndex((i) => i.id === inviteId)
+      if (idx !== -1) invites.value[eventId][idx] = updated
+    }
+    return updated
   }
 
   async function deleteInvite(eventId: string, inviteId: string) {
@@ -662,6 +676,7 @@ export const useAdminStore = defineStore("admin", () => {
     getInvites,
     fetchInvites,
     createInvite,
+    updateInvite,
     deleteInvite,
     addGuestToInvite,
     updateGuestInInvite,
