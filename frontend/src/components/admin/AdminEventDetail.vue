@@ -170,7 +170,7 @@ function noop() {}
 
     <!-- Tab Content -->
     <div :key="refreshKey">
-      <AdminGuestOverview v-if="activeTab === 'guests'" :event-id="event.id" />
+      <AdminGuestOverview v-if="activeTab === 'guests'" :event="event" />
 
       <AdminHosts
         v-else-if="activeTab === 'hosts'"
