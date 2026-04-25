@@ -38,7 +38,7 @@ const filterButtons: { key: StatusFilter; label: string }[] = [
   { key: "pending", label: "Pending" },
 ]
 
-const guestSortMode = ref<GuestSortMode>("name-asc")
+const guestSortMode = ref<GuestSortMode>("responded-newest")
 
 /** Guests for the active status filter, ordered by the current sort mode. */
 const sortedFilteredGuests = computed(() => {
@@ -292,10 +292,10 @@ onMounted(async () => {
                     v-model="guestSortMode"
                     class="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-800 focus:ring-2 focus:ring-accent focus:outline-none sm:flex-initial sm:min-w-44"
                   >
+                    <option value="responded-newest">RSVP: Newest</option>
+                    <option value="responded-oldest">RSVP: Oldest</option>
                     <option value="name-asc">Name: A to Z</option>
                     <option value="name-desc">Name: Z to A</option>
-                    <option value="responded-newest">RSPV: Newest</option>
-                    <option value="responded-oldest">RSPV: Oldest</option>
                   </select>
                 </label>
               </div>

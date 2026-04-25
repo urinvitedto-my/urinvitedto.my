@@ -21,7 +21,7 @@ const error = computed(() => adminStore.getSubError("invites", props.event.id))
 
 type StatusFilter = "all" | "yes" | "no" | "pending"
 const statusFilter = ref<StatusFilter>("all")
-const sortMode = ref<GuestSortMode>("name-asc")
+const sortMode = ref<GuestSortMode>("responded-newest")
 
 interface FlatGuest {
   id: string
@@ -163,10 +163,10 @@ onMounted(() => adminStore.fetchInvites(props.event.id))
             v-model="sortMode"
             class="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-800 focus:ring-2 focus:ring-accent focus:outline-none sm:flex-initial sm:min-w-44"
           >
+            <option value="responded-newest">RSVP: Newest</option>
+            <option value="responded-oldest">RSVP: Oldest</option>
             <option value="name-asc">Name: A to Z</option>
             <option value="name-desc">Name: Z to A</option>
-            <option value="responded-newest">RSPV: Newest</option>
-            <option value="responded-oldest">RSPV: Oldest</option>
           </select>
         </label>
       </div>
