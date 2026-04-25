@@ -17,7 +17,9 @@ func (h *Handlers) ListFAQs(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var exists bool
-	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).Scan(&exists); err != nil || !exists {
+	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).
+		Scan(&exists); err != nil ||
+		!exists {
 		h.writeError(w, http.StatusNotFound, "not_found", "Event not found")
 		return
 	}
@@ -29,7 +31,12 @@ func (h *Handlers) ListFAQs(w http.ResponseWriter, r *http.Request) {
 	`, eventID)
 	if err != nil {
 		slog.Error("DB error listing FAQs", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to list FAQs")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to list FAQs",
+		)
 		return
 	}
 	defer rows.Close()
@@ -37,7 +44,13 @@ func (h *Handlers) ListFAQs(w http.ResponseWriter, r *http.Request) {
 	items := []models.AdminFAQ{}
 	for rows.Next() {
 		var item models.AdminFAQ
-		if err := rows.Scan(&item.ID, &item.Question, &item.Answer, &item.OrderIndex, &item.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&item.ID,
+			&item.Question,
+			&item.Answer,
+			&item.OrderIndex,
+			&item.CreatedAt,
+		); err != nil {
 			slog.Error("Error scanning FAQ", "error", err)
 			continue
 		}
@@ -60,7 +73,12 @@ func (h *Handlers) CreateFAQ(w http.ResponseWriter, r *http.Request) {
 	req.Question = strings.TrimSpace(req.Question)
 	req.Answer = strings.TrimSpace(req.Answer)
 	if req.Question == "" {
-		h.writeError(w, http.StatusBadRequest, "invalid_question", "Question is required")
+		h.writeError(
+			w,
+			http.StatusBadRequest,
+			"invalid_question",
+			"Question is required",
+		)
 		return
 	}
 	if req.Answer == "" {
@@ -71,7 +89,9 @@ func (h *Handlers) CreateFAQ(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var exists bool
-	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).Scan(&exists); err != nil || !exists {
+	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).
+		Scan(&exists); err != nil ||
+		!exists {
 		h.writeError(w, http.StatusNotFound, "not_found", "Event not found")
 		return
 	}
@@ -81,7 +101,8 @@ func (h *Handlers) CreateFAQ(w http.ResponseWriter, r *http.Request) {
 		orderIndex = *req.OrderIndex
 	} else {
 		var maxIdx *int
-		_ = h.db.QueryRow(ctx, `SELECT MAX(order_index) FROM event_faqs WHERE event_id = $1`, eventID).Scan(&maxIdx)
+		_ = h.db.QueryRow(ctx, `SELECT MAX(order_index) FROM event_faqs WHERE event_id = $1`, eventID).
+			Scan(&maxIdx)
 		if maxIdx != nil {
 			orderIndex = *maxIdx + 1
 		}
@@ -97,7 +118,12 @@ func (h *Handlers) CreateFAQ(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		slog.Error("DB error creating FAQ", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to create FAQ")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to create FAQ",
+		)
 		return
 	}
 
@@ -118,7 +144,12 @@ func (h *Handlers) UpdateFAQ(w http.ResponseWriter, r *http.Request) {
 	req.Question = strings.TrimSpace(req.Question)
 	req.Answer = strings.TrimSpace(req.Answer)
 	if req.Question == "" {
-		h.writeError(w, http.StatusBadRequest, "invalid_question", "Question is required")
+		h.writeError(
+			w,
+			http.StatusBadRequest,
+			"invalid_question",
+			"Question is required",
+		)
 		return
 	}
 	if req.Answer == "" {
@@ -148,7 +179,12 @@ func (h *Handlers) UpdateFAQ(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		slog.Error("DB error updating FAQ", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to update FAQ")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to update FAQ",
+		)
 		return
 	}
 
@@ -167,7 +203,12 @@ func (h *Handlers) DeleteFAQ(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		slog.Error("DB error deleting FAQ", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to delete FAQ")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to delete FAQ",
+		)
 		return
 	}
 

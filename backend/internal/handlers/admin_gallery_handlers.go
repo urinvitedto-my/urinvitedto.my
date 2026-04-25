@@ -17,7 +17,9 @@ func (h *Handlers) ListGallery(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var exists bool
-	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).Scan(&exists); err != nil || !exists {
+	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).
+		Scan(&exists); err != nil ||
+		!exists {
 		h.writeError(w, http.StatusNotFound, "not_found", "Event not found")
 		return
 	}
@@ -29,7 +31,12 @@ func (h *Handlers) ListGallery(w http.ResponseWriter, r *http.Request) {
 	`, eventID)
 	if err != nil {
 		slog.Error("DB error listing gallery", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to list gallery")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to list gallery",
+		)
 		return
 	}
 	defer rows.Close()
@@ -37,7 +44,14 @@ func (h *Handlers) ListGallery(w http.ResponseWriter, r *http.Request) {
 	items := []models.AdminGalleryItem{}
 	for rows.Next() {
 		var item models.AdminGalleryItem
-		if err := rows.Scan(&item.ID, &item.MediaType, &item.MediaURL, &item.Caption, &item.OrderIndex, &item.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&item.ID,
+			&item.MediaType,
+			&item.MediaURL,
+			&item.Caption,
+			&item.OrderIndex,
+			&item.CreatedAt,
+		); err != nil {
 			slog.Error("Error scanning gallery item", "error", err)
 			continue
 		}
@@ -60,7 +74,12 @@ func (h *Handlers) CreateGalleryItem(w http.ResponseWriter, r *http.Request) {
 	req.MediaType = strings.ToLower(strings.TrimSpace(req.MediaType))
 	req.MediaURL = strings.TrimSpace(req.MediaURL)
 	if req.MediaType != "photo" && req.MediaType != "video" {
-		h.writeError(w, http.StatusBadRequest, "invalid_type", "Media type must be photo or video")
+		h.writeError(
+			w,
+			http.StatusBadRequest,
+			"invalid_type",
+			"Media type must be photo or video",
+		)
 		return
 	}
 	if req.MediaURL == "" {
@@ -71,7 +90,9 @@ func (h *Handlers) CreateGalleryItem(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var exists bool
-	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).Scan(&exists); err != nil || !exists {
+	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).
+		Scan(&exists); err != nil ||
+		!exists {
 		h.writeError(w, http.StatusNotFound, "not_found", "Event not found")
 		return
 	}
@@ -81,7 +102,8 @@ func (h *Handlers) CreateGalleryItem(w http.ResponseWriter, r *http.Request) {
 		orderIndex = *req.OrderIndex
 	} else {
 		var maxIdx *int
-		_ = h.db.QueryRow(ctx, `SELECT MAX(order_index) FROM event_gallery WHERE event_id = $1`, eventID).Scan(&maxIdx)
+		_ = h.db.QueryRow(ctx, `SELECT MAX(order_index) FROM event_gallery WHERE event_id = $1`, eventID).
+			Scan(&maxIdx)
 		if maxIdx != nil {
 			orderIndex = *maxIdx + 1
 		}
@@ -97,7 +119,12 @@ func (h *Handlers) CreateGalleryItem(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		slog.Error("DB error creating gallery item", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to create gallery item")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to create gallery item",
+		)
 		return
 	}
 
@@ -137,7 +164,12 @@ func (h *Handlers) UpdateGalleryItem(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		slog.Error("DB error updating gallery item", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to update gallery item")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to update gallery item",
+		)
 		return
 	}
 
@@ -156,7 +188,12 @@ func (h *Handlers) DeleteGalleryItem(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		slog.Error("DB error deleting gallery item", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to delete gallery item")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to delete gallery item",
+		)
 		return
 	}
 

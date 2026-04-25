@@ -346,7 +346,9 @@ func (h *Handlers) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var event models.AdminEvent
-	err := h.db.QueryRow(ctx, `
+	err := h.db.QueryRow(
+		ctx,
+		`
 		UPDATE events SET
 			type = $1, slug = $2, title = $3, description = $4, is_public = $5,
 			starts_at = $6, location = $7, cover_image_url = $8, location_photo_url = $9,
@@ -354,8 +356,18 @@ func (h *Handlers) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 		WHERE id = $11
 		RETURNING id, type, slug, title, description, is_public,
 			cover_image_url, location_photo_url, music_url, starts_at, location, created_at
-	`, req.Type, req.Slug, req.Title, req.Description, req.IsPublic,
-		startsAt, req.Location, req.CoverImageURL, req.LocationPhotoURL, req.MusicURL, eventID,
+	`,
+		req.Type,
+		req.Slug,
+		req.Title,
+		req.Description,
+		req.IsPublic,
+		startsAt,
+		req.Location,
+		req.CoverImageURL,
+		req.LocationPhotoURL,
+		req.MusicURL,
+		eventID,
 	).Scan(
 		&event.ID, &event.Type, &event.Slug, &event.Title, &event.Description,
 		&event.IsPublic, &event.CoverImageURL, &event.LocationPhotoURL, &event.MusicURL,
@@ -425,7 +437,10 @@ func (h *Handlers) DeleteEvent(w http.ResponseWriter, r *http.Request) {
 }
 
 // fetchEventCounts populates invite/guest/RSVP counts on an AdminEvent.
-func (h *Handlers) fetchEventCounts(ctx context.Context, event *models.AdminEvent) error {
+func (h *Handlers) fetchEventCounts(
+	ctx context.Context,
+	event *models.AdminEvent,
+) error {
 	return h.db.QueryRow(ctx, `
 		SELECT
 			COALESCE((SELECT COUNT(*) FROM invites WHERE event_id = $1), 0),

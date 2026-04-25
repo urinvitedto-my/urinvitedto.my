@@ -24,7 +24,12 @@ func (h *Handlers) GetCustomContent(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		slog.Error("DB error reading custom_content", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to read custom content")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to read custom content",
+		)
 		return
 	}
 
@@ -54,7 +59,12 @@ func (h *Handlers) UpdateCustomContent(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		slog.Error("DB error updating custom_content", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to update custom content")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to update custom content",
+		)
 		return
 	}
 
@@ -76,7 +86,12 @@ func (h *Handlers) GetEnabledComponents(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 		slog.Error("DB error reading enabled_components", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to read enabled components")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to read enabled components",
+		)
 		return
 	}
 
@@ -106,7 +121,12 @@ func (h *Handlers) UpdateEnabledComponents(w http.ResponseWriter, r *http.Reques
 			return
 		}
 		slog.Error("DB error updating enabled_components", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to update enabled components")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to update enabled components",
+		)
 		return
 	}
 

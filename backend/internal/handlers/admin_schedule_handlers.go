@@ -18,7 +18,9 @@ func (h *Handlers) ListSchedule(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var exists bool
-	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).Scan(&exists); err != nil || !exists {
+	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).
+		Scan(&exists); err != nil ||
+		!exists {
 		h.writeError(w, http.StatusNotFound, "not_found", "Event not found")
 		return
 	}
@@ -30,7 +32,12 @@ func (h *Handlers) ListSchedule(w http.ResponseWriter, r *http.Request) {
 	`, eventID)
 	if err != nil {
 		slog.Error("DB error listing schedule", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to list schedule")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to list schedule",
+		)
 		return
 	}
 	defer rows.Close()
@@ -38,7 +45,14 @@ func (h *Handlers) ListSchedule(w http.ResponseWriter, r *http.Request) {
 	items := []models.AdminScheduleItem{}
 	for rows.Next() {
 		var item models.AdminScheduleItem
-		if err := rows.Scan(&item.ID, &item.Time, &item.Title, &item.Description, &item.OrderIndex, &item.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&item.ID,
+			&item.Time,
+			&item.Title,
+			&item.Description,
+			&item.OrderIndex,
+			&item.CreatedAt,
+		); err != nil {
 			slog.Error("Error scanning schedule item", "error", err)
 			continue
 		}
@@ -66,14 +80,21 @@ func (h *Handlers) CreateScheduleItem(w http.ResponseWriter, r *http.Request) {
 
 	parsedTime, err := time.Parse(time.RFC3339, req.Time)
 	if err != nil {
-		h.writeError(w, http.StatusBadRequest, "invalid_time", "Time must be a valid ISO 8601 date string")
+		h.writeError(
+			w,
+			http.StatusBadRequest,
+			"invalid_time",
+			"Time must be a valid ISO 8601 date string",
+		)
 		return
 	}
 
 	ctx := r.Context()
 
 	var exists bool
-	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).Scan(&exists); err != nil || !exists {
+	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).
+		Scan(&exists); err != nil ||
+		!exists {
 		h.writeError(w, http.StatusNotFound, "not_found", "Event not found")
 		return
 	}
@@ -84,7 +105,8 @@ func (h *Handlers) CreateScheduleItem(w http.ResponseWriter, r *http.Request) {
 		orderIndex = *req.OrderIndex
 	} else {
 		var maxIdx *int
-		_ = h.db.QueryRow(ctx, `SELECT MAX(order_index) FROM event_schedule WHERE event_id = $1`, eventID).Scan(&maxIdx)
+		_ = h.db.QueryRow(ctx, `SELECT MAX(order_index) FROM event_schedule WHERE event_id = $1`, eventID).
+			Scan(&maxIdx)
 		if maxIdx != nil {
 			orderIndex = *maxIdx + 1
 		}
@@ -100,7 +122,12 @@ func (h *Handlers) CreateScheduleItem(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		slog.Error("DB error creating schedule item", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to create schedule item")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to create schedule item",
+		)
 		return
 	}
 
@@ -126,7 +153,12 @@ func (h *Handlers) UpdateScheduleItem(w http.ResponseWriter, r *http.Request) {
 
 	parsedTime, err := time.Parse(time.RFC3339, req.Time)
 	if err != nil {
-		h.writeError(w, http.StatusBadRequest, "invalid_time", "Time must be a valid ISO 8601 date string")
+		h.writeError(
+			w,
+			http.StatusBadRequest,
+			"invalid_time",
+			"Time must be a valid ISO 8601 date string",
+		)
 		return
 	}
 
@@ -153,7 +185,12 @@ func (h *Handlers) UpdateScheduleItem(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		slog.Error("DB error updating schedule item", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to update schedule item")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to update schedule item",
+		)
 		return
 	}
 
@@ -172,7 +209,12 @@ func (h *Handlers) DeleteScheduleItem(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		slog.Error("DB error deleting schedule item", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to delete schedule item")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to delete schedule item",
+		)
 		return
 	}
 

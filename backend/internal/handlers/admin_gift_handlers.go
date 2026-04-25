@@ -17,7 +17,9 @@ func (h *Handlers) ListGifts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var exists bool
-	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).Scan(&exists); err != nil || !exists {
+	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).
+		Scan(&exists); err != nil ||
+		!exists {
 		h.writeError(w, http.StatusNotFound, "not_found", "Event not found")
 		return
 	}
@@ -29,7 +31,12 @@ func (h *Handlers) ListGifts(w http.ResponseWriter, r *http.Request) {
 	`, eventID)
 	if err != nil {
 		slog.Error("DB error listing gifts", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to list gifts")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to list gifts",
+		)
 		return
 	}
 	defer rows.Close()
@@ -37,7 +44,15 @@ func (h *Handlers) ListGifts(w http.ResponseWriter, r *http.Request) {
 	items := []models.AdminGift{}
 	for rows.Next() {
 		var item models.AdminGift
-		if err := rows.Scan(&item.ID, &item.GiftType, &item.Title, &item.Description, &item.Link, &item.OrderIndex, &item.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&item.ID,
+			&item.GiftType,
+			&item.Title,
+			&item.Description,
+			&item.Link,
+			&item.OrderIndex,
+			&item.CreatedAt,
+		); err != nil {
 			slog.Error("Error scanning gift", "error", err)
 			continue
 		}
@@ -60,7 +75,12 @@ func (h *Handlers) CreateGift(w http.ResponseWriter, r *http.Request) {
 	req.GiftType = strings.ToLower(strings.TrimSpace(req.GiftType))
 	req.Title = strings.TrimSpace(req.Title)
 	if req.GiftType != "physical" && req.GiftType != "monetary" {
-		h.writeError(w, http.StatusBadRequest, "invalid_type", "Gift type must be physical or monetary")
+		h.writeError(
+			w,
+			http.StatusBadRequest,
+			"invalid_type",
+			"Gift type must be physical or monetary",
+		)
 		return
 	}
 	if req.Title == "" {
@@ -71,7 +91,9 @@ func (h *Handlers) CreateGift(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var exists bool
-	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).Scan(&exists); err != nil || !exists {
+	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).
+		Scan(&exists); err != nil ||
+		!exists {
 		h.writeError(w, http.StatusNotFound, "not_found", "Event not found")
 		return
 	}
@@ -81,7 +103,8 @@ func (h *Handlers) CreateGift(w http.ResponseWriter, r *http.Request) {
 		orderIndex = *req.OrderIndex
 	} else {
 		var maxIdx *int
-		_ = h.db.QueryRow(ctx, `SELECT MAX(order_index) FROM event_gifts WHERE event_id = $1`, eventID).Scan(&maxIdx)
+		_ = h.db.QueryRow(ctx, `SELECT MAX(order_index) FROM event_gifts WHERE event_id = $1`, eventID).
+			Scan(&maxIdx)
 		if maxIdx != nil {
 			orderIndex = *maxIdx + 1
 		}
@@ -97,7 +120,12 @@ func (h *Handlers) CreateGift(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		slog.Error("DB error creating gift", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to create gift")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to create gift",
+		)
 		return
 	}
 
@@ -118,7 +146,12 @@ func (h *Handlers) UpdateGift(w http.ResponseWriter, r *http.Request) {
 	req.GiftType = strings.ToLower(strings.TrimSpace(req.GiftType))
 	req.Title = strings.TrimSpace(req.Title)
 	if req.GiftType != "physical" && req.GiftType != "monetary" {
-		h.writeError(w, http.StatusBadRequest, "invalid_type", "Gift type must be physical or monetary")
+		h.writeError(
+			w,
+			http.StatusBadRequest,
+			"invalid_type",
+			"Gift type must be physical or monetary",
+		)
 		return
 	}
 	if req.Title == "" {
@@ -148,7 +181,12 @@ func (h *Handlers) UpdateGift(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		slog.Error("DB error updating gift", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to update gift")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to update gift",
+		)
 		return
 	}
 
@@ -167,7 +205,12 @@ func (h *Handlers) DeleteGift(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		slog.Error("DB error deleting gift", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to delete gift")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to delete gift",
+		)
 		return
 	}
 

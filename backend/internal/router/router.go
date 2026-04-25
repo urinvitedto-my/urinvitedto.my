@@ -86,37 +86,57 @@ func (rm *Router) SetupRouter() *chi.Mux {
 		api.Route("/admin", func(ar chi.Router) {
 			ar.Use(rm.mw.Auth)
 			ar.Use(rm.mw.RequireAdmin)
+
+			// Events handlers
 			ar.Get("/events", h.ListEvents)
 			ar.Post("/events", h.CreateEvent)
 			ar.Put("/events/{id}", h.UpdateEvent)
 			ar.Delete("/events/{id}", h.DeleteEvent)
+
+			// Host handlers
 			ar.Post("/events/{id}/hosts", h.AddHost)
 			ar.Delete("/events/{id}/hosts/{hostId}", h.DeleteHost)
+
+			// Invite handlers
 			ar.Get("/events/{id}/invites", h.ListInvites)
 			ar.Post("/events/{id}/invites", h.CreateInvite)
 			ar.Put("/events/{id}/invites/{inviteId}", h.UpdateInvite)
 			ar.Delete("/events/{id}/invites/{inviteId}", h.DeleteInvite)
+
+			// Guest handlers
 			ar.Post("/events/{id}/invites/{inviteId}/guests", h.AddGuest)
 			ar.Put("/events/{id}/guests/{guestId}", h.UpdateGuest)
 			ar.Delete("/events/{id}/guests/{guestId}", h.DeleteGuest)
+
+			// Schedule handlers
 			ar.Get("/events/{id}/schedule", h.ListSchedule)
 			ar.Post("/events/{id}/schedule", h.CreateScheduleItem)
 			ar.Put("/events/{id}/schedule/{itemId}", h.UpdateScheduleItem)
 			ar.Delete("/events/{id}/schedule/{itemId}", h.DeleteScheduleItem)
+
+			// FAQ handlers
 			ar.Get("/events/{id}/faqs", h.ListFAQs)
 			ar.Post("/events/{id}/faqs", h.CreateFAQ)
 			ar.Put("/events/{id}/faqs/{itemId}", h.UpdateFAQ)
 			ar.Delete("/events/{id}/faqs/{itemId}", h.DeleteFAQ)
+
+			// Gift handlers
 			ar.Get("/events/{id}/gifts", h.ListGifts)
 			ar.Post("/events/{id}/gifts", h.CreateGift)
 			ar.Put("/events/{id}/gifts/{itemId}", h.UpdateGift)
 			ar.Delete("/events/{id}/gifts/{itemId}", h.DeleteGift)
+
+			// Gallery handlers
 			ar.Get("/events/{id}/gallery", h.ListGallery)
 			ar.Post("/events/{id}/gallery", h.CreateGalleryItem)
 			ar.Put("/events/{id}/gallery/{itemId}", h.UpdateGalleryItem)
 			ar.Delete("/events/{id}/gallery/{itemId}", h.DeleteGalleryItem)
+
+			// Custom content handlers
 			ar.Get("/events/{id}/custom-content", h.GetCustomContent)
 			ar.Put("/events/{id}/custom-content", h.UpdateCustomContent)
+
+			// Component handlers
 			ar.Get("/events/{id}/enabled-components", h.GetEnabledComponents)
 			ar.Put("/events/{id}/enabled-components", h.UpdateEnabledComponents)
 		})
