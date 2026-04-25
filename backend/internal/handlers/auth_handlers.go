@@ -12,7 +12,12 @@ func (h *Handlers) GetMe(w http.ResponseWriter, r *http.Request) {
 
 	isAdmin, err := h.IsAdmin(r.Context(), email)
 	if err != nil {
-		h.writeError(w, http.StatusInternalServerError, "server_error", "Failed to check admin status")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"server_error",
+			"Failed to check admin status",
+		)
 		return
 	}
 

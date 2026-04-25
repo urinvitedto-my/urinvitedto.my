@@ -1,4 +1,4 @@
-/** How to order the guest list (name is the default). */
+/** How to order the guest list. */
 export type GuestSortMode =
   | "name-asc"
   | "name-desc"

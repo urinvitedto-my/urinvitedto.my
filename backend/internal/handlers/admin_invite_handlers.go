@@ -15,9 +15,11 @@ import (
 	"github.com/urinvitedto-my/backend/internal/models"
 )
 
-const inviteCodeChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-const inviteCodeLength = 6
-const maxCodeRetries = 10
+const (
+	inviteCodeChars  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	inviteCodeLength = 6
+	maxCodeRetries   = 10
+)
 
 // generateInviteCode creates a random 6-char alphanumeric code (A-Z, 0-9).
 func generateInviteCode() (string, error) {
@@ -39,7 +41,9 @@ func (h *Handlers) ListInvites(w http.ResponseWriter, r *http.Request) {
 
 	// verify event exists
 	var exists bool
-	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).Scan(&exists); err != nil || !exists {
+	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).
+		Scan(&exists); err != nil ||
+		!exists {
 		h.writeError(w, http.StatusNotFound, "not_found", "Event not found")
 		return
 	}
@@ -51,7 +55,12 @@ func (h *Handlers) ListInvites(w http.ResponseWriter, r *http.Request) {
 	`, eventID)
 	if err != nil {
 		slog.Error("DB error listing invites", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to list invites")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to list invites",
+		)
 		return
 	}
 	defer rows.Close()
@@ -59,7 +68,12 @@ func (h *Handlers) ListInvites(w http.ResponseWriter, r *http.Request) {
 	invites := []models.AdminInvite{}
 	for rows.Next() {
 		var inv models.AdminInvite
-		if err := rows.Scan(&inv.ID, &inv.InviteCode, &inv.Label, &inv.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&inv.ID,
+			&inv.InviteCode,
+			&inv.Label,
+			&inv.CreatedAt,
+		); err != nil {
 			slog.Error("Error scanning invite", "error", err)
 			continue
 		}
@@ -91,7 +105,9 @@ func (h *Handlers) CreateInvite(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var exists bool
-	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).Scan(&exists); err != nil || !exists {
+	if err := h.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM events WHERE id = $1)`, eventID).
+		Scan(&exists); err != nil ||
+		!exists {
 		h.writeError(w, http.StatusNotFound, "not_found", "Event not found")
 		return
 	}
@@ -102,7 +118,12 @@ func (h *Handlers) CreateInvite(w http.ResponseWriter, r *http.Request) {
 		code, err := generateInviteCode()
 		if err != nil {
 			slog.Error("Failed to generate invite code", "error", err)
-			h.writeError(w, http.StatusInternalServerError, "code_error", "Failed to generate invite code")
+			h.writeError(
+				w,
+				http.StatusInternalServerError,
+				"code_error",
+				"Failed to generate invite code",
+			)
 			return
 		}
 
@@ -119,7 +140,12 @@ func (h *Handlers) CreateInvite(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 			slog.Error("DB error creating invite", "error", err)
-			h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to create invite")
+			h.writeError(
+				w,
+				http.StatusInternalServerError,
+				"db_error",
+				"Failed to create invite",
+			)
 			return
 		}
 
@@ -159,7 +185,12 @@ func (h *Handlers) UpdateInvite(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		slog.Error("DB error updating invite", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to update invite")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to update invite",
+		)
 		return
 	}
 
@@ -185,7 +216,12 @@ func (h *Handlers) DeleteInvite(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		slog.Error("DB error deleting invite", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to delete invite")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to delete invite",
+		)
 		return
 	}
 
@@ -210,7 +246,12 @@ func (h *Handlers) AddGuest(w http.ResponseWriter, r *http.Request) {
 
 	req.DisplayName = strings.TrimSpace(req.DisplayName)
 	if req.DisplayName == "" {
-		h.writeError(w, http.StatusBadRequest, "invalid_name", "Display name is required")
+		h.writeError(
+			w,
+			http.StatusBadRequest,
+			"invalid_name",
+			"Display name is required",
+		)
 		return
 	}
 
@@ -238,7 +279,12 @@ func (h *Handlers) AddGuest(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		slog.Error("DB error adding guest", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to add guest")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to add guest",
+		)
 		return
 	}
 
@@ -258,13 +304,24 @@ func (h *Handlers) UpdateGuest(w http.ResponseWriter, r *http.Request) {
 
 	req.DisplayName = strings.TrimSpace(req.DisplayName)
 	if req.DisplayName == "" {
-		h.writeError(w, http.StatusBadRequest, "invalid_name", "Display name is required")
+		h.writeError(
+			w,
+			http.StatusBadRequest,
+			"invalid_name",
+			"Display name is required",
+		)
 		return
 	}
 
 	req.RsvpStatus = strings.ToLower(strings.TrimSpace(req.RsvpStatus))
-	if req.RsvpStatus != "pending" && req.RsvpStatus != "yes" && req.RsvpStatus != "no" {
-		h.writeError(w, http.StatusBadRequest, "invalid_status", "RSVP status must be pending, yes, or no")
+	if req.RsvpStatus != "pending" && req.RsvpStatus != "yes" &&
+		req.RsvpStatus != "no" {
+		h.writeError(
+			w,
+			http.StatusBadRequest,
+			"invalid_status",
+			"RSVP status must be pending, yes, or no",
+		)
 		return
 	}
 
@@ -285,7 +342,12 @@ func (h *Handlers) UpdateGuest(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		slog.Error("DB error updating guest", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to update guest")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to update guest",
+		)
 		return
 	}
 
@@ -304,7 +366,12 @@ func (h *Handlers) DeleteGuest(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		slog.Error("DB error deleting guest", "error", err)
-		h.writeError(w, http.StatusInternalServerError, "db_error", "Failed to delete guest")
+		h.writeError(
+			w,
+			http.StatusInternalServerError,
+			"db_error",
+			"Failed to delete guest",
+		)
 		return
 	}
 
@@ -317,7 +384,10 @@ func (h *Handlers) DeleteGuest(w http.ResponseWriter, r *http.Request) {
 }
 
 // fetchInviteGuests retrieves guests for an invite.
-func (h *Handlers) fetchInviteGuests(ctx context.Context, inviteID string) ([]models.AdminGuest, error) {
+func (h *Handlers) fetchInviteGuests(
+	ctx context.Context,
+	inviteID string,
+) ([]models.AdminGuest, error) {
 	rows, err := h.db.Query(ctx, `
 		SELECT id, display_name, rsvp_status, rsvp_message, rsvp_at, created_at
 		FROM guests WHERE invite_id = $1
@@ -331,7 +401,14 @@ func (h *Handlers) fetchInviteGuests(ctx context.Context, inviteID string) ([]mo
 	guests := []models.AdminGuest{}
 	for rows.Next() {
 		var g models.AdminGuest
-		if err := rows.Scan(&g.ID, &g.DisplayName, &g.RsvpStatus, &g.RsvpMessage, &g.RsvpAt, &g.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&g.ID,
+			&g.DisplayName,
+			&g.RsvpStatus,
+			&g.RsvpMessage,
+			&g.RsvpAt,
+			&g.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
 		guests = append(guests, g)
